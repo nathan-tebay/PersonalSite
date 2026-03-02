@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tebay.dev</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background-color: #1a1a2e;
+      transition: background-color 0.2s ease;
+    }
+
+    /* ── Outer layout: nav | main column ─────────────────────────────────── */
+    .page-layout {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 1440px;
+      padding: 1.5rem;
+    }
+
+    /* ── Shared panel base ───────────────────────────────────────────────── */
+    .side-panel {
+      border-radius: 1rem;
+      outline: 5px solid var(--panel-border, #0d0d17);
+      background-color: var(--info-bg, #2a2a3e);
+      padding: 1.25rem;
+      font-family: system-ui, sans-serif;
+      color: rgba(255,255,255,0.85);
+      transition: background-color 0.2s ease, outline-color 0.2s ease;
+    }
+
+    .side-panel .section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .side-panel .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 1rem 0;
+    }
+
+    /* ── Left nav panel ──────────────────────────────────────────────────── */
+    #nav-panel {
+      width: 220px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 1.5rem;
+      align-self: flex-start;
+    }
+
+    #nav-panel .tree {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    #nav-panel .tree ul {
+      list-style: none;
+      padding-left: 1rem;
+      margin-top: 0.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    #nav-panel details > summary {
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.7);
+      padding: 0.3rem 0.4rem;
+      border-radius: 0.4rem;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      user-select: none;
+      transition: background 0.12s, color 0.12s;
+    }
+
+    #nav-panel details > summary::before {
+      content: '▶';
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.3);
+      transition: transform 0.15s;
+      flex-shrink: 0;
+    }
+
+    #nav-panel details[open] > summary::before { transform: rotate(90deg); }
+
+    #nav-panel details > summary:hover {
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+    }
+
+    #nav-panel .tree a {
+      display: block;
+      font-size: 0.8rem;
+      color: #4ade80;
+      text-decoration: none;
+      padding: 0.28rem 0.4rem;
+      border-radius: 0.4rem;
+      transition: background 0.12s;
+    }
+
+    #nav-panel .tree a:hover { background: rgba(255,255,255,0.07); }
+
+    #nav-panel .tree > li > a {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    #nav-panel .tree > li > a:hover { color: #fff; }
+
+    /* ── Main column ─────────────────────────────────────────────────────── */
+    .main-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ── Top row: logo + bio ─────────────────────────────────────────────── */
+    .top-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 1.25rem;
+    }
+
+    /* ── Logo panel ──────────────────────────────────────────────────────── */
+    #panel {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 1rem;
+      outline: 5px solid var(--panel-border, #0d0d17);
+      transition: outline-color 0.2s ease;
+    }
+
+    #panel::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url('background.jpeg');
+      background-repeat: repeat;
+      background-size: auto;
+      opacity: 0.8;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #logo-wrap {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5% 5%;
+    }
+
+    #logo-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -30px;
+      background: radial-gradient(
+        ellipse 52% 44% at 50% 50%,
+        rgba(28, 28, 28, 0.97)  0%,
+        rgba(22, 22, 22, 0.85) 45%,
+        rgba(15, 15, 15, 0.40) 70%,
+        transparent            100%
+      );
+      pointer-events: none;
+    }
+
+    img {
+      position: relative;
+      max-width: min(800px, 100%);
+      height: auto;
+    }
+
+    /* ── Info panel ──────────────────────────────────────────────────────── */
+    #info-panel {
+      width: 260px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    #info-panel h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+
+    #info-panel .subtitle {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    #info-panel p {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.65);
+    }
+
+    #info-panel a {
+      display: block;
+      font-size: 0.82rem;
+      color: #4ade80;
+      text-decoration: none;
+      margin-bottom: 0.25rem;
+    }
+
+    #info-panel a:hover { text-decoration: underline; }
+
+    #info-panel > div { margin-bottom: 0; }
+
+    /* ── Content panel ───────────────────────────────────────────────────── */
+    #content-panel {
+      padding: 2rem;
+      column-count: 2;
+      column-gap: 2rem;
+    }
+
+    #content-panel p {
+      font-size: 0.85rem;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 1rem;
+      break-inside: avoid;
+    }
+
+    /* ── Color picker ────────────────────────────────────────────────────── */
+    #picker-wrap {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 2rem;
+      padding: 0.5rem 1rem 0.5rem 0.6rem;
+    }
+
+    #color-picker {
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      border-radius: 50%;
+      padding: 0;
+      cursor: pointer;
+      background: none;
+    }
+
+    #color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+    #color-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
+    #color-picker::-moz-color-swatch { border: none; border-radius: 50%; }
+
+    #picker-label {
+      font-family: system-ui, sans-serif;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.7);
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-layout">
+
+    <!-- Left sticky nav -->
+    <nav id="nav-panel" class="side-panel">
+      <span class="section-label">Navigation</span>
+      <ul class="tree">
+        <li>
+          <details open>
+            <summary>Projects</summary>
+            <ul>
+              <li><a href="#">MAPDashboard</a></li>
+              <li><a href="#">MicrophoneController</a></li>
+              <li>
+                <details>
+                  <summary>Web</summary>
+                  <ul>
+                    <li><a href="#">tebay.dev</a></li>
+                    <li><a href="#">Portfolio</a></li>
+                  </ul>
+                </details>
+              </li>
+            </ul>
+          </details>
+        </li>
+        <li>
+          <details>
+            <summary>Blog</summary>
+            <ul>
+              <li><a href="#">Post One</a></li>
+              <li><a href="#">Post Two</a></li>
+              <li><a href="#">Post Three</a></li>
+            </ul>
+          </details>
+        </li>
+        <li>
+          <details>
+            <summary>Resources</summary>
+            <ul>
+              <li><a href="#">Tools</a></li>
+              <li><a href="#">Reading List</a></li>
+              <li><a href="#">Snippets</a></li>
+            </ul>
+          </details>
+        </li>
+        <div class="divider"></div>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+
+    <!-- Main column -->
+    <div class="main-col">
+
+      <!-- Top row: logo + bio -->
+      <div class="top-row">
+        <div id="panel">
+          <div id="logo-wrap">
+            <img src="tebay-dev.svg" alt="Tebay.dev logo">
+          </div>
+        </div>
+
+        <div id="info-panel" class="side-panel">
+          <div>
+            <h2>Nathan Tebay</h2>
+            <p class="subtitle">Software Developer</p>
+          </div>
+          <div class="divider"></div>
+          <div>
+            <span class="section-label">About</span>
+            <p>Your bio goes here. A short description of who you are, what you do, and what you're passionate about.</p>
+          </div>
+          <div class="divider"></div>
+          <div>
+            <span class="section-label">Links</span>
+            <a href="#">GitHub</a>
+            <a href="#">LinkedIn</a>
+            <a href="#">tebay.dev</a>
+          </div>
+          <div class="divider"></div>
+          <div>
+            <span class="section-label">Contact</span>
+            <p>your@email.com</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content panel -->
+      <div id="content-panel" class="side-panel"></div>
+
+    </div>
+  </div>
+
+  <div id="picker-wrap">
+    <input type="color" id="color-picker" value="#1a1a2e" title="Change background color">
+    <span id="picker-label">Background</span>
+  </div>
+
+  <script>
+    // ── Lorem ipsum generator (~10 000 words) ─────────────────────────────
+    const PARA = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    const ALT  = "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.";
+    const content = document.getElementById('content-panel');
+    for (let i = 0; i < 145; i++) {
+      const p = document.createElement('p');
+      p.textContent = i % 2 === 0 ? PARA : ALT;
+      content.appendChild(p);
+    }
+
+    // ── Color theming ─────────────────────────────────────────────────────
+    const picker      = document.getElementById('color-picker');
+    const body        = document.body;
+    const panel       = document.getElementById('panel');
+    const allPanels   = document.querySelectorAll('.side-panel');
+
+    function darken(r, g, b, f)  { return `rgb(${Math.round(r*f)},${Math.round(g*f)},${Math.round(b*f)})`; }
+    function lighten(r, g, b, a) { return `rgb(${Math.round(r+(255-r)*a)},${Math.round(g+(255-g)*a)},${Math.round(b+(255-b)*a)})`; }
+
+    function applyColor(hex) {
+      const r = parseInt(hex.slice(1,3), 16);
+      const g = parseInt(hex.slice(3,5), 16);
+      const b = parseInt(hex.slice(5,7), 16);
+      const border = darken(r, g, b, 0.5);
+      const light  = lighten(r, g, b, 0.18);
+      body.style.backgroundColor = hex;
+      panel.style.outlineColor   = border;
+      allPanels.forEach(p => {
+        p.style.outlineColor     = border;
+        p.style.backgroundColor  = light;
+      });
+    }
+
+    picker.addEventListener('input', () => applyColor(picker.value));
+    applyColor(picker.value);
+  </script>
+</body>
+</html>
