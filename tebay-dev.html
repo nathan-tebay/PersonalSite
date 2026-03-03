@@ -209,10 +209,17 @@
       height: auto;
     }
 
-    /* ── Info panel ──────────────────────────────────────────────────────── */
-    #info-panel {
+    /* ── Right column: bio + theme ───────────────────────────────────────── */
+    .right-col {
       width: 260px;
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ── Info panel ──────────────────────────────────────────────────────── */
+    #info-panel {
       display: flex;
       flex-direction: column;
       gap: 0;
@@ -265,37 +272,15 @@
 
     /* ── Theme swatch picker ─────────────────────────────────────────────── */
     #picker-wrap {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
-      background: rgba(0,0,0,0.45);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 1.25rem;
-      padding: 0.65rem 0.85rem;
-    }
-
-    #picker-label {
-      font-family: system-ui, sans-serif;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
-      user-select: none;
+      gap: 0.6rem;
     }
 
     #swatches {
       display: flex;
       flex-wrap: wrap;
       gap: 0.45rem;
-      /* 6 swatches per row: 6×1.9rem + 5×0.45rem ≈ 13.65rem */
-      max-width: 13.7rem;
     }
 
     .swatch {
@@ -393,27 +378,34 @@
           </div>
         </div>
 
-        <div id="info-panel" class="side-panel">
-          <div>
-            <h2>Nathan Tebay</h2>
-            <p class="subtitle">Software Developer</p>
+        <div class="right-col">
+          <div id="info-panel" class="side-panel">
+            <div>
+              <h2>Nathan Tebay</h2>
+              <p class="subtitle">Software Developer</p>
+            </div>
+            <div class="divider"></div>
+            <div>
+              <span class="section-label">About</span>
+              <p>Your bio goes here. A short description of who you are, what you do, and what you're passionate about.</p>
+            </div>
+            <div class="divider"></div>
+            <div>
+              <span class="section-label">Links</span>
+              <a href="#">GitHub</a>
+              <a href="#">LinkedIn</a>
+              <a href="#">tebay.dev</a>
+            </div>
+            <div class="divider"></div>
+            <div>
+              <span class="section-label">Contact</span>
+              <p>your@email.com</p>
+            </div>
           </div>
-          <div class="divider"></div>
-          <div>
-            <span class="section-label">About</span>
-            <p>Your bio goes here. A short description of who you are, what you do, and what you're passionate about.</p>
-          </div>
-          <div class="divider"></div>
-          <div>
-            <span class="section-label">Links</span>
-            <a href="#">GitHub</a>
-            <a href="#">LinkedIn</a>
-            <a href="#">tebay.dev</a>
-          </div>
-          <div class="divider"></div>
-          <div>
-            <span class="section-label">Contact</span>
-            <p>your@email.com</p>
+
+          <div id="picker-wrap" class="side-panel">
+            <span class="section-label">Theme</span>
+            <div id="swatches"></div>
           </div>
         </div>
       </div>
@@ -422,11 +414,6 @@
       <div id="content-panel" class="side-panel"></div>
 
     </div>
-  </div>
-
-  <div id="picker-wrap">
-    <span id="picker-label">Theme</span>
-    <div id="swatches"></div>
   </div>
 
   <script>
