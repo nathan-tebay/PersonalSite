@@ -57,10 +57,8 @@ function luminance([r, g, b]) {
 }
 
 // ── Apply a theme ─────────────────────────────────────────────────────
-const body      = document.body;
-const panel     = document.getElementById('panel');
-const allPanels = document.querySelectorAll('.side-panel');
-const root      = document.documentElement;
+const body = document.body;
+const root = document.documentElement;
 
 function applyTheme(hex) {
   const base    = hexToRgb(hex);
@@ -85,15 +83,11 @@ function applyTheme(hex) {
     root.style.setProperty('--hover-bg',  'rgba(255,255,255,0.07)');
   }
 
-  const borderColor = toCss(darken(base, 0.5));
-  const fillCss     = toCss(fill);
-
+  // Drive panel colours via CSS custom properties so every panel on every page
+  // picks up the theme, including those injected by layout.js after this runs.
+  root.style.setProperty('--info-bg',      toCss(fill));
+  root.style.setProperty('--panel-border', toCss(darken(base, 0.5)));
   body.style.backgroundColor = hex;
-  if (panel) panel.style.outlineColor = borderColor;
-  allPanels.forEach(p => {
-    p.style.outlineColor    = borderColor;
-    p.style.backgroundColor = fillCss;
-  });
 }
 
 // ── Tooltip (body-level, escapes backdrop-filter stacking context) ────
@@ -114,7 +108,23 @@ function showTip(el, label) {
 
 function hideTip() { tip.style.opacity = '0'; }
 
-const savedHex = localStorage.getItem('theme') ?? THEMES[0].hex;
+// ── Theme persistence (localStorage + window.name fallback for file://) ──
+function isValidHex(s) { return /^#[0-9a-fA-F]{6}$/.test(s); }
+
+function getSavedTheme() {
+  const ls = localStorage.getItem('theme');
+  if (ls && isValidHex(ls)) return ls;
+  if (isValidHex(window.name))  return window.name;
+  return THEMES[0].hex;
+}
+
+function saveTheme(hex) {
+  localStorage.setItem('theme', hex);
+  window.name = hex; // persists across same-tab file:// navigations
+}
+
+const savedHex = getSavedTheme();
+window.name = savedHex; // seed window.name so the next page can read it
 
 // ── Render swatches (only on pages that have the picker) ──────────────
 const swatchContainer = document.getElementById('swatches');
@@ -134,7 +144,7 @@ if (swatchContainer) {
       activeBtn = btn;
       hideTip();
       applyTheme(theme.hex);
-      localStorage.setItem('theme', theme.hex);
+      saveTheme(theme.hex);
     });
     swatchContainer.appendChild(btn);
     if (theme.hex === savedHex) {
