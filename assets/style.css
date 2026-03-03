@@ -263,6 +263,194 @@ img {
   break-inside: avoid;
 }
 
+/* ── Site header ─────────────────────────────────────────────────────── */
+#site-header {
+  align-self: stretch;
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+/* Inner container mirrors .page-layout so the logo tracks the nav column */
+#header-inner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+#site-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('../background.jpeg');
+  background-repeat: repeat;
+  background-size: auto;
+  opacity: 0.8;
+  z-index: 0;
+}
+
+#site-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to left,
+    rgba(10,10,20,0.97)  0%,
+    rgba(10,10,20,0.82) 30%,
+    rgba(10,10,20,0.25) 65%,
+    transparent         100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+#header-logo-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Circular dark vignette behind the logo to help it stand out */
+#header-logo-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -30px;
+  background: radial-gradient(
+    ellipse 55% 70% at 50% 50%,
+    rgba(10,10,20,0.88)  0%,
+    rgba(10,10,20,0.55) 50%,
+    transparent         100%
+  );
+  pointer-events: none;
+}
+
+#header-logo {
+  position: relative;
+  width: 220px;
+  height: auto;
+}
+
+/* ── Nav active link ─────────────────────────────────────────────────── */
+#nav-panel .tree a.active {
+  color: var(--text-high);
+  font-weight: 600;
+  background: var(--hover-bg);
+}
+
+/* ── Project pages ───────────────────────────────────────────────────── */
+.project-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.project-header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-high);
+  margin-bottom: 0.25rem;
+}
+
+.project-header .tagline {
+  font-size: 0.85rem;
+  color: var(--text-low);
+}
+
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-family: system-ui, sans-serif;
+  color: var(--text-link);
+  text-decoration: none;
+  border: 1.5px solid currentColor;
+  border-radius: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.12s;
+}
+
+.github-link:hover { opacity: 0.72; }
+
+.project-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.project-section h3 {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-low);
+  margin-bottom: 0.5rem;
+}
+
+.project-section p,
+.project-section li {
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--text-mid);
+  margin-bottom: 0.3rem;
+}
+
+.project-section ul { list-style: none; padding: 0; }
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.tag {
+  font-size: 0.72rem;
+  font-family: monospace;
+  color: var(--text-mid);
+  border: 1px solid var(--divider);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.45rem;
+}
+
+.renders-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.render-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  display: block;
+}
+
+.render-card .render-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-low);
+  text-align: center;
+  margin-top: 0.4rem;
+}
+
 /* ── Theme swatch picker ─────────────────────────────────────────────── */
 #picker-wrap {
   display: flex;

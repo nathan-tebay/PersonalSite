@@ -2,10 +2,12 @@
 const PARA = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 const ALT  = "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.";
 const contentPanel = document.getElementById('content-panel');
-for (let i = 0; i < 145; i++) {
-  const p = document.createElement('p');
-  p.textContent = i % 2 === 0 ? PARA : ALT;
-  contentPanel.appendChild(p);
+if (contentPanel) {
+  for (let i = 0; i < 145; i++) {
+    const p = document.createElement('p');
+    p.textContent = i % 2 === 0 ? PARA : ALT;
+    contentPanel.appendChild(p);
+  }
 }
 
 // ── Theme definitions ─────────────────────────────────────────────────
@@ -87,7 +89,7 @@ function applyTheme(hex) {
   const fillCss     = toCss(fill);
 
   body.style.backgroundColor = hex;
-  panel.style.outlineColor   = borderColor;
+  if (panel) panel.style.outlineColor = borderColor;
   allPanels.forEach(p => {
     p.style.outlineColor    = borderColor;
     p.style.backgroundColor = fillCss;
@@ -112,38 +114,40 @@ function showTip(el, label) {
 
 function hideTip() { tip.style.opacity = '0'; }
 
-// ── Render swatches ───────────────────────────────────────────────────
-const swatchContainer = document.getElementById('swatches');
-let activeBtn = null;
-
 const savedHex = localStorage.getItem('theme') ?? THEMES[0].hex;
 
-THEMES.forEach((theme) => {
-  const btn = document.createElement('button');
-  btn.className = 'swatch';
-  btn.style.backgroundColor = theme.hex;
-  btn.setAttribute('aria-label', theme.name);
-  btn.addEventListener('mouseenter', () => showTip(btn, theme.name));
-  btn.addEventListener('mouseleave', hideTip);
-  btn.addEventListener('click', () => {
-    if (activeBtn) activeBtn.classList.remove('active');
-    btn.classList.add('active');
-    activeBtn = btn;
-    hideTip();
-    applyTheme(theme.hex);
-    localStorage.setItem('theme', theme.hex);
-  });
-  swatchContainer.appendChild(btn);
-  if (theme.hex === savedHex) {
-    btn.classList.add('active');
-    activeBtn = btn;
-  }
-});
+// ── Render swatches (only on pages that have the picker) ──────────────
+const swatchContainer = document.getElementById('swatches');
+if (swatchContainer) {
+  let activeBtn = null;
 
-// Fall back to first swatch if saved value no longer matches any theme
-if (!activeBtn) {
-  activeBtn = swatchContainer.firstChild;
-  activeBtn.classList.add('active');
+  THEMES.forEach((theme) => {
+    const btn = document.createElement('button');
+    btn.className = 'swatch';
+    btn.style.backgroundColor = theme.hex;
+    btn.setAttribute('aria-label', theme.name);
+    btn.addEventListener('mouseenter', () => showTip(btn, theme.name));
+    btn.addEventListener('mouseleave', hideTip);
+    btn.addEventListener('click', () => {
+      if (activeBtn) activeBtn.classList.remove('active');
+      btn.classList.add('active');
+      activeBtn = btn;
+      hideTip();
+      applyTheme(theme.hex);
+      localStorage.setItem('theme', theme.hex);
+    });
+    swatchContainer.appendChild(btn);
+    if (theme.hex === savedHex) {
+      btn.classList.add('active');
+      activeBtn = btn;
+    }
+  });
+
+  // Fall back to first swatch if saved value no longer matches any theme
+  if (!activeBtn) {
+    activeBtn = swatchContainer.firstChild;
+    activeBtn.classList.add('active');
+  }
 }
 
 applyTheme(savedHex);

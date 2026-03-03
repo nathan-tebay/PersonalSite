@@ -6,56 +6,10 @@
   <title>Tebay.dev</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
+<body data-page="home">
   <div class="page-layout">
 
-    <!-- Left sticky nav -->
-    <nav id="nav-panel" class="side-panel">
-      <span class="section-label">Navigation</span>
-      <ul class="tree">
-        <li>
-          <details open>
-            <summary>Projects</summary>
-            <ul>
-              <li><a href="#">MAPDashboard</a></li>
-              <li><a href="#">MicrophoneController</a></li>
-              <li>
-                <details>
-                  <summary>Web</summary>
-                  <ul>
-                    <li><a href="#">tebay.dev</a></li>
-                    <li><a href="#">Portfolio</a></li>
-                  </ul>
-                </details>
-              </li>
-            </ul>
-          </details>
-        </li>
-        <li>
-          <details>
-            <summary>Blog</summary>
-            <ul>
-              <li><a href="#">Post One</a></li>
-              <li><a href="#">Post Two</a></li>
-              <li><a href="#">Post Three</a></li>
-            </ul>
-          </details>
-        </li>
-        <li>
-          <details>
-            <summary>Resources</summary>
-            <ul>
-              <li><a href="#">Tools</a></li>
-              <li><a href="#">Reading List</a></li>
-              <li><a href="#">Snippets</a></li>
-            </ul>
-          </details>
-        </li>
-        <div class="divider"></div>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-    </nav>
+    <div id="layout-nav"></div>
 
     <!-- Main column -->
     <div class="main-col">
@@ -106,6 +60,7 @@
     </div>
   </div>
 
+  <script src="assets/layout.js"></script>
   <script src="assets/script.js"></script>
 </body>
 </html>
