@@ -298,6 +298,7 @@
     }
 
     .swatch {
+      position: relative;
       width: 1.4rem;
       height: 1.4rem;
       border-radius: 50%;
@@ -308,8 +309,28 @@
       padding: 0;
     }
 
-    .swatch:hover  { transform: scale(1.2); }
-    .swatch.active { border-color: rgba(255,255,255,0.75); }
+    .swatch::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: calc(100% + 7px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.82);
+      color: rgba(255,255,255,0.92);
+      font-family: system-ui, sans-serif;
+      font-size: 0.68rem;
+      font-weight: 500;
+      white-space: nowrap;
+      padding: 0.18rem 0.45rem;
+      border-radius: 0.3rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+    }
+
+    .swatch:hover         { transform: scale(1.2); }
+    .swatch:hover::after  { opacity: 1; }
+    .swatch.active        { border-color: rgba(255,255,255,0.75); }
   </style>
 </head>
 <body>
@@ -510,7 +531,8 @@
       const btn = document.createElement('button');
       btn.className = 'swatch' + (i === 0 ? ' active' : '');
       btn.style.backgroundColor = theme.hex;
-      btn.title = theme.name;
+      btn.dataset.label = theme.name;
+      btn.setAttribute('aria-label', theme.name);
       btn.addEventListener('click', () => {
         if (activeBtn) activeBtn.classList.remove('active');
         btn.classList.add('active');
