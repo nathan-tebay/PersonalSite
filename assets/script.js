@@ -1,17 +1,21 @@
-// ── Lorem ipsum generator (~10 000 words) ─────────────────────────────
-const PARA = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-const ALT  = "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.";
+// ── Lorem ipsum placeholder content ───────────────────────────────────
+const LOREM_PARAGRAPH = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+const LOREM_PARAGRAPH_ALT = 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.';
+
 const contentPanel = document.getElementById('content-panel');
 if (contentPanel) {
   for (let i = 0; i < 145; i++) {
-    const p = document.createElement('p');
-    p.textContent = i % 2 === 0 ? PARA : ALT;
-    contentPanel.appendChild(p);
+    const paragraph = document.createElement('p');
+    paragraph.textContent = i % 2 === 0 ? LOREM_PARAGRAPH : LOREM_PARAGRAPH_ALT;
+    contentPanel.appendChild(paragraph);
   }
 }
 
-// ── Theme definitions ─────────────────────────────────────────────────
-// All chosen to complement the green PCB circuit-board logo.
+// ── Theme definitions ──────────────────────────────────────────────────
+
+/** @typedef {{ name: string, hex: string }} Theme */
+
+/** @type {Theme[]} All themes chosen to complement the green PCB circuit-board logo. */
 const THEMES = [
   { name: 'Forest',    hex: '#0d1f14' },  // deep PCB green
   { name: 'Abyss',     hex: '#0a1520' },  // deep ocean blue
@@ -27,7 +31,13 @@ const THEMES = [
   { name: 'Sage',      hex: '#8aad92' },  // muted sage green
 ];
 
-// ── Colour helpers ────────────────────────────────────────────────────
+// ── Colour helpers ─────────────────────────────────────────────────────
+
+/**
+ * Converts a 6-digit hex color string to an [R, G, B] array.
+ * @param {string} hex - A hex color string like '#1a2b3c'.
+ * @returns {[number, number, number]} Array of [red, green, blue] values (0–255).
+ */
 function hexToRgb(hex) {
   return [
     parseInt(hex.slice(1, 3), 16),
@@ -36,38 +46,69 @@ function hexToRgb(hex) {
   ];
 }
 
-function darken([r, g, b], f) {
-  return [Math.round(r * f), Math.round(g * f), Math.round(b * f)];
+/**
+ * Darkens an RGB color by multiplying each channel by a scale factor.
+ * @param {[number, number, number]} _ - Input color as [red, green, blue].
+ * @param {number} factor - Scale factor in range 0–1 (0 = black, 1 = unchanged).
+ * @returns {[number, number, number]} Darkened color.
+ */
+function darken([red, green, blue], factor) {
+  return [Math.round(red * factor), Math.round(green * factor), Math.round(blue * factor)];
 }
 
-function lighten([r, g, b], a) {
+/**
+ * Lightens an RGB color by blending it toward white by the given amount.
+ * @param {[number, number, number]} _ - Input color as [red, green, blue].
+ * @param {number} amount - Blend amount in range 0–1 (0 = unchanged, 1 = white).
+ * @returns {[number, number, number]} Lightened color.
+ */
+function lighten([red, green, blue], amount) {
   return [
-    Math.round(r + (255 - r) * a),
-    Math.round(g + (255 - g) * a),
-    Math.round(b + (255 - b) * a),
+    Math.round(red   + (255 - red)   * amount),
+    Math.round(green + (255 - green) * amount),
+    Math.round(blue  + (255 - blue)  * amount),
   ];
 }
 
-function toCss([r, g, b]) { return `rgb(${r},${g},${b})`; }
+/**
+ * Converts an RGB array to a CSS rgb() string.
+ * @param {[number, number, number]} _ - Color as [red, green, blue].
+ * @returns {string} CSS color string like 'rgb(26,43,60)'.
+ */
+function toCss([red, green, blue]) { return `rgb(${red},${green},${blue})`; }
 
-// WCAG relative luminance
-function luminance([r, g, b]) {
-  const lin = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
-  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+/**
+ * Computes the WCAG relative luminance of an RGB color.
+ * @param {[number, number, number]} _ - Color as [red, green, blue].
+ * @returns {number} Luminance value in range 0–1.
+ */
+function luminance([red, green, blue]) {
+  const linearize = (channelValue) => {
+    const normalized = channelValue / 255;
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : Math.pow((normalized + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * linearize(red) + 0.7152 * linearize(green) + 0.0722 * linearize(blue);
 }
 
-// ── Apply a theme ─────────────────────────────────────────────────────
+// ── Apply a theme ──────────────────────────────────────────────────────
 const body = document.body;
 const root = document.documentElement;
 
+/**
+ * Applies a background theme to the page, updating body color, panel fills,
+ * outlines, and all text-related CSS custom properties.
+ * @param {string} hex - A hex color string like '#0d1f14'.
+ */
 function applyTheme(hex) {
-  const base    = hexToRgb(hex);
-  const isLight = luminance(base) > 0.15; // background is light → panels go darker
+  const baseColor = hexToRgb(hex);
+  const isLightBackground = luminance(baseColor) > 0.15;
 
   // Light themes: darken panels; dark themes: lighten panels
-  const fill = isLight ? darken(base, 0.78) : lighten(base, 0.18);
+  const panelFill = isLightBackground ? darken(baseColor, 0.78) : lighten(baseColor, 0.18);
 
-  if (isLight) {
+  if (isLightBackground) {
     root.style.setProperty('--text-high', 'rgba(0,0,0,0.87)');
     root.style.setProperty('--text-mid',  'rgba(0,0,0,0.60)');
     root.style.setProperty('--text-low',  'rgba(0,0,0,0.40)');
@@ -84,40 +125,61 @@ function applyTheme(hex) {
   }
 
   // Drive panel colours via CSS custom properties so every panel on every page
-  // picks up the theme, including those injected by layout.js after this runs.
-  root.style.setProperty('--info-bg',      toCss(fill));
-  root.style.setProperty('--panel-border', toCss(darken(base, 0.5)));
+  // picks up the theme, including those injected by layout.js.
+  root.style.setProperty('--info-bg',      toCss(panelFill));
+  root.style.setProperty('--panel-border', toCss(darken(baseColor, 0.5)));
   body.style.backgroundColor = hex;
 }
 
-// ── Tooltip (body-level, escapes backdrop-filter stacking context) ────
-const tip = document.createElement('div');
-tip.id = 'swatch-tip';
-document.body.appendChild(tip);
+// ── Tooltip (body-level, escapes backdrop-filter stacking context) ─────
+const tooltipElement = document.createElement('div');
+tooltipElement.id = 'swatch-tip';
+document.body.appendChild(tooltipElement);
 
-function showTip(el, label) {
-  const r = el.getBoundingClientRect();
-  tip.textContent = label;
-  tip.style.opacity = '0';
-  tip.style.display = 'block';
-  const tw = tip.offsetWidth;
-  tip.style.left = `${r.left + r.width / 2 - tw / 2}px`;
-  tip.style.top  = `${r.top - tip.offsetHeight - 7}px`;
-  tip.style.opacity = '1';
+/**
+ * Positions and shows the swatch tooltip near the given element.
+ * @param {HTMLElement} element - The swatch button that triggered the tooltip.
+ * @param {string} label - Text to display in the tooltip.
+ */
+function showTip(element, label) {
+  const boundingRect = element.getBoundingClientRect();
+  tooltipElement.textContent = label;
+  tooltipElement.style.opacity = '0';
+  tooltipElement.style.display = 'block';
+  const tooltipWidth = tooltipElement.offsetWidth;
+  tooltipElement.style.left = `${boundingRect.left + boundingRect.width / 2 - tooltipWidth / 2}px`;
+  tooltipElement.style.top  = `${boundingRect.top - tooltipElement.offsetHeight - 7}px`;
+  tooltipElement.style.opacity = '1';
 }
 
-function hideTip() { tip.style.opacity = '0'; }
+/** Hides the swatch tooltip. */
+function hideTip() { tooltipElement.style.opacity = '0'; }
 
 // ── Theme persistence (localStorage + window.name fallback for file://) ──
-function isValidHex(s) { return /^#[0-9a-fA-F]{6}$/.test(s); }
 
+/**
+ * Checks whether a string is a valid 6-digit hex color.
+ * @param {string} hexString - The string to validate.
+ * @returns {boolean}
+ */
+function isValidHex(hexString) { return /^#[0-9a-fA-F]{6}$/.test(hexString); }
+
+/**
+ * Retrieves the saved theme hex from localStorage, falling back to window.name
+ * (which persists across same-tab file:// navigations) and then to the default theme.
+ * @returns {string} A valid hex color string.
+ */
 function getSavedTheme() {
-  const ls = localStorage.getItem('theme');
-  if (ls && isValidHex(ls)) return ls;
-  if (isValidHex(window.name))  return window.name;
+  const localStorageValue = localStorage.getItem('theme');
+  if (localStorageValue && isValidHex(localStorageValue)) return localStorageValue;
+  if (isValidHex(window.name)) return window.name;
   return THEMES[0].hex;
 }
 
+/**
+ * Persists the selected theme hex to both localStorage and window.name.
+ * @param {string} hex - A valid hex color string.
+ */
 function saveTheme(hex) {
   localStorage.setItem('theme', hex);
   window.name = hex; // persists across same-tab file:// navigations
@@ -126,37 +188,37 @@ function saveTheme(hex) {
 const savedHex = getSavedTheme();
 window.name = savedHex; // seed window.name so the next page can read it
 
-// ── Render swatches (only on pages that have the picker) ──────────────
+// ── Render swatches (only on pages that have the picker) ───────────────
 const swatchContainer = document.getElementById('swatches');
 if (swatchContainer) {
-  let activeBtn = null;
+  let activeSwatchButton = null;
 
   THEMES.forEach((theme) => {
-    const btn = document.createElement('button');
-    btn.className = 'swatch';
-    btn.style.backgroundColor = theme.hex;
-    btn.setAttribute('aria-label', theme.name);
-    btn.addEventListener('mouseenter', () => showTip(btn, theme.name));
-    btn.addEventListener('mouseleave', hideTip);
-    btn.addEventListener('click', () => {
-      if (activeBtn) activeBtn.classList.remove('active');
-      btn.classList.add('active');
-      activeBtn = btn;
+    const swatchButton = document.createElement('button');
+    swatchButton.className = 'swatch';
+    swatchButton.style.backgroundColor = theme.hex;
+    swatchButton.setAttribute('aria-label', theme.name);
+    swatchButton.addEventListener('mouseenter', () => showTip(swatchButton, theme.name));
+    swatchButton.addEventListener('mouseleave', hideTip);
+    swatchButton.addEventListener('click', () => {
+      if (activeSwatchButton) activeSwatchButton.classList.remove('active');
+      swatchButton.classList.add('active');
+      activeSwatchButton = swatchButton;
       hideTip();
       applyTheme(theme.hex);
       saveTheme(theme.hex);
     });
-    swatchContainer.appendChild(btn);
+    swatchContainer.appendChild(swatchButton);
     if (theme.hex === savedHex) {
-      btn.classList.add('active');
-      activeBtn = btn;
+      swatchButton.classList.add('active');
+      activeSwatchButton = swatchButton;
     }
   });
 
   // Fall back to first swatch if saved value no longer matches any theme
-  if (!activeBtn) {
-    activeBtn = swatchContainer.firstChild;
-    activeBtn.classList.add('active');
+  if (!activeSwatchButton) {
+    activeSwatchButton = swatchContainer.firstChild;
+    activeSwatchButton.classList.add('active');
   }
 }
 

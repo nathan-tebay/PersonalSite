@@ -480,6 +480,17 @@ img {
 .swatch:hover  { transform: scale(1.15); }
 .swatch.active { border-color: rgba(255,255,255,0.75); }
 
+/* ── Responsive: reflow bio + theme below logo before logo shrinks ───── */
+@media (max-width: 1280px) {
+  .top-row {
+    flex-direction: column;
+  }
+
+  .right-col {
+    width: 100%;
+  }
+}
+
 /* JS-rendered tooltip, appended to <body> to escape stacking contexts */
 #swatch-tip {
   position: fixed;
