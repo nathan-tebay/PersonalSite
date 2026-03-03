@@ -40,11 +40,13 @@ Everything is in `tebay-dev.html` — no bundler, no framework, no npm.
 
 ### Theming
 
-A `<input type="color">` picker in the top-right corner drives the background color.
-JS derives two computed colors from the picked hex:
+Six curated swatch buttons (bottom-right) choose the background color. All swatches are dark tones selected to complement the green PCB logo: Navy, Forest, Abyss, Void, Obsidian, Gunmetal.
 
-- **border/outline**: `darken(r,g,b, 0.5)` — 50% darker, applied to all `.side-panel` outlines
-- **panel fill**: `lighten(r,g,b, 0.18)` — 18% toward white, applied to `.side-panel` backgrounds
+JS derives colors from the chosen hex:
+
+- **border/outline**: `darken(base, 0.5)` — 50% darker, applied to `#panel` and all `.side-panel` outlines
+- **panel fill**: `lighten(base, 0.18)` — 18% toward white, applied to `.side-panel` backgrounds
+- **text CSS variables**: computed from WCAG relative luminance of the panel fill; if luminance > 0.18 the panel is considered "light" and dark text vars are applied, otherwise white text vars are used. Variables: `--text-high`, `--text-mid`, `--text-low`, `--text-link`, `--divider`, `--hover-bg`.
 
 ### Logo (`tebay-dev.svg`)
 
