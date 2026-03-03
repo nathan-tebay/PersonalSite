@@ -270,12 +270,14 @@
       right: 2rem;
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 0.75rem;
+      max-width: 22rem;
       background: rgba(0,0,0,0.45);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 2rem;
+      border-radius: 1.25rem;
       padding: 0.55rem 1rem 0.55rem 0.75rem;
     }
 
@@ -422,12 +424,17 @@
     // ── Theme definitions ─────────────────────────────────────────────────
     // All chosen to complement the green PCB circuit-board logo.
     const THEMES = [
-      { name: 'Navy',     hex: '#1a1a2e' },  // default blue-navy
-      { name: 'Forest',   hex: '#0d1f14' },  // deep PCB green
-      { name: 'Abyss',    hex: '#0a1520' },  // deep ocean blue
-      { name: 'Void',     hex: '#18102e' },  // dark violet
-      { name: 'Obsidian', hex: '#111111' },  // near-black neutral
-      { name: 'Gunmetal', hex: '#14181e' },  // dark blue-gray
+      { name: 'Navy',      hex: '#1a1a2e' },  // default blue-navy
+      { name: 'Forest',    hex: '#0d1f14' },  // deep PCB green
+      { name: 'Abyss',     hex: '#0a1520' },  // deep ocean blue
+      { name: 'Void',      hex: '#18102e' },  // dark violet
+      { name: 'Obsidian',  hex: '#111111' },  // near-black neutral
+      { name: 'Gunmetal',  hex: '#14181e' },  // dark blue-gray
+      { name: 'Ember',     hex: '#7a2800' },  // burnt orange
+      { name: 'Rust',      hex: '#a84518' },  // lighter burnt orange
+      { name: 'Fog',       hex: '#b8c4cc' },  // light blue-gray
+      { name: 'Parchment', hex: '#c8b89a' },  // warm tan/cream
+      { name: 'Sage',      hex: '#8aad92' },  // muted sage green
     ];
 
     // ── Colour helpers ────────────────────────────────────────────────────
