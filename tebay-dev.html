@@ -527,9 +527,10 @@
     const swatchContainer = document.getElementById('swatches');
     let activeBtn = null;
 
+    const savedHex = localStorage.getItem('theme') ?? THEMES[0].hex;
+
     THEMES.forEach((theme, i) => {
       const btn = document.createElement('button');
-      btn.className = 'swatch' + (i === 0 ? ' active' : '');
       btn.style.backgroundColor = theme.hex;
       btn.dataset.label = theme.name;
       btn.setAttribute('aria-label', theme.name);
@@ -538,12 +539,22 @@
         btn.classList.add('active');
         activeBtn = btn;
         applyTheme(theme.hex);
+        localStorage.setItem('theme', theme.hex);
       });
       swatchContainer.appendChild(btn);
-      if (i === 0) activeBtn = btn;
+      if (theme.hex === savedHex) {
+        btn.classList.add('active');
+        activeBtn = btn;
+      }
     });
 
-    applyTheme(THEMES[0].hex);
+    // Fall back to first swatch if saved value no longer matches any theme
+    if (!activeBtn) {
+      activeBtn = swatchContainer.firstChild;
+      activeBtn.classList.add('active');
+    }
+
+    applyTheme(savedHex);
   </script>
 </body>
 </html>
