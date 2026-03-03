@@ -298,39 +298,36 @@
     }
 
     .swatch {
-      position: relative;
-      width: 1.4rem;
-      height: 1.4rem;
+      width: 1.9rem;
+      height: 1.9rem;
       border-radius: 50%;
       border: 2.5px solid transparent;
       cursor: pointer;
       transition: transform 0.12s ease, border-color 0.12s ease;
       outline: none;
       padding: 0;
+      flex-shrink: 0;
     }
 
-    .swatch::after {
-      content: attr(data-label);
-      position: absolute;
-      bottom: calc(100% + 7px);
-      left: 50%;
-      transform: translateX(-50%);
+    .swatch:hover  { transform: scale(1.15); }
+    .swatch.active { border-color: rgba(255,255,255,0.75); }
+
+    /* JS-rendered tooltip, appended to <body> to escape stacking contexts */
+    #swatch-tip {
+      position: fixed;
       background: rgba(0,0,0,0.82);
       color: rgba(255,255,255,0.92);
       font-family: system-ui, sans-serif;
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       font-weight: 500;
       white-space: nowrap;
-      padding: 0.18rem 0.45rem;
+      padding: 0.2rem 0.5rem;
       border-radius: 0.3rem;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.12s ease;
+      z-index: 9999;
     }
-
-    .swatch:hover         { transform: scale(1.2); }
-    .swatch:hover::after  { opacity: 1; }
-    .swatch.active        { border-color: rgba(255,255,255,0.75); }
   </style>
 </head>
 <body>
@@ -523,21 +520,42 @@
       });
     }
 
+    // ── Tooltip (body-level, escapes backdrop-filter stacking context) ────
+    const tip = document.createElement('div');
+    tip.id = 'swatch-tip';
+    document.body.appendChild(tip);
+
+    function showTip(el, label) {
+      const r = el.getBoundingClientRect();
+      tip.textContent = label;
+      tip.style.opacity = '0';
+      tip.style.display = 'block';
+      const tw = tip.offsetWidth;
+      tip.style.left = `${r.left + r.width / 2 - tw / 2}px`;
+      tip.style.top  = `${r.top - tip.offsetHeight - 7}px`;
+      tip.style.opacity = '1';
+    }
+
+    function hideTip() { tip.style.opacity = '0'; }
+
     // ── Render swatches ───────────────────────────────────────────────────
     const swatchContainer = document.getElementById('swatches');
     let activeBtn = null;
 
     const savedHex = localStorage.getItem('theme') ?? THEMES[0].hex;
 
-    THEMES.forEach((theme, i) => {
+    THEMES.forEach((theme) => {
       const btn = document.createElement('button');
+      btn.className = 'swatch';
       btn.style.backgroundColor = theme.hex;
-      btn.dataset.label = theme.name;
       btn.setAttribute('aria-label', theme.name);
+      btn.addEventListener('mouseenter', () => showTip(btn, theme.name));
+      btn.addEventListener('mouseleave', hideTip);
       btn.addEventListener('click', () => {
         if (activeBtn) activeBtn.classList.remove('active');
         btn.classList.add('active');
         activeBtn = btn;
+        hideTip();
         applyTheme(theme.hex);
         localStorage.setItem('theme', theme.hex);
       });
