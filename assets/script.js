@@ -11,7 +11,6 @@ for (let i = 0; i < 145; i++) {
 // ── Theme definitions ─────────────────────────────────────────────────
 // All chosen to complement the green PCB circuit-board logo.
 const THEMES = [
-  { name: 'Navy',      hex: '#1a1a2e' },  // default blue-navy
   { name: 'Forest',    hex: '#0d1f14' },  // deep PCB green
   { name: 'Abyss',     hex: '#0a1520' },  // deep ocean blue
   { name: 'Void',      hex: '#18102e' },  // dark violet
@@ -19,6 +18,8 @@ const THEMES = [
   { name: 'Gunmetal',  hex: '#14181e' },  // dark blue-gray
   { name: 'Ember',     hex: '#7a2800' },  // burnt orange
   { name: 'Rust',      hex: '#a84518' },  // lighter burnt orange
+  { name: 'Cobalt',    hex: '#0d1a3a' },  // deep blue — safe for red-green colour blindness
+  { name: 'Graphite',  hex: '#1c1c1c' },  // neutral gray — hue-free, works for all CVD types
   { name: 'Fog',       hex: '#b8c4cc' },  // light blue-gray
   { name: 'Parchment', hex: '#c8b89a' },  // warm tan/cream
   { name: 'Sage',      hex: '#8aad92' },  // muted sage green
@@ -34,7 +35,7 @@ function hexToRgb(hex) {
 }
 
 function darken([r, g, b], f) {
-  return `rgb(${Math.round(r * f)},${Math.round(g * f)},${Math.round(b * f)})`;
+  return [Math.round(r * f), Math.round(g * f), Math.round(b * f)];
 }
 
 function lighten([r, g, b], a) {
@@ -44,6 +45,8 @@ function lighten([r, g, b], a) {
     Math.round(b + (255 - b) * a),
   ];
 }
+
+function toCss([r, g, b]) { return `rgb(${r},${g},${b})`; }
 
 // WCAG relative luminance
 function luminance([r, g, b]) {
@@ -58,11 +61,13 @@ const allPanels = document.querySelectorAll('.side-panel');
 const root      = document.documentElement;
 
 function applyTheme(hex) {
-  const base = hexToRgb(hex);
-  const fill = lighten(base, 0.18);   // panel background
-  const dark = luminance(fill) > 0.18; // true → panel is light, use dark text
+  const base    = hexToRgb(hex);
+  const isLight = luminance(base) > 0.15; // background is light → panels go darker
 
-  if (dark) {
+  // Light themes: darken panels; dark themes: lighten panels
+  const fill = isLight ? darken(base, 0.78) : lighten(base, 0.18);
+
+  if (isLight) {
     root.style.setProperty('--text-high', 'rgba(0,0,0,0.87)');
     root.style.setProperty('--text-mid',  'rgba(0,0,0,0.60)');
     root.style.setProperty('--text-low',  'rgba(0,0,0,0.40)');
@@ -78,8 +83,8 @@ function applyTheme(hex) {
     root.style.setProperty('--hover-bg',  'rgba(255,255,255,0.07)');
   }
 
-  const borderColor = darken(base, 0.5);
-  const fillCss     = `rgb(${fill[0]},${fill[1]},${fill[2]})`;
+  const borderColor = toCss(darken(base, 0.5));
+  const fillCss     = toCss(fill);
 
   body.style.backgroundColor = hex;
   panel.style.outlineColor   = borderColor;
