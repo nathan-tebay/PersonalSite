@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoRejection — Tebay.dev</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body data-page="autorejection" data-basepath="../">
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+      <div class="main-col">
+        <div class="side-panel">
+          <div class="project-header">
+            <div>
+              <h1>AutoRejection</h1>
+              <p class="tagline">
+                Node-RED automation system with hardware integration and a
+                custom dashboard UI
+              </p>
+            </div>
+            <a
+              href="https://github.com/nathan-tebay/AutoRejection"
+              class="github-link"
+              target="_blank"
+              rel="noopener">
+              View on GitHub
+            </a>
+          </div>
+
+          <div class="renders-row">
+            <div class="render-card">
+              <img
+                src="../assets/images/autorejection-front.webp"
+                alt="AutoRejection — front render" />
+              <span class="render-label">Front</span>
+            </div>
+            <div class="render-card">
+              <img
+                src="../assets/images/autorejection-top.webp"
+                alt="AutoRejection — top render" />
+              <span class="render-label">Top</span>
+            </div>
+            <div class="render-card">
+              <img
+                src="../assets/images/autorejection-back.webp"
+                alt="AutoRejection — back render" />
+              <span class="render-label">Back</span>
+            </div>
+          </div>
+
+          <div class="renders-row">
+            <div class="render-card">
+              <img
+                src="../assets/images/loadcell-pcb.jpg"
+                alt="AutoRejection — load cell PCB" />
+              <span class="render-label">Load Cell PCB</span>
+            </div>
+            <div class="render-card render-card--span2">
+              <div class="render-placeholder">
+                These are the renderings of the auto-rejection machine and load
+                cell controller PCB. This machine can weigh 50+ cans of beer as
+                they come off a canning line. If the cans are under- or
+                overfilled, they will be ejected from the canning line by the
+                small puck on the left side of the machine. The star wheel
+                design allows for precise control over the ejection process,
+                ensuring the cans have enough time to fully stop for each
+                measurement. Achieving that stability was crucial to the
+                machine's performance and reliability, and it was one of the
+                most challenging aspects of the project.
+              </div>
+              <div class="render-placeholder">
+                The load cell controller PCB is built around an HX711 load cell
+                amplifier with an ATmega328P microcontroller to take consistent
+                weight samples. The PCB is designed to be compact and easily
+                integrated into the machine's enclosure, with mounting holes
+                that align with the Raspberry Pi's mounting holes. The
+                controller reads the weight measurements from the load cell and
+                communicates with the Node-RED automation system to determine
+                whether each can should be accepted or rejected. Node-Red also
+                hosts a web server accessible via Wi-Fi from the Raspberry Pi
+                that provides real-time weight data, calibration settings, and
+                historical records.
+              </div>
+              <div class="render-center">
+                <button
+                  class="render-open-btn render-open-btn--lg"
+                  id="arProtoBtn">
+                  See Prototype
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="project-body">
+            <div class="project-section project-section--overview">
+              <h3>Overview</h3>
+              <p>
+                A Raspberry Pi-based system for industrial process automation,
+                UI integration, and data management. Integrates with physical
+                hardware via Arduino microcontrollers and exposes a live
+                dashboard through Node-RED's UIBuilder module.
+              </p>
+              <p>
+                Flow logic is defined visually in Node-RED and backed by
+                JavaScript processing scripts. Supports standalone operation and
+                networked deployment modes.
+              </p>
+            </div>
+
+            <div class="project-section project-section--stack">
+              <h3>Stack</h3>
+              <div class="tag-list">
+                <span class="tag">Node-RED</span>
+                <span class="tag">Node.js</span>
+                <span class="tag">JavaScript</span>
+                <span class="tag">Arduino</span>
+                <span class="tag">UIBuilder</span>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Challenges</h3>
+              <ul>
+                <li></li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Learnings</h3>
+              <ul>
+                <li></li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Components</h3>
+              <ul>
+                <li>Node-RED flows for visual automation logic</li>
+                <li>
+                  Arduino hardware modules (standalone and networked variants)
+                </li>
+                <li>JavaScript file processing scripts</li>
+                <li>UIBuilder dashboard for real-time monitoring</li>
+                <li>
+                  AWS IoT integration for data storage and over the air updates.
+                </li>
+              </ul>
+            </div>
+            <div class="project-section">
+              <h3>Hardware</h3>
+              <ul>
+                <li>Arduino microcontrollers for physical I/O</li>
+                <li>
+                  StandAlone and WildGoose designs for the weight measurement
+                  and rejection systems.
+                </li>
+                <li>
+                  Raspberry Pi for networked deployment and control through two
+                  separate wifi networks.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-modal" id="arProtoModal" hidden>
+      <div class="video-modal__backdrop" id="arProtoBackdrop"></div>
+      <div class="video-modal__box">
+        <button class="video-modal__close" id="arProtoClose">&#x2715;</button>
+        <video
+          class="video-modal__video"
+          id="arProtoVideo"
+          src="../assets/images/first-prototype.mp4"
+          playsinline
+          controls></video>
+        <p class="video-modal__caption">First prototype in action</p>
+      </div>
+    </div>
+
+    <script src="../assets/layout.js"></script>
+    <script src="../assets/script.js"></script>
+    <script>
+      (function () {
+        var modal = document.getElementById("arProtoModal");
+        var video = document.getElementById("arProtoVideo");
+        var openBtn = document.getElementById("arProtoBtn");
+        var closeBtn = document.getElementById("arProtoClose");
+        var backdrop = document.getElementById("arProtoBackdrop");
+        if (!modal) return;
+
+        function openModal() {
+          modal.hidden = false;
+          video.play();
+        }
+
+        function closeModal() {
+          modal.hidden = true;
+          video.pause();
+          video.currentTime = 0;
+        }
+
+        openBtn.addEventListener("click", openModal);
+        closeBtn.addEventListener("click", closeModal);
+        backdrop.addEventListener("click", closeModal);
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") closeModal();
+        });
+      })();
+    </script>
+  </body>
+</html>

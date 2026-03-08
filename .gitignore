@@ -1,0 +1,3 @@
+# Admin auth — replace default before building; do not commit real credentials
+admin/.htpasswd
+admin/cgi-bin/.htpasswd

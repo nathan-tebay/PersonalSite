@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DBFirstDataGrid — Tebay.dev</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body data-page="dbfirstgrid" data-basepath="../">
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+
+      <div class="main-col">
+        <div class="side-panel">
+          <div class="project-header">
+            <div>
+              <h1>DBFirstDataGrid</h1>
+              <p class="tagline">
+                Full-stack equipment management dashboard with a database-driven
+                data grid
+              </p>
+            </div>
+            <a
+              href="https://github.com/nathan-tebay/DBFirstDatagrid"
+              class="github-link"
+              target="_blank"
+              rel="noopener"
+            >
+              View on GitHub
+            </a>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="project-body">
+            <div class="project-section project-section--overview">
+              <h3>Overview</h3>
+              <p>
+                A React + Express equipment management dashboard where the UI is
+                driven entirely by database schema metadata. The server inspects
+                each table's columns at runtime and returns typed field
+                descriptors — the frontend then builds table headers, form
+                inputs, and dropdown lists without any hardcoded field
+                knowledge.
+              </p>
+              <p>
+                Supports nested subgrids (e.g. order items inside orders),
+                paginated data fetching, and an add-record modal. Switchable
+                between SQLite for local development and MySQL for production.
+              </p>
+            </div>
+
+            <div class="project-section project-section--stack">
+              <h3>Stack</h3>
+              <div class="tag-list">
+                <span class="tag">React 17</span>
+                <span class="tag">Express 4</span>
+                <span class="tag">SQLite</span>
+                <span class="tag">MySQL</span>
+                <span class="tag">Podman</span>
+                <span class="tag">Node.js</span>
+                <span class="tag">ES Modules</span>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Challenges</h3>
+              <ul>
+                <li></li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Learnings</h3>
+              <ul>
+                <li></li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Key Features</h3>
+              <ul>
+                <li>
+                  Schema-driven UI — field types, dropdowns, and labels inferred
+                  from column names
+                </li>
+                <li>
+                  Recursive subgrids for relational data (orders → order items)
+                </li>
+                <li>
+                  SQL injection prevention via strict allowlist and regex
+                  validation
+                </li>
+                <li>
+                  Podman Compose for containerised dev and test environments
+                </li>
+                <li>
+                  Server + frontend test suites with in-memory SQLite for
+                  isolation
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>API</h3>
+              <ul>
+                <li><span class="tag">GET</span> /fetch — paginated rows</li>
+                <li>
+                  <span class="tag">GET</span> /fetchFields — column metadata
+                </li>
+                <li>
+                  <span class="tag">GET</span> /fetchDistinct — distinct values
+                </li>
+                <li><span class="tag">PUT</span> /add — insert row</li>
+                <li><span class="tag">PATCH</span> /update — update row</li>
+                <li><span class="tag">DELETE</span> /delete — delete row</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/layout.js"></script>
+    <script src="../assets/script.js" defer></script>
+  </body>
+</html>

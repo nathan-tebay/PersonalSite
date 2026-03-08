@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog Admin — Tebay.dev</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="../assets/style.css" />
+    <style>
+      :root {
+        --danger:   #f87171;
+        --warning:  #fbbf24;
+        --input-bg: rgba(0, 0, 0, 0.25);
+      }
+
+      /* ── Admin panel fills the main column ───────────────────────────── */
+      #admin-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      /* ── Toolbar ──────────────────────────────────────────────────────── */
+      #admin-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid var(--divider);
+      }
+
+      #admin-toolbar h2 { font-size: 0.95rem; font-weight: 600; flex: 1; color: var(--text-high); }
+
+      #logout-btn {
+        background: none;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 0.3rem;
+        color: var(--text-mid);
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.78rem;
+        padding: 0.2rem 0.65rem;
+        transition: color 0.12s, border-color 0.12s;
+      }
+
+      #logout-btn:hover { color: var(--text-high); border-color: rgba(255, 255, 255, 0.3); }
+
+      /* ── Two-column editor ────────────────────────────────────────────── */
+      #editor-layout {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 1rem;
+        min-height: 520px;
+      }
+
+      /* ── Post list ────────────────────────────────────────────────────── */
+      #post-list {
+        background: rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--divider);
+        border-radius: 0.5rem;
+        overflow-y: auto;
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+
+      .list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.15rem;
+        border-bottom: 1px solid var(--divider);
+      }
+
+      .list-header span {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-low);
+      }
+
+      #new-btn {
+        background: none;
+        color: var(--text-link);
+        border: 1px solid var(--text-link);
+        border-radius: 0.3rem;
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        letter-spacing: 0.04em;
+        transition: opacity 0.12s;
+      }
+
+      #new-btn:hover { opacity: 0.75; }
+
+      .post-item {
+        padding: 0.45rem 0.55rem;
+        border-radius: 0.4rem;
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+
+      .post-item:hover  { background: var(--hover-bg); }
+      .post-item.active { background: rgba(74, 222, 128, 0.1); }
+
+      .post-item-row {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .post-item-title { font-size: 0.82rem; color: var(--text-high); flex: 1; }
+      .post-item-date  { font-size: 0.7rem; color: var(--text-low); margin-top: 0.1rem; }
+
+      .badge {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border-radius: 0.25rem;
+        padding: 0.1rem 0.35rem;
+        flex-shrink: 0;
+      }
+
+      .badge--published { color: var(--text-link);  background: rgba(74, 222, 128, 0.12); }
+      .badge--draft     { color: var(--warning);     background: rgba(251, 191, 36, 0.12); }
+
+      /* ── Editor panel ─────────────────────────────────────────────────── */
+      #editor-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        min-width: 0;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .form-group label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-low);
+      }
+
+      .form-group input,
+      .form-group textarea {
+        background: var(--input-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.4rem;
+        color: var(--text-high);
+        font-family: system-ui, sans-serif;
+        font-size: 0.85rem;
+        padding: 0.45rem 0.65rem;
+        outline: none;
+        transition: border-color 0.12s;
+        width: 100%;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus { border-color: var(--text-link); }
+
+      .form-group input[type="password"] { letter-spacing: 0.1em; }
+
+      .form-group textarea {
+        font-family: 'Courier New', monospace;
+        font-size: 0.82rem;
+        resize: vertical;
+        min-height: 300px;
+        line-height: 1.55;
+      }
+
+      /* ── Write / Preview tabs ─────────────────────────────────────────── */
+      .tabs {
+        display: flex;
+        gap: 0.4rem;
+        border-bottom: 1px solid var(--divider);
+        margin-bottom: 0.5rem;
+      }
+
+      .tab-btn {
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--text-mid);
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.6rem;
+        margin-bottom: -1px;
+        transition: color 0.12s, border-color 0.12s;
+      }
+
+      .tab-btn.active { color: var(--text-high); border-bottom-color: var(--text-link); }
+
+      #preview-pane {
+        display: none;
+        background: var(--input-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.4rem;
+        padding: 1.25rem;
+        min-height: 300px;
+        line-height: 1.7;
+      }
+
+      #preview-pane h1, #preview-pane h2, #preview-pane h3 {
+        color: var(--text-high); margin: 1rem 0 0.5rem; font-weight: 600;
+      }
+
+      #preview-pane p    { font-size: 0.85rem; margin-bottom: 0.75rem; color: var(--text-mid); }
+      #preview-pane a    { color: var(--text-link); }
+      #preview-pane code { font-family: monospace; background: rgba(0,0,0,0.35); padding: 0.1em 0.3em; border-radius: 0.2em; font-size: 0.85em; }
+      #preview-pane pre  { background: rgba(0,0,0,0.35); padding: 1rem; border-radius: 0.4rem; overflow-x: auto; margin-bottom: 0.75rem; font-size: 0.82rem; }
+
+      /* ── Action buttons ───────────────────────────────────────────────── */
+      .btn-row {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      button.primary {
+        background: var(--text-link);
+        color: #0a1a0f;
+        border: none;
+        border-radius: 0.4rem;
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.82rem;
+        font-weight: 700;
+        padding: 0.5rem 1.25rem;
+        transition: opacity 0.12s;
+      }
+
+      button.primary:hover { opacity: 0.85; }
+
+      button.secondary {
+        background: none;
+        color: var(--text-mid);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 0.4rem;
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.82rem;
+        padding: 0.5rem 1rem;
+        transition: color 0.12s, border-color 0.12s;
+      }
+
+      button.secondary:hover { color: var(--text-high); border-color: rgba(255, 255, 255, 0.3); }
+
+      button.danger {
+        background: none;
+        color: var(--danger);
+        border: 1px solid var(--danger);
+        border-radius: 0.4rem;
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.82rem;
+        padding: 0.5rem 1rem;
+        transition: opacity 0.12s;
+      }
+
+      button.danger:hover { opacity: 0.75; }
+
+      /* ── Image section ─────────────────────────────────────────────── */
+      #img-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .img-section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .img-upload-label {
+        background: none;
+        color: var(--text-link);
+        border: 1px solid var(--text-link);
+        border-radius: 0.3rem;
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        letter-spacing: 0.04em;
+        transition: opacity 0.12s;
+        user-select: none;
+      }
+
+      .img-upload-label:hover { opacity: 0.75; }
+
+      #img-drop-zone {
+        border: 1px dashed rgba(255,255,255,0.2);
+        border-radius: 0.4rem;
+        padding: 0.6rem 1rem;
+        text-align: center;
+        font-size: 0.78rem;
+        color: var(--text-low);
+        cursor: pointer;
+        transition: border-color 0.12s, background 0.12s;
+      }
+
+      #img-drop-zone.drag-over {
+        border-color: var(--text-link);
+        background: rgba(74, 222, 128, 0.06);
+        color: var(--text-mid);
+      }
+
+      #img-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .img-thumb {
+        position: relative;
+        width: 72px;
+        cursor: grab;
+        border-radius: 0.35rem;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: border-color 0.12s;
+      }
+
+      .img-thumb:hover { border-color: rgba(255,255,255,0.3); }
+
+      .img-thumb img {
+        width: 100%;
+        height: 52px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .img-thumb-name {
+        font-size: 0.6rem;
+        color: var(--text-low);
+        padding: 0.2rem 0.3rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background: var(--input-bg);
+      }
+
+      .img-thumb-del {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: rgba(0,0,0,0.65);
+        border: none;
+        border-radius: 50%;
+        color: var(--danger);
+        cursor: pointer;
+        font-size: 0.65rem;
+        line-height: 1;
+        padding: 0.15rem 0.3rem;
+        opacity: 0;
+        transition: opacity 0.12s;
+      }
+
+      .img-thumb:hover .img-thumb-del { opacity: 1; }
+
+      /* ── WIP checkbox ─────────────────────────────────────────────────── */
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        color: var(--text-mid);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .checkbox-label input[type="checkbox"] {
+        width: 1rem;
+        height: 1rem;
+        accent-color: var(--warning);
+        cursor: pointer;
+      }
+
+      #publish-btn {
+        background: none;
+        border: 1px solid;
+        border-radius: 0.4rem;
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        transition: opacity 0.12s;
+      }
+
+      #publish-btn.state-draft     { color: var(--text-link); border-color: var(--text-link); }
+      #publish-btn.state-published { color: var(--warning);   border-color: var(--warning); }
+      #publish-btn:hover { opacity: 0.75; }
+
+      #status {
+        font-size: 0.8rem;
+        min-height: 1.2em;
+        color: var(--text-link);
+      }
+
+      /* ── Responsive: stack editor on small screens ────────────────────── */
+      @media (max-width: 700px) {
+        #editor-layout { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body data-page="admin" data-basepath="../">
+
+    <!-- ── Page layout ────────────────────────────────────────────────────── -->
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+      <div class="main-col">
+        <div class="side-panel" id="admin-panel">
+
+          <div id="admin-toolbar">
+            <h2>Blog Admin</h2>
+            <a href="../blog.html" style="font-size:0.8rem;color:var(--text-link);text-decoration:none;opacity:0.8;transition:opacity 0.12s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">View Blog →</a>
+            <button id="logout-btn">Sign out</button>
+          </div>
+
+          <div id="editor-layout">
+            <div id="post-list">
+              <div class="list-header">
+                <span>Posts</span>
+                <button id="new-btn">+ New</button>
+              </div>
+              <div id="post-list-items"></div>
+            </div>
+
+            <div id="editor-panel">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="field-title">Title</label>
+                  <input id="field-title" type="text" placeholder="Post title" />
+                </div>
+                <div class="form-group">
+                  <label for="field-slug">Slug</label>
+                  <input id="field-slug" type="text" placeholder="post-slug" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="field-date">Date</label>
+                  <input id="field-date" type="date" />
+                </div>
+                <div class="form-group">
+                  <label for="field-desc">Description</label>
+                  <input id="field-desc" type="text" placeholder="Short description for the listing" />
+                </div>
+              </div>
+              <div class="form-group" style="flex-direction:row;align-items:center;">
+                <label class="checkbox-label">
+                  <input id="field-wip" type="checkbox" />
+                  Show as WIP placeholder on blog listing
+                </label>
+              </div>
+              <div id="img-section">
+                <div class="img-section-header">
+                  <span style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-low);">Images</span>
+                  <label class="img-upload-label" for="img-file-input">+ Upload</label>
+                  <input type="file" id="img-file-input" accept="image/*" multiple hidden>
+                </div>
+                <div id="img-drop-zone">Drop images here or click Upload</div>
+                <div id="img-grid"></div>
+              </div>
+              <div class="form-group">
+                <div class="tabs">
+                  <button class="tab-btn active" id="tab-text">Text</button>
+                  <button class="tab-btn" id="tab-html">HTML</button>
+                  <button class="tab-btn" id="tab-preview">Preview</button>
+                </div>
+                <textarea id="field-content" placeholder="Write your post…"></textarea>
+                <div id="preview-pane"></div>
+              </div>
+              <div class="btn-row">
+                <button class="primary"   id="save-btn">Save</button>
+                <button id="publish-btn"  style="display:none" class="state-draft">Publish</button>
+                <button class="secondary" id="clear-btn">Clear</button>
+                <button class="danger"    id="delete-btn" style="display:none">Delete</button>
+                <span id="status"></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/layout.js"></script>
+    <script src="../assets/script.js"></script>
+    <script src="../assets/blog-storage.js"></script>
+    <script>
+      (function () {
+        /** @type {string} Posts base URL from /config.cgi */
+        let postsUrl = "/blog/posts";
+
+        /** @type {"local"|"s3"} */
+        let storageMode = "s3";
+
+        /** @type {string|null} */
+        let currentSlug = null;
+
+        /** @type {boolean|null} null when no post is loaded */
+        let currentPublished = null;
+
+        /** @type {"text"|"html"} */
+        let currentMode = "text";
+
+        /** Plain text with <image: filename> placeholders */
+        let textContent = "";
+
+        /** Actual HTML with <img> tags */
+        let htmlContent = "";
+
+        /** @type {Array} */
+        let posts = [];
+
+        // ── DOM refs ─────────────────────────────────────────────────────
+        const titleInput   = document.getElementById("field-title");
+        const slugInput    = document.getElementById("field-slug");
+        const dateInput    = document.getElementById("field-date");
+        const descInput    = document.getElementById("field-desc");
+        const wipInput     = document.getElementById("field-wip");
+        const contentInput = document.getElementById("field-content");
+        const previewPane  = document.getElementById("preview-pane");
+        const statusEl     = document.getElementById("status");
+        const deleteBtn    = document.getElementById("delete-btn");
+        const publishBtn   = document.getElementById("publish-btn");
+        const postListEl   = document.getElementById("post-list-items");
+        const imgGrid      = document.getElementById("img-grid");
+        const imgDropZone  = document.getElementById("img-drop-zone");
+        const imgFileInput = document.getElementById("img-file-input");
+        const tabText      = document.getElementById("tab-text");
+        const tabHtml      = document.getElementById("tab-html");
+        const tabPreview   = document.getElementById("tab-preview");
+
+        // ── API ───────────────────────────────────────────────────────────
+        async function apiPost(path, body) {
+          return fetch(path, { method: "POST", body });
+        }
+
+        // ── Utilities ─────────────────────────────────────────────────────
+        function escapeHtml(s) {
+          return s.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        function setStatus(msg, isError) {
+          statusEl.textContent = msg;
+          statusEl.style.color = isError ? "var(--danger)" : "var(--text-link)";
+        }
+
+        // ── Image storage (server-side, per-slug directory in S3/MinIO) ──
+        /** @type {string[]} filenames for the currently loaded slug */
+        let currentImages = [];
+
+        function imageUrl(slug, filename) {
+          return "/blog/posts/" + slug + "/" + filename;
+        }
+
+        async function loadImages(slug) {
+          if (!slug) { currentImages = []; renderImageGrid(null); return; }
+          try {
+            const r = await fetch("../cgi-bin/images.cgi?slug=" + encodeURIComponent(slug));
+            currentImages = r.ok ? ((await r.json()).images || []) : [];
+          } catch (_) { currentImages = []; }
+          renderImageGrid(slug);
+        }
+
+        async function addImageFiles(slug, files) {
+          if (!slug) { setStatus("Save the post first before uploading images.", true); return; }
+          for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            var b64 = await new Promise(function (resolve) {
+              var reader = new FileReader();
+              reader.onload = function (e) { resolve(e.target.result.split(",")[1]); };
+              reader.readAsDataURL(file);
+            });
+            await apiPost("../cgi-bin/upload.cgi", new URLSearchParams({
+              slug: slug, filename: file.name, image_b64: b64,
+            }));
+          }
+          await loadImages(slug);
+        }
+
+        async function removeImage(slug, filename) {
+          await apiPost("../cgi-bin/delete-image.cgi", new URLSearchParams({ slug: slug, filename: filename }));
+          await loadImages(slug);
+        }
+
+        // ── Image grid ────────────────────────────────────────────────────
+        function renderImageGrid(slug) {
+          imgGrid.innerHTML = "";
+          if (!slug) return;
+          currentImages.forEach(function (filename) {
+            const thumb = document.createElement("div");
+            thumb.className = "img-thumb";
+            thumb.draggable = true;
+            thumb.dataset.filename = filename;
+
+            const el = document.createElement("img");
+            el.src = imageUrl(slug, filename);
+            el.alt = filename;
+
+            const lbl = document.createElement("div");
+            lbl.className = "img-thumb-name";
+            lbl.textContent = filename;
+
+            const del = document.createElement("button");
+            del.className = "img-thumb-del";
+            del.textContent = "×";
+            del.title = "Remove";
+            del.addEventListener("click", function (e) {
+              e.stopPropagation();
+              if (confirm('Remove "' + filename + '"?')) removeImage(slug, filename);
+            });
+
+            thumb.addEventListener("dragstart", function (e) {
+              e.dataTransfer.setData("application/x-blog-image", filename);
+              e.dataTransfer.effectAllowed = "copy";
+            });
+
+            thumb.appendChild(el);
+            thumb.appendChild(lbl);
+            thumb.appendChild(del);
+            imgGrid.appendChild(thumb);
+          });
+        }
+
+        // ── Conversion ────────────────────────────────────────────────────
+        // Images are referenced by server URL: /blog/posts/<slug>/<filename>
+        function textToHtml(text) {
+          let html = text.replace(/<image:\s*([^>]+?)>/g, function (_, name) {
+            name = name.trim();
+            const src = currentSlug ? imageUrl(currentSlug, name) : "";
+            return '<img src="' + src + '" alt="' + escapeHtml(name) + '" style="max-width:100%;">';
+          });
+          html = html.replace(/\n/g, "<br>\n");
+          return html;
+        }
+
+        function htmlToText(html) {
+          let text = html;
+          // Stash <img> tags as null-byte placeholders to protect them from the tag stripper
+          const stash = [];
+          text = text.replace(/<img\s[^>]*>/gi, function (match) {
+            const srcM = match.match(/src="([^"]*)"/i);
+            const altM = match.match(/alt="([^"]*)"/i);
+            const src  = srcM ? srcM[1] : "";
+            const alt  = altM ? altM[1] : "";
+            // Extract filename from URL path or fall back to alt text
+            const name = src ? src.split("/").pop() : (alt || "image");
+            const ph   = "\x00" + stash.length + "\x00";
+            stash.push("<image: " + name + ">");
+            return ph;
+          });
+          // Block elements → newlines
+          text = text.replace(/<br\s*\/?>/gi, "\n");
+          text = text.replace(/<\/(?:p|div|li|h[1-6])>/gi, "\n");
+          // Strip remaining tags
+          text = text.replace(/<[^>]+>/g, "");
+          // Decode entities
+          text = text.replace(/&amp;/g, "&").replace(/&lt;/g, "<")
+                     .replace(/&gt;/g, ">").replace(/&quot;/g, '"')
+                     .replace(/&#39;/g, "'").replace(/&nbsp;/g, " ");
+          // Restore stashed image placeholders
+          stash.forEach(function (val, i) { text = text.split("\x00" + i + "\x00").join(val); });
+          return text.replace(/\n{3,}/g, "\n\n").trim();
+        }
+
+        // ── Session storage ───────────────────────────────────────────────
+        function saveSession() {
+          if (!currentSlug) return;
+          sessionStorage.setItem("tebay_t_" + currentSlug, textContent);
+          sessionStorage.setItem("tebay_h_" + currentSlug, htmlContent);
+        }
+
+        // ── Sync textarea → current-mode variable ─────────────────────────
+        function syncFromTextarea() {
+          if (currentMode === "text") textContent = contentInput.value;
+          else if (currentMode === "html") htmlContent = contentInput.value;
+        }
+
+        // ── Tab switching ─────────────────────────────────────────────────
+        function switchTab(mode) {
+          syncFromTextarea();
+          if (mode === "text") {
+            if (currentMode === "html") textContent = htmlToText(htmlContent);
+            currentMode = "text";
+            contentInput.value        = textContent;
+            contentInput.style.display = "";
+            previewPane.style.display  = "none";
+            tabText.classList.add("active");
+            tabHtml.classList.remove("active");
+            tabPreview.classList.remove("active");
+          } else if (mode === "html") {
+            if (currentMode === "text") htmlContent = textToHtml(textContent);
+            currentMode = "html";
+            contentInput.value        = htmlContent;
+            contentInput.style.display = "";
+            previewPane.style.display  = "none";
+            tabText.classList.remove("active");
+            tabHtml.classList.add("active");
+            tabPreview.classList.remove("active");
+          } else {
+            if (currentMode === "text") htmlContent = textToHtml(textContent);
+            else htmlContent = contentInput.value;
+            contentInput.style.display = "none";
+            previewPane.style.display  = "block";
+            previewPane.innerHTML      = htmlContent;
+            tabText.classList.remove("active");
+            tabHtml.classList.remove("active");
+            tabPreview.classList.add("active");
+          }
+          saveSession();
+        }
+
+        tabText.addEventListener("click",    function () { switchTab("text"); });
+        tabHtml.addEventListener("click",    function () { switchTab("html"); });
+        tabPreview.addEventListener("click", function () { switchTab("preview"); });
+
+        // ── Get final HTML for saving ─────────────────────────────────────
+        function getHtmlContent() {
+          syncFromTextarea();
+          return currentMode === "text" ? textToHtml(textContent) : htmlContent;
+        }
+
+        // ── Publish button state ──────────────────────────────────────────
+        function syncPublishBtn() {
+          if (currentPublished === null) { publishBtn.style.display = "none"; return; }
+          publishBtn.style.display = "";
+          if (currentPublished) {
+            publishBtn.textContent = "Unpublish";
+            publishBtn.className   = "state-published";
+          } else {
+            publishBtn.textContent = "Publish";
+            publishBtn.className   = "state-draft";
+          }
+        }
+
+        // ── Post list ─────────────────────────────────────────────────────
+        function renderPostList() {
+          postListEl.innerHTML = "";
+          [...posts].sort(function (a, b) { return b.date.localeCompare(a.date); })
+            .forEach(function (post) {
+              const item = document.createElement("div");
+              item.className = "post-item" + (post.slug === currentSlug ? " active" : "");
+              const badgeClass = post.published ? "badge--published" : "badge--draft";
+              item.innerHTML =
+                '<div class="post-item-row">' +
+                  '<span class="post-item-title">' + escapeHtml(post.title) + "</span>" +
+                  '<span class="badge ' + badgeClass + '">' + (post.published ? "Live" : "Draft") + "</span>" +
+                "</div>" +
+                '<div class="post-item-date">' + post.date + "</div>";
+              item.addEventListener("click", function () { loadPost(post.slug, post.published); });
+              postListEl.appendChild(item);
+            });
+        }
+
+        async function loadPosts() {
+          if (storageMode === "local") {
+            posts = BlogStorage.getAllPosts();
+            renderPostList();
+            return;
+          }
+          try {
+            const response = await fetch("../cgi-bin/posts.cgi");
+            posts = response.ok ? await response.json() : [];
+          } catch (_) {
+            setStatus("Could not load posts from server.", true);
+          }
+          renderPostList();
+        }
+
+        // ── Editor ────────────────────────────────────────────────────────
+        async function loadPost(slug, published) {
+          try {
+            let title, date, desc, content, wip = false;
+            if (storageMode === "local") {
+              const post = BlogStorage.getPost(slug);
+              if (!post) throw new Error("Not found");
+              ({ title, date, desc, content } = post);
+              wip = !!post.wip;
+            } else {
+              const filename = published ? slug + "/index.html" : slug + "/draft.html";
+              const response = await fetch(postsUrl + "/" + filename);
+              if (!response.ok) throw new Error("Not found");
+              const raw = await response.text();
+              const nl  = raw.indexOf("\n");
+              const match = raw.substring(0, nl).match(/^<!-- (.*) -->$/);
+              if (!match) throw new Error("Invalid post format");
+              const meta = JSON.parse(match[1]);
+              ({ title, date, desc } = meta);
+              wip     = !!meta.wip;
+              content = raw.substring(nl + 1);
+            }
+            titleInput.value = title;
+            slugInput.value  = slug;
+            dateInput.value  = date;
+            descInput.value  = desc;
+            wipInput.checked = wip;
+            currentSlug      = slug;
+            currentPublished = published;
+
+            // Load images from server before restoring content (so textToHtml has currentImages)
+            await loadImages(slug);
+
+            // Restore from session if available, else derive text from html
+            const st = sessionStorage.getItem("tebay_t_" + slug);
+            const sh = sessionStorage.getItem("tebay_h_" + slug);
+            if (st !== null || sh !== null) {
+              textContent = st || "";
+              htmlContent = sh || content || "";
+            } else {
+              htmlContent = content || "";
+              textContent = htmlToText(htmlContent);
+            }
+
+            contentInput.value = currentMode === "html" ? htmlContent : textContent;
+            contentInput.style.display = "";
+            previewPane.style.display  = "none";
+
+            deleteBtn.style.display = "";
+            syncPublishBtn();
+            setStatus("");
+            renderPostList();
+          } catch (err) {
+            setStatus("Error loading post: " + err.message, true);
+          }
+        }
+
+        function clearEditor() {
+          currentSlug      = null;
+          currentPublished = null;
+          currentMode      = "text";
+          currentImages    = [];
+          textContent      = "";
+          htmlContent      = "";
+          titleInput.value   = "";
+          slugInput.value    = "";
+          dateInput.value    = new Date().toISOString().slice(0, 10);
+          descInput.value    = "";
+          wipInput.checked   = false;
+          contentInput.value = "";
+          contentInput.style.display = "";
+          previewPane.style.display  = "none";
+          tabText.classList.add("active");
+          tabHtml.classList.remove("active");
+          tabPreview.classList.remove("active");
+          deleteBtn.style.display = "none";
+          syncPublishBtn();
+          setStatus("");
+          renderImageGrid(null);
+          renderPostList();
+        }
+
+        // Auto-slug from title
+        titleInput.addEventListener("input", function () {
+          if (!currentSlug) {
+            slugInput.value = titleInput.value
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-|-$/g, "");
+          }
+        });
+
+        // ── Image upload ──────────────────────────────────────────────────
+        function handleFiles(files) {
+          const slug = currentSlug || slugInput.value.trim();
+          addImageFiles(slug, Array.from(files).filter(function (f) { return f.type.startsWith("image/"); }));
+        }
+
+        imgDropZone.addEventListener("click", function () { imgFileInput.click(); });
+        imgFileInput.addEventListener("change", function () {
+          if (imgFileInput.files.length) handleFiles(imgFileInput.files);
+          imgFileInput.value = "";
+        });
+        imgDropZone.addEventListener("dragover", function (e) {
+          e.preventDefault();
+          imgDropZone.classList.add("drag-over");
+        });
+        imgDropZone.addEventListener("dragleave", function () {
+          imgDropZone.classList.remove("drag-over");
+        });
+        imgDropZone.addEventListener("drop", function (e) {
+          e.preventDefault();
+          imgDropZone.classList.remove("drag-over");
+          if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+        });
+
+        // ── Drag image from grid into textarea ────────────────────────────
+        contentInput.addEventListener("dragover", function (e) {
+          if (e.dataTransfer.types.indexOf("application/x-blog-image") >= 0) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+          }
+        });
+        contentInput.addEventListener("drop", function (e) {
+          const filename = e.dataTransfer.getData("application/x-blog-image");
+          if (!filename) return;
+          e.preventDefault();
+          let insert;
+          if (currentMode === "text") {
+            insert = "<image: " + filename + ">";
+          } else {
+            insert = '<img src="' + imageUrl(currentSlug, filename) + '" alt="' + escapeHtml(filename) + '" style="max-width:100%;">';
+          }
+          const s = contentInput.selectionStart;
+          const end = contentInput.selectionEnd;
+          contentInput.value = contentInput.value.substring(0, s) + insert + contentInput.value.substring(end);
+          contentInput.selectionStart = contentInput.selectionEnd = s + insert.length;
+          contentInput.focus();
+        });
+
+        // ── Save ──────────────────────────────────────────────────────────
+        document.getElementById("save-btn").addEventListener("click", async function () {
+          const slug  = slugInput.value.trim();
+          const title = titleInput.value.trim();
+          if (!slug || !title) { setStatus("Slug and title are required.", true); return; }
+          setStatus("Saving…");
+          const content = getHtmlContent();
+          if (storageMode === "local") {
+            const saved = BlogStorage.savePost({
+              slug, title, date: dateInput.value, desc: descInput.value,
+              content, wip: wipInput.checked,
+            });
+            currentSlug      = slug;
+            currentPublished = saved.published;
+            deleteBtn.style.display = "";
+            syncPublishBtn();
+            setStatus("Saved.");
+            renderImageGrid(slug);
+            await loadPosts();
+            return;
+          }
+          const response = await apiPost("../cgi-bin/save.cgi", new URLSearchParams({
+            slug, title, date: dateInput.value, desc: descInput.value,
+            content, wip: wipInput.checked,
+          }));
+          if (!response) return;
+          const json = await response.json();
+          if (json.ok) {
+            currentSlug      = slug;
+            currentPublished = json.published;
+            deleteBtn.style.display = "";
+            syncPublishBtn();
+            setStatus("Saved.");
+            renderImageGrid(slug);
+            await loadPosts();
+          } else {
+            setStatus("Error: " + (json.error || "unknown"), true);
+          }
+        });
+
+        // ── Publish toggle ────────────────────────────────────────────────
+        publishBtn.addEventListener("click", async function () {
+          if (!currentSlug) return;
+          setStatus((currentPublished ? "Unpublish" : "Publish") + "ing…");
+          if (storageMode === "local") {
+            const post = BlogStorage.togglePublished(currentSlug);
+            currentPublished = post.published;
+            wipInput.checked = !!post.wip;
+            syncPublishBtn();
+            setStatus(post.published ? "Published." : "Unpublished.");
+            await loadPosts();
+            return;
+          }
+          const response = await apiPost("../cgi-bin/publish.cgi", new URLSearchParams({ slug: currentSlug }));
+          if (!response) return;
+          const json = await response.json();
+          if (json.ok) {
+            currentPublished = json.published;
+            syncPublishBtn();
+            setStatus(json.published ? "Published." : "Unpublished.");
+            await loadPosts();
+          } else {
+            setStatus("Error: " + (json.error || "unknown"), true);
+          }
+        });
+
+        // ── Delete ────────────────────────────────────────────────────────
+        deleteBtn.addEventListener("click", async function () {
+          if (!currentSlug) return;
+          if (!confirm('Delete "' + titleInput.value + '"?')) return;
+          setStatus("Deleting…");
+          if (storageMode === "local") {
+            BlogStorage.deletePost(currentSlug);
+            clearEditor();
+            await loadPosts();
+            setStatus("Deleted.");
+            return;
+          }
+          const response = await apiPost("../cgi-bin/delete.cgi", new URLSearchParams({ slug: currentSlug }));
+          if (!response) return;
+          const json = await response.json();
+          if (json.ok) {
+            clearEditor();
+            await loadPosts();
+            setStatus("Deleted.");
+          } else {
+            setStatus("Error: " + (json.error || "unknown"), true);
+          }
+        });
+
+        document.getElementById("new-btn").addEventListener("click", clearEditor);
+        document.getElementById("clear-btn").addEventListener("click", clearEditor);
+
+        document.getElementById("logout-btn").addEventListener("click", async function () {
+          try {
+            await fetch("../cgi-bin/posts.cgi", {
+              headers: { Authorization: "Basic " + btoa("logout:logout") },
+            });
+          } catch (_) {}
+          window.location.href = "../index.html";
+        });
+
+        // ── Bootstrap ─────────────────────────────────────────────────────
+        (async function init() {
+          try {
+            const cfg = await (await fetch("../config.cgi")).json();
+            postsUrl    = cfg.postsUrl;
+            storageMode = cfg.storage || "s3";
+          } catch (_) { /* config.cgi not available, keeping s3 mode defaults */ }
+
+          clearEditor();
+          await loadPosts();
+        })();
+      })();
+    </script>
+  </body>
+</html>

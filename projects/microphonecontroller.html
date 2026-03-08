@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MicrophoneController — Tebay.dev</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body data-page="microphonecontroller" data-basepath="../">
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+      <div class="main-col">
+        <div class="side-panel">
+          <div class="project-header">
+            <div>
+              <h1>MicrophoneController</h1>
+              <p class="tagline">
+                2-button USB HID microphone controller with tap-to-toggle and
+                push-to-talk
+              </p>
+            </div>
+            <a
+              href="https://github.com/nathan-tebay/MicrophoneController"
+              class="github-link"
+              target="_blank"
+              rel="noopener">
+              View on GitHub
+            </a>
+          </div>
+
+          <div class="renders-row renders-row--2">
+            <div class="render-card">
+              <img
+                src="../assets/images/microphone-controller.jpg"
+                alt="MicrophoneController — assembled" />
+              <span class="render-label">Assembled</span>
+              <div class="render-center">
+                <button
+                  class="render-open-btn render-open-btn--lg"
+                  id="mcDemoBtn">
+                  Demo
+                </button>
+              </div>
+            </div>
+            <div class="render-card">
+              <img
+                src="../assets/images/microphone-controller-internal.jpg"
+                alt="MicrophoneController — internal" />
+              <span class="render-label">Internal</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="project-body">
+            <div class="project-section project-section--stack">
+              <h3>Problem</h3>
+              <p>
+                In many games and communication apps, you can control multiple
+                microphone channels, such as team and proximity chat. This
+                controller is intended to solve that problem while also allowing
+                you to push-to-talk or hold-to-talk on multiple channels without
+                guessing if a chat channel is currently active. The mode switch
+                on the bottom lets you use the same hardware for either keyboard
+                or gamepad input, depending on the app's support for each HID
+                type.
+              </p>
+              <p>
+                I also found this useful for controlling my WhisperTranscription
+                application, as the dual buttons and tap-or-hold functionality
+                are perfect for distinguishing between transcribing my text and
+                issuing commands to an AI model. This is my current setup,
+                though I am considering updating the hotkeys, as this
+                application is far more flexible for using obscure keys or key
+                combinations.
+              </p>
+            </div>
+            <div class="project-section project-section--overview">
+              <h3>Overview</h3>
+              <p>
+                <br />A custom USB device built using the nullbits Bit-C PRO. It
+                has two buttons: one can be tapped to turn on or off, and the
+                other is held down for push-to-talk. A switch changes between
+                acting like a keyboard (Scroll Lock/Pause) and a gamepad
+                (buttons 8-9). LEDs show the current state of each button. The
+                game controller mode is configured directly using the AVR core's
+                HID feature, without additional libraries.
+              </p>
+              <p>
+                The gamepad HID descriptor is implemented directly via the AVR
+                core's HID.h — no third-party joystick library required.
+              </p>
+            </div>
+
+            <div class="project-section project-section--stack">
+              <h3>Stack</h3>
+              <div class="tag-list">
+                <span class="tag">Arduino C++</span>
+                <span class="tag">ATmega32U4</span>
+                <span class="tag">USB HID</span>
+                <span class="tag">AVR core</span>
+                <span class="tag">arduino-cli</span>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Challenges</h3>
+              <ul>
+                <li></li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Learnings</h3>
+              <ul>
+                <li></li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Hardware</h3>
+              <ul>
+                <li>Board: nullbits Bit-C PRO (Arduino Leonardo-compatible)</li>
+                <li>Button 1 — D2, internal pull-up → GND</li>
+                <li>Button 2 — D3, internal pull-up → GND</li>
+                <li>LED 1 — D4 via 220 Ω resistor</li>
+                <li>LED 2 — D5 via 220 Ω resistor</li>
+                <li>Mode switch — D15 to GND = keyboard; floating = gamepad</li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Button Behaviour</h3>
+              <ul>
+                <li>
+                  Tap — toggle mic on/off (keyboard: key press+release; gamepad:
+                  brief button press)
+                </li>
+                <li>
+                  Hold ≥ 50 ms — push-to-talk; latch active while held, cleared
+                  on release
+                </li>
+                <li>
+                  Mode switch — releases all outputs and resets all latch states
+                </li>
+                <li>Keyboard keys: Scroll Lock (btn 1), Pause (btn 2)</li>
+                <li>
+                  Gamepad buttons: 8 and 9 (beyond standard controller layouts)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-modal" id="mcDemoModal" hidden>
+      <div class="video-modal__backdrop" id="mcDemoBackdrop"></div>
+      <div class="video-modal__box">
+        <button class="video-modal__close" id="mcDemoClose">&#x2715;</button>
+        <video
+          class="video-modal__video"
+          id="mcDemoVideo"
+          src="../assets/images/demo.mp4"
+          playsinline
+          controls></video>
+      </div>
+    </div>
+
+    <script src="../assets/layout.js"></script>
+    <script src="../assets/script.js"></script>
+    <script>
+      (function () {
+        var modal = document.getElementById("mcDemoModal");
+        var video = document.getElementById("mcDemoVideo");
+        var openBtn = document.getElementById("mcDemoBtn");
+        var closeBtn = document.getElementById("mcDemoClose");
+        var backdrop = document.getElementById("mcDemoBackdrop");
+        if (!modal) return;
+
+        function openModal() {
+          modal.hidden = false;
+          video.play();
+        }
+
+        function closeModal() {
+          modal.hidden = true;
+          video.pause();
+          video.currentTime = 0;
+        }
+
+        openBtn.addEventListener("click", openModal);
+        closeBtn.addEventListener("click", closeModal);
+        backdrop.addEventListener("click", closeModal);
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") closeModal();
+        });
+      })();
+    </script>
+  </body>
+</html>

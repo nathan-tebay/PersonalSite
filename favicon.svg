@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background -->
+  <rect width="32" height="32" rx="3" fill="#0d1f14"/>
+  <!-- T crossbar trace -->
+  <rect x="4" y="8" width="24" height="5" fill="#4ade80"/>
+  <!-- T stem trace -->
+  <rect x="14" y="13" width="4" height="13" fill="#4ade80"/>
+  <!-- Via: left end of crossbar -->
+  <circle cx="6" cy="10.5" r="3.5" fill="#c87941"/>
+  <!-- Via: right end of crossbar -->
+  <circle cx="26" cy="10.5" r="3.5" fill="#c87941"/>
+  <!-- Via: bottom of stem -->
+  <circle cx="16" cy="24.5" r="3.5" fill="#c87941"/>
+</svg>

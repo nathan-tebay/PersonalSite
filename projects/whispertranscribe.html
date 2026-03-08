@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhisperTranscribe — Tebay.dev</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body data-page="whispertranscribe" data-basepath="../">
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+      <div class="main-col">
+        <div class="side-panel">
+          <div class="project-header">
+            <div>
+              <h1>WhisperTranscribe</h1>
+              <p class="tagline">
+                GPU-accelerated push-to-talk transcription and voice command daemon —
+                one button types, the other commands a local or cloud LLM
+              </p>
+            </div>
+            <a
+              href="https://github.com/nathan-tebay/whisper-transcribe"
+              class="github-link"
+              target="_blank"
+              rel="noopener"
+            >
+              View on GitHub
+            </a>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="project-body">
+            <div class="project-section project-section--overview">
+              <h3>Overview</h3>
+              <p>
+                A Python daemon driven by the two-button
+                <a href="microphonecontroller.html">MicrophoneController</a> USB
+                HID device. Both buttons share the same hold-to-record flow —
+                audio is captured via PipeWire while the key is held and
+                transcribed by whisper.cpp on release — but diverge in what
+                happens with the result.
+              </p>
+              <p>
+                <strong>Scroll Lock</strong> injects the transcription directly
+                into the focused window via ydotool with no clipboard
+                interaction. <strong>Pause</strong> routes the text through a
+                configurable LLM (local Ollama or Claude CLI) which interprets
+                the spoken instruction and returns an executable action —
+                launching an app, running a shell command in a terminal, or
+                injecting a key sequence.
+              </p>
+              <p>
+                The daemon grabs the keyboard exclusively via evdev so neither
+                key ever reaches the desktop. A 0.5-second tap guard discards
+                accidental presses. Transcription runs on the GPU via
+                whisper.cpp built with the Vulkan backend, keeping latency low
+                even with the large-v3 model. A systemd user service handles
+                autostart and restart on failure.
+              </p>
+            </div>
+
+            <div class="project-section project-section--stack">
+              <h3>Stack</h3>
+              <div class="tag-list">
+                <span class="tag">Python 3.14</span>
+                <span class="tag">whisper.cpp</span>
+                <span class="tag">Vulkan</span>
+                <span class="tag">python-evdev</span>
+                <span class="tag">PipeWire</span>
+                <span class="tag">ydotool</span>
+                <span class="tag">Ollama</span>
+                <span class="tag">Claude</span>
+                <span class="tag">GTK3</span>
+                <span class="tag">D-Bus</span>
+                <span class="tag">systemd</span>
+                <span class="tag">pytest</span>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Challenges</h3>
+              <ul>
+                <li></li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Learnings</h3>
+              <ul>
+                <li></li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>LLM Command Mode</h3>
+              <p>
+                The LLM receives the transcription and must respond with exactly
+                one of three formats, which the daemon parses and executes:
+              </p>
+              <ul>
+                <li>
+                  <code>GUI: &lt;cmd&gt;</code> — launches an application or URL
+                  silently in the background
+                </li>
+                <li>
+                  <code>TERMINAL: &lt;cmd&gt;</code> — runs a shell command in a
+                  new terminal window using the configured terminal emulator
+                </li>
+                <li>
+                  <code>KEYS: &lt;sequence&gt;</code> — injects raw ydotool
+                  keycode events, enabling shortcuts like select-all, undo, or
+                  arbitrary key combinations by voice
+                </li>
+              </ul>
+              <p>
+                The Scroll Lock button also doubles as a command trigger: if the
+                transcribed text begins with the configured prefix word (default:
+                <code>command</code>), the remainder is routed through the LLM
+                pipeline instead of being typed.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>System Tray</h3>
+              <p>
+                A GTK3 system tray application implements the KDE
+                StatusNotifierItem + DBusMenu protocols, giving a persistent
+                tray icon that reflects the daemon's running state. The tray
+                polls the systemd user service every two seconds and updates
+                the icon between a microphone and a muted microphone
+                accordingly.
+              </p>
+              <p>
+                The tray menu provides start/stop toggle and a settings dialog
+                covering: keyboard device selection (dropdown of all
+                evdev-capable devices), hotkey capture (click the button then
+                press any key), LLM backend selection (Ollama or Claude), live
+                Ollama model picker (queries the local instance for installed
+                models), and an advanced panel for binary paths, audio backend,
+                language, timeouts, and terminal emulator. Works natively on
+                KDE; GNOME requires the AppIndicator shell extension.
+              </p>
+            </div>
+
+            <div class="project-section project-section--components">
+              <h3>Components</h3>
+              <ul>
+                <li>
+                  <code>key_watcher</code> — evdev device discovery and
+                  exclusive keyboard grab; maps multiple keycodes to independent
+                  callback pairs
+                </li>
+                <li>
+                  <code>recorder</code> — spawns pw-record as a subprocess to
+                  stream audio to a temp WAV while the key is held
+                </li>
+                <li>
+                  <code>transcriber</code> — invokes whisper.cpp with
+                  <code>--no-timestamps -np</code>; strips and returns clean
+                  text, or None on failure
+                </li>
+                <li>
+                  <code>commander</code> — builds a structured prompt, queries
+                  Ollama or Claude CLI, parses the response, and dispatches
+                  GUI/TERMINAL/KEYS actions
+                </li>
+                <li>
+                  <code>typer</code> — calls ydotool to inject transcribed text
+                  or raw key sequences into the active window
+                </li>
+                <li>
+                  <code>tray</code> — GTK3 StatusNotifierItem tray with
+                  DBusMenu settings dialog
+                </li>
+                <li>
+                  <code>daemon</code> — orchestrates all modules; handles
+                  SIGTERM/SIGINT cleanly and manages the minimum-duration guard
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section project-section--wip">
+              <h3>Work in Progress</h3>
+              <p>The <code>ubuntu-debian-support</code> branch broadens platform compatibility:</p>
+              <ul>
+                <li>
+                  <strong>PulseAudio fallback</strong> — <code>recorder.py</code> now
+                  auto-detects the available audio backend at startup; uses
+                  <code>pw-record</code> on PipeWire systems (Fedora) and falls back to
+                  <code>parecord</code> on PulseAudio systems (Ubuntu/Debian). Backend can
+                  also be pinned explicitly via config.
+                </li>
+                <li>
+                  <strong>NVIDIA and CPU whisper.cpp builds</strong> — alongside the
+                  existing Vulkan/AMD build, the branch documents and supports building
+                  whisper.cpp with CUDA for NVIDIA GPUs
+                  (<code>-DGGML_CUDA=ON</code>) and a plain CPU-only build for
+                  machines without a supported GPU.
+                </li>
+                <li>
+                  <strong>WAV finalisation fix</strong> — recording is now stopped with
+                  SIGINT instead of SIGTERM. SIGTERM caused both pw-record and parecord to
+                  leave <code>data_size=0</code> in the WAV header, which whisper.cpp
+                  rejects silently. SIGINT triggers a proper flush and correct header write.
+                </li>
+                <li>
+                  <strong>Keyboard enumeration refactor</strong> — device listing
+                  extracted into a shared <code>list_keyboard_devices()</code>
+                  function, removing duplication between the daemon and the system
+                  tray. The tray also gains a clearer error message when
+                  <code>StatusNotifierWatcher</code> is unavailable on GNOME.
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Hardware</h3>
+              <ul>
+                <li>
+                  <a href="microphonecontroller.html">MicrophoneController</a>
+                  USB HID device — Scroll Lock triggers transcription mode;
+                  Pause triggers LLM command mode
+                </li>
+                <li>
+                  AMD Radeon RX 7900 XTX — Vulkan backend drives GPU-accelerated
+                  whisper.cpp inference (GGML_VULKAN=ON), keeping transcription
+                  latency low for both modes
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/layout.js"></script>
+    <script src="../assets/script.js"></script>
+  </body>
+</html>

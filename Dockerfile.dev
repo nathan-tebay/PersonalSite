@@ -1,0 +1,39 @@
+# Development image — runs against a local MinIO instance (S3-compatible) by default.
+FROM alpine:latest
+
+RUN apk add --no-cache busybox-extras && \
+    ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') && \
+    wget -qO /usr/local/bin/mc \
+      "https://dl.min.io/client/mc/release/linux-${ARCH}/mc" && \
+    chmod +x /usr/local/bin/mc
+
+RUN mkdir -p /var/www/html /var/www/html/blog/posts
+COPY . /var/www/html/
+
+RUN cp /var/www/html/docker-entrypoint.sh /usr/local/bin/entrypoint.sh && \
+    cp /var/www/html/sync-posts.sh        /usr/local/bin/sync-posts.sh && \
+    chmod +x \
+      /usr/local/bin/entrypoint.sh \
+      /usr/local/bin/sync-posts.sh \
+      /var/www/html/config.cgi \
+      /var/www/html/admin/cgi-bin/save.cgi \
+      /var/www/html/admin/cgi-bin/delete.cgi \
+      /var/www/html/admin/cgi-bin/publish.cgi \
+      /var/www/html/admin/cgi-bin/posts.cgi \
+      /var/www/html/admin/cgi-bin/upload.cgi \
+      /var/www/html/admin/cgi-bin/images.cgi \
+      /var/www/html/admin/cgi-bin/delete-image.cgi
+
+COPY .credentials /etc/httpd.conf
+RUN printf '.webp:image/webp\n.mp4:video/mp4\n' >> /etc/httpd.conf
+
+EXPOSE 8888
+
+# STORAGE=local: CGI scripts read/write /var/www/html/blog/posts/ directly.
+# No sync loop is started in local mode.
+# Mount a local directory to persist posts across container restarts:
+#   podman run -p 8888:8888 -v ./posts:/var/www/html/blog/posts:Z tebay-site-dev
+ENV STORAGE=local
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["httpd", "-f", "-p", "8888", "-h", "/var/www/html", "-c", "/etc/httpd.conf"]

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog — Tebay.dev</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body data-page="blog">
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+      <div class="main-col">
+        <div class="side-panel">
+          <div class="project-header">
+            <div>
+              <h1>Blog</h1>
+              <p class="tagline">Thoughts, notes, and project write-ups.</p>
+            </div>
+          </div>
+          <div id="blog-list" class="blog-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/layout.js"></script>
+    <script src="assets/script.js"></script>
+    <script src="assets/blog-storage.js"></script>
+    <script>
+      (function () {
+        const listEl = document.getElementById("blog-list");
+
+        /**
+         * Escape text for safe insertion into the listing HTML.
+         * @param {string} text
+         * @returns {string}
+         */
+        function escapeHtml(text) {
+          return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        }
+
+        /**
+         * Render the fetched post list into the page.
+         * @param {Array<{slug:string,title:string,date:string,desc:string,wip?:boolean}>} posts
+         */
+        function renderPosts(posts) {
+          if (!posts.length) {
+            listEl.innerHTML = '<p class="blog-empty">No posts yet.</p>';
+            return;
+          }
+          const sorted = [...posts].sort((a, b) => b.date.localeCompare(a.date));
+          sorted.forEach(function (post) {
+            if (post.wip) {
+              const item = document.createElement("div");
+              item.className = "blog-card blog-card--wip";
+              item.innerHTML =
+                '<span class="blog-card__date">' + post.date + "</span>" +
+                '<span class="blog-card__title">WIP: ' + escapeHtml(post.title) + "</span>" +
+                '<span class="blog-card__desc">Coming soon\u2026</span>';
+              listEl.appendChild(item);
+            } else {
+              const anchor = document.createElement("a");
+              anchor.className = "blog-card";
+              anchor.href = "blog-post.html?slug=" + encodeURIComponent(post.slug);
+              anchor.innerHTML =
+                '<span class="blog-card__date">' + post.date + "</span>" +
+                '<span class="blog-card__title">' + escapeHtml(post.title) + "</span>" +
+                '<span class="blog-card__desc">'  + escapeHtml(post.desc)  + "</span>";
+              listEl.appendChild(anchor);
+            }
+          });
+        }
+
+        (async function init() {
+          try {
+            const config = await fetch("config.cgi").then(function (r) { return r.json(); });
+            let posts;
+            if (config.storage === "local") {
+              posts = BlogStorage.getPublishedAndWipPosts();
+            } else {
+              const manifestResponse = await fetch(config.postsUrl + "/manifest.json");
+              posts = manifestResponse.ok ? await manifestResponse.json() : [];
+            }
+            renderPosts(posts);
+          } catch (_) {
+            listEl.innerHTML = '<p class="blog-empty">Could not load posts.</p>';
+          }
+        })();
+      })();
+    </script>
+  </body>
+</html>

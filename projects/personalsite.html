@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PersonalSite — Tebay.dev</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body data-page="personalsite" data-basepath="../">
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+
+      <div class="main-col">
+        <div class="side-panel">
+          <div class="project-header">
+            <div>
+              <h1>PersonalSite</h1>
+              <p class="tagline">
+                This site — a personal portfolio and documentation platform
+                built from scratch with vanilla HTML, CSS, and JavaScript
+              </p>
+            </div>
+            <a
+              href="https://github.com/nathan-tebay/PersonalSite"
+              class="github-link"
+              target="_blank"
+              rel="noopener"
+            >
+              View on GitHub
+            </a>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="project-body">
+            <div class="project-section project-section--overview">
+              <h3>Overview</h3>
+              <p>
+                A hand-rolled personal site with no frameworks or build tools.
+                Layout, theming, navigation, and blog functionality are all
+                implemented in plain HTML, CSS, and vanilla JavaScript.
+              </p>
+              <p>
+                The nav panel is generated dynamically by a shared
+                <code>layout.js</code> script injected on every page, keeping
+                navigation consistent without a build step. A theme picker
+                persists the selected colour scheme via localStorage.
+              </p>
+            </div>
+
+            <div class="project-section project-section--stack">
+              <h3>Stack</h3>
+              <div class="tag-list">
+                <span class="tag">HTML5</span>
+                <span class="tag">CSS3</span>
+                <span class="tag">Vanilla JS</span>
+                <span class="tag">Podman</span>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Challenges</h3>
+              <ul>
+                <li></li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Learnings</h3>
+              <ul>
+                <li></li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Key Features</h3>
+              <ul>
+                <li>Dynamic nav and header injected via a shared layout script</li>
+                <li>Multi-theme colour picker persisted to localStorage</li>
+                <li>Blog with localStorage-backed post storage and admin panel</li>
+                <li>Mobile-responsive layout with hamburger nav drawer</li>
+                <li>No build step — deploy by copying static files</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/layout.js"></script>
+    <script src="../assets/script.js"></script>
+  </body>
+</html>

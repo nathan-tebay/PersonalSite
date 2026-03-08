@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog — Tebay.dev</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body data-page="blog">
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+      <div class="main-col">
+        <div class="side-panel" id="post-panel">
+          <p class="blog-empty">Loading…</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/layout.js"></script>
+    <script src="assets/script.js"></script>
+    <script src="assets/blog-storage.js"></script>
+    <script>
+      (function () {
+        const panel = document.getElementById("post-panel");
+
+        /**
+         * Parse the slug from the page's query string.
+         * @returns {string|null}
+         */
+        function getSlug() {
+          return new URLSearchParams(window.location.search).get("slug");
+        }
+
+        /**
+         * Render a loaded post into the content panel.
+         * @param {{slug:string,title:string,date:string,desc:string}} meta
+         * @param {string} bodyHtml
+         */
+        function renderPost(meta, bodyHtml) {
+          document.title = meta.title + " — Tebay.dev";
+          panel.innerHTML =
+            '<div class="project-header">' +
+              '<div>' +
+                '<h1>' + meta.title + '</h1>' +
+                '<p class="tagline">' + meta.date + '</p>' +
+              '</div>' +
+              '<a href="blog.html" class="github-link">← Blog</a>' +
+            '</div>' +
+            // Post body — content is admin-authored, innerHTML is intentional
+            '<div class="blog-post-content">' + bodyHtml + '</div>';
+        }
+
+        (async function init() {
+          const slug = getSlug();
+          if (!slug) {
+            panel.innerHTML = '<p class="blog-empty">No post specified.</p>';
+            return;
+          }
+          try {
+            const config = await fetch("config.cgi").then(function (r) { return r.json(); });
+            let meta, bodyHtml;
+            if (config.storage === "local") {
+              const post = BlogStorage.getPost(slug);
+              if (!post || !post.published) throw new Error("Post not found.");
+              meta     = { slug: post.slug, title: post.title, date: post.date, desc: post.desc };
+              bodyHtml = post.content;
+            } else {
+              const postResponse = await fetch(config.postsUrl + "/" + encodeURIComponent(slug) + "-published.html");
+              if (!postResponse.ok) throw new Error("Post not found.");
+              const text = await postResponse.text();
+              const newlineIndex = text.indexOf("\n");
+              const metaMatch = text.substring(0, newlineIndex).match(/^<!-- (.*) -->$/);
+              if (!metaMatch) throw new Error("Invalid post format.");
+              meta     = JSON.parse(metaMatch[1]);
+              bodyHtml = text.substring(newlineIndex + 1);
+            }
+            renderPost(meta, bodyHtml);
+          } catch (error) {
+            panel.innerHTML = '<p class="blog-empty">' + error.message + '</p>';
+          }
+        })();
+      })();
+    </script>
+  </body>
+</html>
