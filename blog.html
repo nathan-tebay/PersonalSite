@@ -25,7 +25,6 @@
 
     <script src="assets/layout.js"></script>
     <script src="assets/script.js"></script>
-    <script src="assets/blog-storage.js"></script>
     <script>
       (function () {
         const listEl = document.getElementById("blog-list");
@@ -76,15 +75,8 @@
 
         (async function init() {
           try {
-            const config = await fetch("config.cgi").then(function (r) { return r.json(); });
-            let posts;
-            if (config.storage === "local") {
-              posts = BlogStorage.getPublishedAndWipPosts();
-            } else {
-              const manifestResponse = await fetch(config.postsUrl + "/manifest.json");
-              posts = manifestResponse.ok ? await manifestResponse.json() : [];
-            }
-            renderPosts(posts);
+            const r = await fetch("/blog/posts/manifest.json");
+            renderPosts(r.ok ? await r.json() : []);
           } catch (_) {
             listEl.innerHTML = '<p class="blog-empty">Could not load posts.</p>';
           }

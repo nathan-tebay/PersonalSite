@@ -19,7 +19,6 @@
 
     <script src="assets/layout.js"></script>
     <script src="assets/script.js"></script>
-    <script src="assets/blog-storage.js"></script>
     <script>
       (function () {
         const panel = document.getElementById("post-panel");
@@ -58,23 +57,14 @@
             return;
           }
           try {
-            const config = await fetch("config.cgi").then(function (r) { return r.json(); });
-            let meta, bodyHtml;
-            if (config.storage === "local") {
-              const post = BlogStorage.getPost(slug);
-              if (!post || !post.published) throw new Error("Post not found.");
-              meta     = { slug: post.slug, title: post.title, date: post.date, desc: post.desc };
-              bodyHtml = post.content;
-            } else {
-              const postResponse = await fetch(config.postsUrl + "/" + encodeURIComponent(slug) + "-published.html");
-              if (!postResponse.ok) throw new Error("Post not found.");
-              const text = await postResponse.text();
-              const newlineIndex = text.indexOf("\n");
-              const metaMatch = text.substring(0, newlineIndex).match(/^<!-- (.*) -->$/);
-              if (!metaMatch) throw new Error("Invalid post format.");
-              meta     = JSON.parse(metaMatch[1]);
-              bodyHtml = text.substring(newlineIndex + 1);
-            }
+            const postResponse = await fetch("/blog/posts/" + encodeURIComponent(slug) + "/index.html");
+            if (!postResponse.ok) throw new Error("Post not found.");
+            const text = await postResponse.text();
+            const newlineIndex = text.indexOf("\n");
+            const metaMatch = text.substring(0, newlineIndex).match(/^<!-- (.*) -->$/);
+            if (!metaMatch) throw new Error("Invalid post format.");
+            const meta     = JSON.parse(metaMatch[1]);
+            const bodyHtml = text.substring(newlineIndex + 1);
             renderPost(meta, bodyHtml);
           } catch (error) {
             panel.innerHTML = '<p class="blog-empty">' + error.message + '</p>';

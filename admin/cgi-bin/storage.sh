@@ -89,11 +89,7 @@ storage_mv() {
 # storage_exists <filename>
 storage_exists() {
   local filename="$1"
-  if [ "$STORAGE" = "local" ]; then
-    [ -f "$LOCAL_DIR/$filename" ]
-  else
-    mc ls "$MC_PREFIX/$filename" >/dev/null 2>&1
-  fi
+  [ -f "$LOCAL_DIR/$filename" ]
 }
 
 # ── JSON helpers ──────────────────────────────────────────────────────────────

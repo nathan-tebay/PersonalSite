@@ -39,6 +39,9 @@ TITLE=$(get_field "$POST_DATA" title)
 DATE=$(get_field "$POST_DATA" date)
 DESC=$(get_field "$POST_DATA" desc)
 CONTENT=$(get_field "$POST_DATA" content)
+WIP_RAW=$(get_field "$POST_DATA" wip)
+WIP="false"
+[ "$WIP_RAW" = "true" ] && WIP="true"
 
 if [ -z "$SLUG" ] || [ -z "$TITLE" ]; then
   printf '\r\n{"error":"slug and title are required"}\n'; exit 0
@@ -50,8 +53,8 @@ storage_exists "$SLUG/index.html" && PUBLISHED="true"
 
 # Build the post file (metadata comment on line 1, then HTML body)
 {
-  printf '<!-- {"slug":"%s","title":"%s","date":"%s","desc":"%s"} -->\n' \
-    "$SLUG" "$(json_escape "$TITLE")" "$DATE" "$(json_escape "$DESC")"
+  printf '<!-- {"slug":"%s","title":"%s","date":"%s","desc":"%s","wip":%s} -->\n' \
+    "$SLUG" "$(json_escape "$TITLE")" "$DATE" "$(json_escape "$DESC")" "$WIP"
   printf '%s' "$CONTENT"
 } > "$TMP_DIR/post.html"
 
@@ -74,15 +77,16 @@ storage_get "manifest-all.json" "$TMP_DIR/manifest-all.json" \
 storage_get "manifest.json" "$TMP_DIR/manifest.json" \
   || printf '[\n]\n' > "$TMP_DIR/manifest.json"
 
-META_ALL=$(printf '{"slug":"%s","title":"%s","date":"%s","desc":"%s","published":%s}' \
-  "$SLUG" "$(json_escape "$TITLE")" "$DATE" "$(json_escape "$DESC")" "$PUBLISHED")
+META_ALL=$(printf '{"slug":"%s","title":"%s","date":"%s","desc":"%s","published":%s,"wip":%s}' \
+  "$SLUG" "$(json_escape "$TITLE")" "$DATE" "$(json_escape "$DESC")" "$PUBLISHED" "$WIP")
 
-META_PUB=$(printf '{"slug":"%s","title":"%s","date":"%s","desc":"%s"}' \
-  "$SLUG" "$(json_escape "$TITLE")" "$DATE" "$(json_escape "$DESC")")
+META_PUB=$(printf '{"slug":"%s","title":"%s","date":"%s","desc":"%s","wip":%s}' \
+  "$SLUG" "$(json_escape "$TITLE")" "$DATE" "$(json_escape "$DESC")" "$WIP")
 
 manifest_upsert "$TMP_DIR/manifest-all.json" "$SLUG" "$META_ALL"
 
-if [ "$PUBLISHED" = "true" ]; then
+# Published posts and WIP posts both appear in the public manifest
+if [ "$PUBLISHED" = "true" ] || [ "$WIP" = "true" ]; then
   manifest_upsert "$TMP_DIR/manifest.json" "$SLUG" "$META_PUB"
 else
   manifest_remove "$TMP_DIR/manifest.json" "$SLUG"
