@@ -1,11 +1,12 @@
 #!/bin/sh
+. /var/www/html/cgi-bin/session.sh
 # CGI: create or update a blog post.
 # POST fields: slug, title, date, desc, content
 # Posts live in per-slug directories:
 #   blogs/<slug>/draft.html    — draft
 #   blogs/<slug>/index.html   — published
 
-. /var/www/html/admin/cgi-bin/storage.sh
+. /var/www/html/cgi-bin/storage.sh
 
 TMP_DIR="/tmp/blog-$$"
 mkdir -p "$TMP_DIR"

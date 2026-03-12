@@ -1,10 +1,11 @@
 #!/bin/sh
+. /var/www/html/cgi-bin/session.sh
 # CGI: list images for a blog post slug.
 # GET param: ?slug=<slug>
 # Returns: {"images":["file1.jpg","file2.png",...]}
 # Reads from local cache (always in sync with S3 after upload).
 
-. /var/www/html/admin/cgi-bin/storage.sh
+. /var/www/html/cgi-bin/storage.sh
 
 printf 'Content-Type: application/json\r\n'
 

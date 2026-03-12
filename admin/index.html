@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blog Admin — Tebay.dev</title>
+  <script>
+    if (!document.cookie.split(';').some(function(c){return c.trim().startsWith('admin_session=')}))
+      window.location.replace('/cgi-bin/login.cgi')
+  </script>
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
     <link rel="stylesheet" href="../assets/style.css" />
     <style>
@@ -418,6 +422,158 @@
         color: var(--text-link);
       }
 
+      /* ── Admin section tabs ───────────────────────────────────────────── */
+      #admin-section-tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--divider);
+      }
+
+      .admin-stab {
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--text-mid);
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.45rem 1.1rem;
+        margin-bottom: -1px;
+        transition: color 0.12s, border-color 0.12s;
+      }
+
+      .admin-stab.active { color: var(--text-high); border-bottom-color: var(--text-link); }
+
+      /* ── Links editor ────────────────────────────────────────────────── */
+      #links-layout {
+        display: grid;
+        grid-template-columns: 190px 1fr;
+        gap: 1rem;
+        min-height: 400px;
+      }
+
+      #cat-panel {
+        background: rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--divider);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        overflow-y: auto;
+      }
+
+      #links-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 0;
+      }
+
+      #links-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      .cat-row {
+        display: flex;
+        gap: 0.35rem;
+        align-items: center;
+      }
+
+      .cat-row input {
+        flex: 1;
+        min-width: 0;
+        background: var(--input-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.35rem;
+        color: var(--text-high);
+        font-family: system-ui, sans-serif;
+        font-size: 0.8rem;
+        padding: 0.3rem 0.45rem;
+        outline: none;
+        transition: border-color 0.12s;
+      }
+
+      .cat-row input:focus { border-color: var(--text-link); }
+
+      .link-card {
+        background: rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--divider);
+        border-radius: 0.45rem;
+        padding: 0.6rem 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .link-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.4rem;
+      }
+
+      .link-card-footer {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+      }
+
+      .link-input {
+        background: var(--input-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.35rem;
+        color: var(--text-high);
+        font-family: system-ui, sans-serif;
+        font-size: 0.8rem;
+        padding: 0.3rem 0.45rem;
+        outline: none;
+        width: 100%;
+        box-sizing: border-box;
+        transition: border-color 0.12s;
+      }
+
+      .link-input:focus { border-color: var(--text-link); }
+
+      .link-select {
+        flex: 1;
+        min-width: 0;
+        background: var(--input-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.35rem;
+        color: var(--text-high);
+        font-family: system-ui, sans-serif;
+        font-size: 0.8rem;
+        padding: 0.3rem 0.45rem;
+        outline: none;
+      }
+
+      .icon-btn {
+        background: none;
+        border: 1px solid currentColor;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.75rem;
+        line-height: 1;
+        padding: 0.2rem 0.45rem;
+        flex-shrink: 0;
+        transition: opacity 0.12s;
+      }
+
+      .icon-btn.danger { color: var(--danger); }
+      .icon-btn:hover { opacity: 0.7; }
+
+      #links-status {
+        font-size: 0.8rem;
+        min-height: 1.2em;
+        color: var(--text-link);
+      }
+
       /* ── Responsive: stack editor on small screens ────────────────────── */
       @media (max-width: 700px) {
         #editor-layout { grid-template-columns: 1fr; }
@@ -437,6 +593,13 @@
             <a href="../blog.html" style="font-size:0.8rem;color:var(--text-link);text-decoration:none;opacity:0.8;transition:opacity 0.12s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">View Blog →</a>
             <button id="logout-btn">Sign out</button>
           </div>
+
+          <div id="admin-section-tabs">
+            <button class="admin-stab active" id="stab-blog">Blog</button>
+            <button class="admin-stab" id="stab-links">Links</button>
+          </div>
+
+          <div id="section-blog">
 
           <div id="editor-layout">
             <div id="post-list">
@@ -489,7 +652,7 @@
                   <button class="tab-btn" id="tab-html">HTML</button>
                   <button class="tab-btn" id="tab-preview">Preview</button>
                 </div>
-                <textarea id="field-content" placeholder="Write your post…"></textarea>
+                <textarea id="field-content" placeholder="Write your post…" data-gramm="true" data-gramm_editor="true" spellcheck="true"></textarea>
                 <div id="preview-pane"></div>
               </div>
               <div class="btn-row">
@@ -501,6 +664,31 @@
               </div>
             </div>
           </div>
+
+          </div><!-- /section-blog -->
+
+          <div id="section-links" style="display:none">
+            <div id="links-layout">
+              <div id="cat-panel">
+                <div class="list-header">
+                  <span>Categories</span>
+                  <button id="add-cat-btn" class="img-upload-label">+ Add</button>
+                </div>
+                <div id="cat-list"></div>
+              </div>
+              <div id="links-main">
+                <div class="list-header">
+                  <span>Links</span>
+                  <button id="add-link-btn" class="img-upload-label">+ Add</button>
+                </div>
+                <div id="links-list"></div>
+                <div class="btn-row" style="margin-top:0.5rem">
+                  <button class="primary" id="links-save-btn">Save</button>
+                  <span id="links-status"></span>
+                </div>
+              </div>
+            </div>
+          </div><!-- /section-links -->
 
         </div>
       </div>
@@ -1025,13 +1213,8 @@
         document.getElementById("new-btn").addEventListener("click", clearEditor);
         document.getElementById("clear-btn").addEventListener("click", clearEditor);
 
-        document.getElementById("logout-btn").addEventListener("click", async function () {
-          try {
-            await fetch("../cgi-bin/posts.cgi", {
-              headers: { Authorization: "Basic " + btoa("logout:logout") },
-            });
-          } catch (_) {}
-          window.location.href = "../index.html";
+        document.getElementById("logout-btn").addEventListener("click", function () {
+          window.location.href = "/cgi-bin/logout.cgi";
         });
 
         // ── Bootstrap ─────────────────────────────────────────────────────
@@ -1045,6 +1228,223 @@
           clearEditor();
           await loadPosts();
         })();
+
+        // ── Admin section tabs ────────────────────────────────────────────
+        var _linksLoaded = false;
+
+        function switchAdminSection(section) {
+          var isLinks = section === "links";
+          document.getElementById("section-blog").style.display  = isLinks ? "none" : "";
+          document.getElementById("section-links").style.display = isLinks ? "" : "none";
+          document.getElementById("stab-blog").classList.toggle("active", !isLinks);
+          document.getElementById("stab-links").classList.toggle("active", isLinks);
+          if (isLinks && !_linksLoaded) {
+            _linksLoaded = true;
+            loadLinksData();
+          }
+        }
+
+        document.getElementById("stab-blog").addEventListener("click",  function () { switchAdminSection("blog"); });
+        document.getElementById("stab-links").addEventListener("click", function () { switchAdminSection("links"); });
+
+        // ── Links editor ──────────────────────────────────────────────────
+        var catListEl    = document.getElementById("cat-list");
+        var linksListEl  = document.getElementById("links-list");
+        var linksStatusEl = document.getElementById("links-status");
+
+        function setLinksStatus(msg, isErr) {
+          linksStatusEl.textContent = msg;
+          linksStatusEl.style.color = isErr ? "var(--danger)" : "var(--text-link)";
+        }
+
+        function linkGenId() {
+          return Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+        }
+
+        function getCurrentCategories() {
+          var cats = [];
+          catListEl.querySelectorAll(".cat-row").forEach(function (row) {
+            cats.push({ id: row.dataset.id, name: row.querySelector("input").value });
+          });
+          return cats;
+        }
+
+        function getAllLinkSelects() {
+          return linksListEl.querySelectorAll(".link-cat");
+        }
+
+        function addOptionToAllSelects(catId, catName) {
+          getAllLinkSelects().forEach(function (sel) {
+            var opt = document.createElement("option");
+            opt.value = catId;
+            opt.textContent = catName || "(unnamed)";
+            sel.appendChild(opt);
+          });
+        }
+
+        function updateOptionInAllSelects(catId, catName) {
+          getAllLinkSelects().forEach(function (sel) {
+            var opt = sel.querySelector('option[value="' + catId + '"]');
+            if (opt) opt.textContent = catName || "(unnamed)";
+          });
+        }
+
+        function removeOptionFromAllSelects(catId) {
+          getAllLinkSelects().forEach(function (sel) {
+            var opt = sel.querySelector('option[value="' + catId + '"]');
+            if (opt) {
+              if (sel.value === catId) sel.value = "";
+              opt.remove();
+            }
+          });
+        }
+
+        function buildCatRow(id, name) {
+          var row = document.createElement("div");
+          row.className = "cat-row";
+          row.dataset.id = id;
+
+          var inp = document.createElement("input");
+          inp.type = "text";
+          inp.value = name;
+          inp.placeholder = "Category name";
+          inp.addEventListener("input", function () {
+            updateOptionInAllSelects(id, inp.value);
+          });
+
+          var del = document.createElement("button");
+          del.className = "icon-btn danger";
+          del.textContent = "×";
+          del.title = "Delete category";
+          del.addEventListener("click", function () {
+            removeOptionFromAllSelects(id);
+            row.remove();
+          });
+
+          row.appendChild(inp);
+          row.appendChild(del);
+          return row;
+        }
+
+        function buildLinkCard(link, categories) {
+          var card = document.createElement("div");
+          card.className = "link-card";
+          card.dataset.id = link.id;
+
+          var row1 = document.createElement("div");
+          row1.className = "link-row";
+
+          var titleInp = document.createElement("input");
+          titleInp.type = "text";
+          titleInp.className = "link-input link-title";
+          titleInp.placeholder = "Title";
+          titleInp.value = link.title || "";
+
+          var urlInp = document.createElement("input");
+          urlInp.type = "url";
+          urlInp.className = "link-input link-url";
+          urlInp.placeholder = "https://";
+          urlInp.value = link.url || "";
+
+          row1.appendChild(titleInp);
+          row1.appendChild(urlInp);
+
+          var descInp = document.createElement("input");
+          descInp.type = "text";
+          descInp.className = "link-input link-desc";
+          descInp.placeholder = "Description (optional)";
+          descInp.value = link.desc || "";
+
+          var footer = document.createElement("div");
+          footer.className = "link-card-footer";
+
+          var sel = document.createElement("select");
+          sel.className = "link-select link-cat";
+          var blank = document.createElement("option");
+          blank.value = "";
+          blank.textContent = "— uncategorized —";
+          sel.appendChild(blank);
+          categories.forEach(function (cat) {
+            var opt = document.createElement("option");
+            opt.value = cat.id;
+            opt.textContent = cat.name || "(unnamed)";
+            opt.selected = (cat.id === link.categoryId);
+            sel.appendChild(opt);
+          });
+
+          var del = document.createElement("button");
+          del.className = "icon-btn danger";
+          del.textContent = "×";
+          del.title = "Delete link";
+          del.addEventListener("click", function () { card.remove(); });
+
+          footer.appendChild(sel);
+          footer.appendChild(del);
+
+          card.appendChild(row1);
+          card.appendChild(descInp);
+          card.appendChild(footer);
+          return card;
+        }
+
+        async function loadLinksData() {
+          try {
+            var r = await fetch("../cgi-bin/links.cgi");
+            var data = r.ok ? await r.json() : { categories: [], links: [] };
+            catListEl.innerHTML = "";
+            linksListEl.innerHTML = "";
+            var cats = data.categories || [];
+            cats.forEach(function (cat) {
+              catListEl.appendChild(buildCatRow(cat.id, cat.name));
+            });
+            (data.links || []).forEach(function (link) {
+              linksListEl.appendChild(buildLinkCard(link, cats));
+            });
+          } catch (_) {
+            setLinksStatus("Could not load links.", true);
+          }
+        }
+
+        document.getElementById("add-cat-btn").addEventListener("click", function () {
+          var id = linkGenId();
+          var row = buildCatRow(id, "");
+          catListEl.appendChild(row);
+          addOptionToAllSelects(id, "");
+          row.querySelector("input").focus();
+        });
+
+        document.getElementById("add-link-btn").addEventListener("click", function () {
+          var cats = getCurrentCategories();
+          var card = buildLinkCard({ id: linkGenId(), url: "", title: "", desc: "", categoryId: "" }, cats);
+          linksListEl.appendChild(card);
+          card.querySelector(".link-title").focus();
+        });
+
+        document.getElementById("links-save-btn").addEventListener("click", async function () {
+          setLinksStatus("Saving…");
+          var categories = getCurrentCategories();
+          var links = [];
+          linksListEl.querySelectorAll(".link-card").forEach(function (card) {
+            links.push({
+              id: card.dataset.id,
+              url:        card.querySelector(".link-url").value.trim(),
+              title:      card.querySelector(".link-title").value.trim(),
+              desc:       card.querySelector(".link-desc").value.trim(),
+              categoryId: card.querySelector(".link-cat").value
+            });
+          });
+          try {
+            var r = await fetch("../cgi-bin/links.cgi", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ categories: categories, links: links })
+            });
+            var json = await r.json();
+            setLinksStatus(json.ok ? "Saved." : "Error: " + (json.error || "unknown"), !json.ok);
+          } catch (_) {
+            setLinksStatus("Save failed.", true);
+          }
+        });
       })();
     </script>
   </body>

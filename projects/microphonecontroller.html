@@ -38,7 +38,8 @@
               <div class="render-center">
                 <button
                   class="render-open-btn render-open-btn--lg"
-                  id="mcDemoBtn">
+                  data-video-src="/videos/microphone-controller-demo.mp4"
+                  data-video-caption="MicrophoneController demo">
                   Demo
                 </button>
               </div>
@@ -155,48 +156,7 @@
       </div>
     </div>
 
-    <div class="video-modal" id="mcDemoModal" hidden>
-      <div class="video-modal__backdrop" id="mcDemoBackdrop"></div>
-      <div class="video-modal__box">
-        <button class="video-modal__close" id="mcDemoClose">&#x2715;</button>
-        <video
-          class="video-modal__video"
-          id="mcDemoVideo"
-          src="../assets/images/demo.mp4"
-          playsinline
-          controls></video>
-      </div>
-    </div>
-
     <script src="../assets/layout.js"></script>
     <script src="../assets/script.js"></script>
-    <script>
-      (function () {
-        var modal = document.getElementById("mcDemoModal");
-        var video = document.getElementById("mcDemoVideo");
-        var openBtn = document.getElementById("mcDemoBtn");
-        var closeBtn = document.getElementById("mcDemoClose");
-        var backdrop = document.getElementById("mcDemoBackdrop");
-        if (!modal) return;
-
-        function openModal() {
-          modal.hidden = false;
-          video.play();
-        }
-
-        function closeModal() {
-          modal.hidden = true;
-          video.pause();
-          video.currentTime = 0;
-        }
-
-        openBtn.addEventListener("click", openModal);
-        closeBtn.addEventListener("click", closeModal);
-        backdrop.addEventListener("click", closeModal);
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape") closeModal();
-        });
-      })();
-    </script>
   </body>
 </html>

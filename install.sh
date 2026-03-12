@@ -176,6 +176,7 @@ REQUIRED_FILES=(
   "admin/cgi-bin/delete.cgi"
   "admin/cgi-bin/publish.cgi"
   "admin/cgi-bin/posts.cgi"
+  "admin/cgi-bin/links.cgi"
   "admin/cgi-bin/storage.sh"
 )
 

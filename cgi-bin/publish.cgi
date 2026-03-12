@@ -1,11 +1,12 @@
 #!/bin/sh
+. /var/www/html/cgi-bin/session.sh
 # CGI: toggle the published state of a post by renaming its file.
 # POST fields: slug
 # Returns: {"ok":true,"published":true|false}
 # Draft:     blogs/<slug>/draft.html
 # Published: blogs/<slug>/index.html
 
-. /var/www/html/admin/cgi-bin/storage.sh
+. /var/www/html/cgi-bin/storage.sh
 
 TMP_DIR="/tmp/blog-$$"
 mkdir -p "$TMP_DIR"
@@ -74,9 +75,11 @@ sed "/\"slug\":\"$SLUG\"/s/\"published\":$OLD_PUBLISHED/\"published\":$NEW_PUBLI
   && mv "$TMP_DIR/manifest-all.tmp" "$TMP_DIR/manifest-all.json"
 
 if [ "$NEW_PUBLISHED" = "true" ]; then
-  # Add to public manifest: strip the "published" field from the all-manifest entry
+  # Add to public manifest: strip "published", clear wip (published = no longer WIP)
   PUB_ENTRY=$(grep '"slug":"'"$SLUG"'"' "$TMP_DIR/manifest-all.json" \
-    | sed 's/,"published":[a-z]*//')
+    | sed 's/^,*//' \
+    | sed 's/,"published":[a-z]*//' \
+    | sed 's/,"wip":true/,"wip":false/')
   manifest_upsert "$TMP_DIR/manifest.json" "$SLUG" "$PUB_ENTRY"
 else
   manifest_remove "$TMP_DIR/manifest.json" "$SLUG"

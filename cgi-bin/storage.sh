@@ -2,9 +2,9 @@
 # Storage abstraction — source this from CGI scripts.
 # Set STORAGE=local for local filesystem (dev), STORAGE=s3 (default) for AWS S3.
 #
-# Local mode: posts are read/written from LOCAL_DIR (mounted at run time).
-# S3 mode:    posts are read/written via mc (mc alias "s3r" configured at
-#             container start by docker-entrypoint.sh).
+# Local mode: posts are read/written from LOCAL_DIR.
+# S3 mode:    posts are read/written via AWS CLI (handles Lambda STS credentials
+#             automatically via the standard AWS credential chain).
 #
 # Storage layout (both local and S3 mirror each other):
 #   blogs/manifest.json          — public post list
@@ -14,10 +14,16 @@
 #   blogs/<slug>/<image>         — uploaded images for that post
 
 STORAGE="${STORAGE:-s3}"
-LOCAL_DIR="/var/www/html/blog/posts"
+LOCAL_DIR="/tmp/www/blog/posts"
 
-# mc path prefix: s3r/<bucket>/blogs
-MC_PREFIX="s3r/${AWS_BUCKET}/blogs"
+# S3 prefix for blog content
+S3_PREFIX="s3://${AWS_BUCKET}/blogs"
+
+# AWS CLI endpoint override for local MinIO dev
+_aws_endpoint_arg=""
+if [ -n "${MINIO_ENDPOINT:-}" ]; then
+  _aws_endpoint_arg="--endpoint-url ${MINIO_ENDPOINT}"
+fi
 
 # ── Storage operations ────────────────────────────────────────────────────────
 
@@ -29,7 +35,13 @@ storage_put() {
     mkdir -p "$(dirname "$LOCAL_DIR/$filename")"
     cp "$localfile" "$LOCAL_DIR/$filename"
   else
-    mc cp --attr "Content-Type=$contenttype" "$localfile" "$MC_PREFIX/$filename" >/dev/null 2>&1
+    _out=$(aws s3 cp "$localfile" "${S3_PREFIX}/${filename}" \
+      --content-type "$contenttype" \
+      --region "${AWS_REGION:-us-east-1}" \
+      ${_aws_endpoint_arg} 2>&1)
+    _rc=$?
+    echo "[storage_put] aws s3 cp s3://${AWS_BUCKET}/blogs/${filename} rc=${_rc} out=${_out}" >&2
+    [ "$_rc" = "0" ] || return 1
     # Mirror to local cache so the change is visible immediately
     mkdir -p "$(dirname "$LOCAL_DIR/$filename")"
     cp "$localfile" "$LOCAL_DIR/$filename" 2>/dev/null
@@ -37,13 +49,18 @@ storage_put() {
 }
 
 # Download a file from storage to a local path. Returns non-zero on failure.
+# Uses local cache when available to avoid redundant aws CLI invocations.
 # storage_get <filename> <local_path>
 storage_get() {
   local filename="$1" localfile="$2"
   if [ "$STORAGE" = "local" ]; then
     cp "$LOCAL_DIR/$filename" "$localfile" 2>/dev/null
+  elif [ -f "$LOCAL_DIR/$filename" ]; then
+    cp "$LOCAL_DIR/$filename" "$localfile"
   else
-    mc cp "$MC_PREFIX/$filename" "$localfile" >/dev/null 2>&1
+    aws s3 cp "${S3_PREFIX}/${filename}" "$localfile" \
+      --region "${AWS_REGION:-us-east-1}" \
+      ${_aws_endpoint_arg} >/dev/null 2>&1
   fi
 }
 
@@ -54,7 +71,9 @@ storage_rm() {
   if [ "$STORAGE" = "local" ]; then
     rm -f "$LOCAL_DIR/$filename"
   else
-    mc rm "$MC_PREFIX/$filename" >/dev/null 2>&1
+    aws s3 rm "${S3_PREFIX}/${filename}" \
+      --region "${AWS_REGION:-us-east-1}" \
+      ${_aws_endpoint_arg} >/dev/null 2>&1
     rm -f "$LOCAL_DIR/$filename"
   fi
 }
@@ -66,7 +85,10 @@ storage_rm_dir() {
   if [ "$STORAGE" = "local" ]; then
     rm -rf "$LOCAL_DIR/$dir"
   else
-    mc rm --recursive --force "$MC_PREFIX/$dir" >/dev/null 2>&1
+    aws s3 rm "${S3_PREFIX}/${dir}" \
+      --recursive \
+      --region "${AWS_REGION:-us-east-1}" \
+      ${_aws_endpoint_arg} >/dev/null 2>&1
     rm -rf "$LOCAL_DIR/$dir"
   fi
 }
@@ -79,7 +101,9 @@ storage_mv() {
     mkdir -p "$(dirname "$LOCAL_DIR/$to")"
     mv "$LOCAL_DIR/$from" "$LOCAL_DIR/$to" 2>/dev/null
   else
-    mc mv "$MC_PREFIX/$from" "$MC_PREFIX/$to" >/dev/null 2>&1
+    aws s3 mv "${S3_PREFIX}/${from}" "${S3_PREFIX}/${to}" \
+      --region "${AWS_REGION:-us-east-1}" \
+      ${_aws_endpoint_arg} >/dev/null 2>&1
     mkdir -p "$(dirname "$LOCAL_DIR/$to")"
     mv "$LOCAL_DIR/$from" "$LOCAL_DIR/$to" 2>/dev/null
   fi
@@ -118,7 +142,9 @@ manifest_remove() {
       [ "$line" = "[" ]  && continue
       [ "$line" = "]" ]  && continue
       [ -z "$line" ]     && continue
-      local entry="${line#,}"
+      local entry
+      entry=$(printf '%s' "$line" | sed 's/^,*//')
+      [ -z "$entry" ]    && continue
       case "$entry" in *'"slug":"'"$slug"'"'*) continue ;; esac
       [ "$first" = "1" ] && { printf '%s\n' "$entry"; first=0; } \
                          || printf ',%s\n' "$entry"
@@ -138,7 +164,9 @@ manifest_upsert() {
       [ "$line" = "[" ]  && continue
       [ "$line" = "]" ]  && continue
       [ -z "$line" ]     && continue
-      local entry="${line#,}"
+      local entry
+      entry=$(printf '%s' "$line" | sed 's/^,*//')
+      [ -z "$entry" ]    && continue
       case "$entry" in *'"slug":"'"$slug"'"'*) continue ;; esac
       [ "$first" = "1" ] && { printf '%s\n' "$entry"; first=0; } \
                          || printf ',%s\n' "$entry"

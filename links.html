@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Links — Tebay.dev</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="assets/style.css" />
+    <style>
+      .project-header { margin-bottom: 1.5rem; }
+      .links-section { margin-bottom: 1.75rem; }
+      .links-section-title {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-low);
+        margin-bottom: 0.6rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid var(--divider);
+      }
+      .links-list { display: flex; flex-direction: column; gap: 0.6rem; }
+      .link-item a {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-link);
+        text-decoration: none;
+      }
+      .link-item a:hover { text-decoration: underline; }
+      .link-item-desc {
+        font-size: 0.8rem;
+        color: var(--text-mid);
+        margin-top: 0.1rem;
+      }
+    </style>
+  </head>
+  <body data-page="links">
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+      <div class="main-col">
+        <div class="side-panel">
+          <div class="project-header">
+            <div>
+              <h1>Links</h1>
+              <p class="tagline">Useful resources, tools, and reading.</p>
+            </div>
+          </div>
+          <div id="links-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/layout.js"></script>
+    <script src="assets/script.js"></script>
+    <script>
+      (function () {
+        const contentEl = document.getElementById("links-content");
+
+        function escapeHtml(s) {
+          return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function render(data) {
+          const categories = data.categories || [];
+          const links = data.links || [];
+
+          if (!links.length) {
+            contentEl.innerHTML = '<p class="blog-empty">No links yet.</p>';
+            return;
+          }
+
+          // Group links by categoryId
+          const catMap = {};
+          categories.forEach(function (c) { catMap[c.id] = c.name; });
+
+          const groups = {};
+          const uncategorized = [];
+          links.forEach(function (link) {
+            if (link.categoryId && catMap[link.categoryId]) {
+              const name = catMap[link.categoryId];
+              if (!groups[name]) groups[name] = [];
+              groups[name].push(link);
+            } else {
+              uncategorized.push(link);
+            }
+          });
+
+          // Render in category order, then uncategorized
+          const html = [];
+          categories.forEach(function (cat) {
+            const catLinks = groups[cat.name];
+            if (!catLinks || !catLinks.length) return;
+            html.push('<div class="links-section">');
+            html.push('<div class="links-section-title">' + escapeHtml(cat.name) + '</div>');
+            html.push('<div class="links-list">');
+            catLinks.forEach(function (link) {
+              html.push('<div class="link-item">');
+              html.push('<div><a href="' + escapeHtml(link.url) + '" target="_blank" rel="noopener">' + escapeHtml(link.title || link.url) + '</a></div>');
+              if (link.desc) html.push('<div class="link-item-desc">' + escapeHtml(link.desc) + '</div>');
+              html.push('</div>');
+            });
+            html.push('</div></div>');
+          });
+
+          if (uncategorized.length) {
+            html.push('<div class="links-section">');
+            if (categories.length) html.push('<div class="links-section-title">Other</div>');
+            html.push('<div class="links-list">');
+            uncategorized.forEach(function (link) {
+              html.push('<div class="link-item">');
+              html.push('<div><a href="' + escapeHtml(link.url) + '" target="_blank" rel="noopener">' + escapeHtml(link.title || link.url) + '</a></div>');
+              if (link.desc) html.push('<div class="link-item-desc">' + escapeHtml(link.desc) + '</div>');
+              html.push('</div>');
+            });
+            html.push('</div></div>');
+          }
+
+          contentEl.innerHTML = html.join('');
+        }
+
+        (async function init() {
+          try {
+            const r = await fetch("/links.json?v=" + Date.now());
+            render(r.ok ? await r.json() : { categories: [], links: [] });
+          } catch (_) {
+            contentEl.innerHTML = '<p class="blog-empty">Could not load links.</p>';
+          }
+        })();
+      })();
+    </script>
+  </body>
+</html>

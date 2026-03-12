@@ -1,8 +1,9 @@
 #!/bin/sh
+. /var/www/html/cgi-bin/session.sh
 # CGI: delete a blog post (draft or published), its images, and remove it from both manifests.
 # POST fields: slug
 
-. /var/www/html/admin/cgi-bin/storage.sh
+. /var/www/html/cgi-bin/storage.sh
 
 TMP_DIR="/tmp/blog-$$"
 mkdir -p "$TMP_DIR"

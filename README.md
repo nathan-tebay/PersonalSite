@@ -46,22 +46,32 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
 │   └── personalsite.html      # This project
 │
 ├── admin/
-│   ├── index.html             # Admin login & blog editor
-│   └── api/
-│       ├── save.cgi           # Save draft post
-│       ├── delete.cgi         # Delete post
-│       ├── publish.cgi        # Publish/unpublish post
-│       ├── posts.cgi          # List all posts
+│   ├── index.html             # Admin panel (protected by session auth)
+│   └── cgi-bin/
+│       ├── login.cgi          # Login form and credential validation
+│       ├── logout.cgi         # Logout and clear session cookie
+│       ├── save.cgi           # Save draft post (session-protected)
+│       ├── delete.cgi         # Delete post (session-protected)
+│       ├── publish.cgi        # Publish/unpublish post (session-protected)
+│       ├── posts.cgi          # List all posts (session-protected)
+│       ├── session.sh         # Session auth enforcement (sourced by CGI scripts)
 │       └── storage.sh         # Storage backend helper
 │
 ├── blog/
 │   └── posts/                 # Post files (created at runtime)
 │
 ├── dev.sh                     # Start dev containers (site + MinIO S3)
-├── Dockerfile                 # Prod image (S3 storage)
+├── Dockerfile                 # Prod image (Lambda, S3 storage, AWS Lambda Web Adapter)
+├── Dockerfile.dev             # Dev image (local storage or MinIO)
 ├── docker-entrypoint.sh       # Container startup logic
 ├── sync-posts.sh              # S3 ↔ local cache sync (prod only)
-└── config.cgi                 # Public API: returns storage mode & posts URL
+├── config.cgi                 # Public API: returns storage mode & posts URL
+├── .credentials               # httpd MIME types and auth config (generated/copied)
+│
+├── scripts/
+│   ├── deploy-lambda.sh       # Build, push to ECR, update Lambda function
+│   ├── generate-credentials.sh # Generate and apply ADMIN_TOKEN to Lambda
+│   └── aws-setup.sh           # Configure AWS IAM, S3, and CloudFront
 ```
 
 ## Getting Started
@@ -80,18 +90,25 @@ This script:
 2. Creates a Podman network (`personalsite-dev`)
 3. Builds the dev image (`Dockerfile.dev`)
 4. Launches two containers:
-   - **MinIO** — S3-compatible storage on `http://localhost:9001` (console: `minioadmin` / `minioadmin`)
-   - **Site** — Served on `http://localhost:8888` with volume mount for live editing
+   - **MinIO** — S3-compatible storage on port 9000/9001 (console: `minioadmin` / `minioadmin`)
+   - **Site** — Served on `http://localhost:8888` with live editing
 
 Both containers run in the background (detached) and are non-blocking.
 
 **Blog storage in dev mode:**
 
-- Blog posts are stored in MinIO (S3-compatible) via `STORAGE=s3`
-- Admin panel at `http://localhost:8888/admin/` (no authentication in dev)
-- MinIO console accessible at `http://localhost:9001` with credentials `minioadmin` / `minioadmin` for debugging
-- Posts persist in MinIO and survive container restarts
-- The `personalsite-dev` network connects both containers; the site uses `http://personalsite-minio:9000` to reach MinIO
+- Blog posts are stored locally (file-backed) via `STORAGE=local`
+- Admin panel at `http://localhost:8888/admin/` with cookie-based session auth
+- Dev password: `Password123` (pre-configured `ADMIN_TOKEN` in `dev.sh`)
+- Posts persist in the local blog directory and survive container restarts
+
+**Admin authentication:**
+
+The site uses cookie-based session authentication:
+- `/cgi-bin/login.cgi` — Login form and credential validation
+- `/cgi-bin/logout.cgi` — Clears session cookie
+- Session token is SHA-256(password), passed in `admin_session` cookie
+- `ADMIN_TOKEN` environment variable holds the hash (never raw password)
 
 **Stopping the dev environment:**
 
@@ -103,32 +120,49 @@ This removes both containers. The network persists but will be cleaned up by Pod
 
 ### Production Deployment
 
-Build the production image with S3 backend:
+The site is deployed as an AWS Lambda function using a container image with the AWS Lambda Web Adapter.
+
+**Build and deploy with the helper script:**
+
+```bash
+./scripts/deploy-lambda.sh \
+  [--account-id 123456789012] \
+  [--region us-east-1] \
+  [--repo ntebay/personalsite] \
+  [--function personalSite] \
+  [--tag latest]
+```
+
+The script:
+1. Authenticates podman with ECR
+2. Builds the container image (linux/amd64)
+3. Pushes to ECR
+4. Updates the Lambda function with the new image
+
+**Manual deployment:**
 
 ```bash
 podman build -f Dockerfile -t tebay-site:latest .
 ```
 
-Required environment variables:
+Required environment variables (set on the Lambda function):
 
-```bash
-podman run \
-  -p 8080:8080 \
-  -e AWS_REGION=us-east-1 \
-  -e AWS_ACCESS_KEY_ID=<key> \
-  -e AWS_SECRET_ACCESS_KEY=<secret> \
-  -e AWS_BUCKET=my-bucket \
-  tebay-site:latest
-```
+- `STORAGE` — Set to `s3` (default in Dockerfile)
+- `AWS_REGION` — AWS region (default: `us-east-1`)
+- `AWS_ACCESS_KEY_ID` — AWS credentials
+- `AWS_SECRET_ACCESS_KEY` — AWS credentials
+- `AWS_BUCKET` — S3 bucket name (e.g. `my-bucket`)
+- `ADMIN_TOKEN` — SHA-256 hash of the admin password (generated via `./scripts/generate-credentials.sh`)
 
 Or use an S3 Access Point ARN (recommended) instead of `AWS_BUCKET`:
 
-```bash
--e AWS_ACCESS_POINT_ARN=arn:aws:s3:us-east-1:123456789012:accesspoint/my-ap
+```
+AWS_ACCESS_POINT_ARN=arn:aws:s3:us-east-1:123456789012:accesspoint/my-ap
 ```
 
-The container:
-- Serves the site on port `8080`
+**Container behavior:**
+
+- Listens on port 8080 (inside Lambda, port is abstracted via Lambda Web Adapter)
 - Syncs posts between S3 and a local cache (`/var/www/html/blog/posts/`) on startup and periodically
 - Serves all blog posts from the local cache (never directly from S3)
 - Requires `STORAGE=s3` environment variable (set by default in `Dockerfile`)
@@ -137,11 +171,12 @@ The container:
 
 ### Storage Mode
 
-The site can operate in two storage modes, set via the `STORAGE` environment variable:
+The site operates in two storage modes, set via the `STORAGE` environment variable:
 
-| Mode | Location                             | Use Case                   | Persistence                  |
-|------|--------------------------------------|----------------------------|-------------------------------|
-| `s3` | MinIO (local dev) or AWS S3 (prod) | Development and production | Persistent across restarts   |
+| Mode    | Location                  | Use Case       | Persistence              |
+|---------|---------------------------|----------------|--------------------------|
+| `local` | Local file system         | Dev            | Persistent across restarts |
+| `s3`    | AWS S3                    | Production     | Persistent across restarts |
 
 The `config.cgi` endpoint returns the active storage mode and post URL:
 
@@ -149,6 +184,26 @@ The `config.cgi` endpoint returns the active storage mode and post URL:
 curl http://localhost:8888/config.cgi
 # {"postsUrl":"/blog/posts","storage":"local"}
 ```
+
+### Admin Authentication
+
+Admin credentials are managed via the `ADMIN_TOKEN` environment variable (set on the Lambda function or container):
+
+**Generate a token:**
+
+```bash
+./scripts/generate-credentials.sh
+```
+
+This prompts for a password, computes its SHA-256 hash, and displays the token.
+
+**Apply to Lambda:**
+
+```bash
+./scripts/generate-credentials.sh --apply --function personalSite --region us-east-1
+```
+
+This automatically updates the Lambda function's `ADMIN_TOKEN` environment variable.
 
 ### Theme Customization
 
@@ -209,7 +264,7 @@ Blog posts (stored as JSON) have the following structure:
 
 ## Admin Panel
 
-Access at `/admin/index.html` (no authentication required in dev; implement as needed for production).
+Access at `/admin/index.html` — redirects to `/cgi-bin/login.cgi` if not authenticated.
 
 **Features:**
 - Create and edit blog posts
@@ -218,14 +273,23 @@ Access at `/admin/index.html` (no authentication required in dev; implement as n
 - Delete posts
 - WIP placeholder posts (shown on public listing with "Coming soon" label)
 
-The admin panel uses the following API endpoints:
+**Login flow:**
+
+1. Visit `/admin/` → redirected to `/cgi-bin/login.cgi`
+2. Enter admin password
+3. On success, `admin_session` cookie is set (contains SHA-256 hash)
+4. Cookie persists; logout via `/cgi-bin/logout.cgi`
+
+The admin panel uses the following API endpoints (all session-protected):
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/admin/api/save.cgi` | Save draft post |
-| POST | `/admin/api/publish.cgi` | Toggle published state |
-| POST | `/admin/api/delete.cgi` | Delete post |
-| GET | `/admin/api/posts.cgi` | List all posts (including drafts) |
+| GET/POST | `/cgi-bin/login.cgi` | Login form and credential validation |
+| GET | `/cgi-bin/logout.cgi` | Clear session cookie |
+| POST | `/cgi-bin/save.cgi` | Save draft post |
+| POST | `/cgi-bin/publish.cgi` | Toggle published state |
+| POST | `/cgi-bin/delete.cgi` | Delete post |
+| GET | `/cgi-bin/posts.cgi` | List all posts (including drafts) |
 
 ## Navigation
 
@@ -256,14 +320,21 @@ The nav uses `data-page` and `data-basepath` attributes on `<body>` for routing:
 |--------|------|-------------|
 | GET | `/config.cgi` | Returns `{postsUrl, storage}` |
 
-### Admin (write operations)
+### Admin Authentication
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/admin/api/save.cgi` | Save/update post |
-| POST | `/admin/api/publish.cgi` | Toggle published state |
-| POST | `/admin/api/delete.cgi` | Delete post |
-| GET | `/admin/api/posts.cgi` | List all posts |
+| GET/POST | `/cgi-bin/login.cgi` | Login form and credential validation |
+| GET | `/cgi-bin/logout.cgi` | Clear session cookie and redirect |
+
+### Admin (protected by session cookie)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/cgi-bin/save.cgi` | Save/update post |
+| POST | `/cgi-bin/publish.cgi` | Toggle published state |
+| POST | `/cgi-bin/delete.cgi` | Delete post |
+| GET | `/cgi-bin/posts.cgi` | List all posts (including drafts) |
 
 ## Browser Support
 
@@ -277,8 +348,9 @@ The nav uses `data-page` and `data-basepath` attributes on `<body>` for routing:
 - **`dev.sh`** — Start containerised dev server with hot-reload (`localhost:8888`)
 - **`docker-entrypoint.sh`** — Container startup logic; handles S3 sync and cache initialization
 - **`sync-posts.sh`** — Bidirectional sync between S3 and local cache (production only)
-- **`scripts/aws-setup.sh`** — Helper to configure AWS credentials for S3 access
-- **`scripts/generate-credentials.sh`** — Generate `.credentials` file for httpd config
+- **`scripts/deploy-lambda.sh`** — Build, push to ECR, and update the Lambda function
+- **`scripts/generate-credentials.sh`** — Generate and apply `ADMIN_TOKEN` to Lambda
+- **`scripts/aws-setup.sh`** — Helper to configure AWS IAM, S3, and CloudFront for blog deployment
 
 ## Development
 
@@ -308,32 +380,92 @@ To add a new theme, define a `[data-theme="themename"]` selector in `style.css` 
 
 ## Deployment Notes
 
-### AWS S3 Setup
+### AWS Lambda Setup
 
-For production S3 deployment, you'll need:
-1. An S3 bucket (or Access Point) with appropriate permissions
-2. AWS credentials with `s3:GetObject`, `s3:PutObject`, `s3:DeleteObject` permissions
-3. `CORS` policy configured if serving from a different domain
+**Prerequisites:**
 
-Use the helper scripts:
+1. AWS Account with Lambda and ECR access
+2. IAM role or user with permissions to:
+   - Create/update Lambda functions
+   - Push to ECR
+   - Get/put objects in S3 (via access point or bucket)
+
+**Required environment variables on the Lambda function:**
+
+- `STORAGE=s3`
+- `AWS_REGION` — e.g. `us-east-1`
+- `AWS_ACCESS_KEY_ID` — IAM credentials
+- `AWS_SECRET_ACCESS_KEY` — IAM credentials
+- `AWS_BUCKET` or `AWS_ACCESS_POINT_ARN` — S3 target
+- `ADMIN_TOKEN` — SHA-256 hash of admin password
+
+**Deploying:**
 
 ```bash
-./scripts/aws-setup.sh      # Configure AWS region and bucket
-./scripts/generate-credentials.sh  # Create .credentials file
+# 1. Generate and apply the admin token
+./scripts/generate-credentials.sh --apply --function personalSite
+
+# 2. Configure S3 IAM and bucket policies
+./scripts/aws-setup.sh --account-id 123456789012 \
+                        --bucket my-bucket \
+                        --principal arn:aws:iam::123456789012:role/personalsite-lambda \
+                        --create-role --bucket-policy
+
+# 3. Build and deploy the container to Lambda
+./scripts/deploy-lambda.sh --account-id 123456789012 --region us-east-1
 ```
 
-### Docker Image Security
+### S3 Access Point (Recommended)
 
-- The prod image (`Dockerfile`) requires AWS credentials at runtime
-- Credentials are **not** baked into the image
-- Use Docker secrets or environment variable injection (e.g., via `.env` file or secrets manager)
+For production, use S3 Access Points to enforce private bucket access:
+
+```bash
+./scripts/aws-setup.sh --account-id 123456789012 \
+                        --bucket my-bucket \
+                        --principal arn:aws:iam::123456789012:role/personalsite-lambda \
+                        --access-point my-ap \
+                        --bucket-policy
+```
+
+This:
+1. Creates/updates IAM policies scoped to `blog/posts/*`
+2. Applies access point resource policy
+3. Denies all direct bucket access (forces access point route)
+
+### CloudFront Video Delivery (Optional)
+
+To serve video files (`videos/*`) via CloudFront with Origin Access Control:
+
+```bash
+./scripts/aws-setup.sh --account-id 123456789012 \
+                        --bucket my-bucket \
+                        --principal arn:aws:iam::123456789012:role/personalsite-lambda \
+                        --access-point my-ap \
+                        --bucket-policy \
+                        --cf-dist-id EXXXXXXXXXX \
+                        --cf-video-policy \
+                        --cf-s3-origin
+```
+
+Options:
+- `--cf-video-policy` — Grant CloudFront OAC read access to `videos/*`
+- `--cf-s3-origin` — Add S3 origin and `videos/*` cache behavior to the distribution
+- `--oac-id` — Override OAC lookup (optional)
+
+### Image Security
+
+- The container image (`Dockerfile`) does **not** contain AWS credentials
+- Credentials are injected at runtime via Lambda environment variables
+- Never commit `.credentials` or sensitive data to version control
 
 ### Cache Invalidation
 
-Blog posts are served from a local cache (`/blog/posts/`) to avoid repeated S3 calls. The cache is synced on container startup. If you need to force a resync:
+Blog posts are served from a local cache (`/blog/posts/`) to avoid repeated S3 calls. The cache is synced on container startup and periodically during operation.
+
+To force a manual resync inside the container:
 
 ```bash
-/usr/local/bin/sync-posts.sh  # Inside the container
+/usr/local/bin/sync-posts.sh
 ```
 
 ## Troubleshooting
@@ -375,10 +507,17 @@ podman logs personalsite-minio
 
 ### Admin panel not saving posts
 
-1. Verify CGI scripts are executable: `ls -la admin/api/`
-2. Check browser console for POST errors
-3. In local mode, verify localStorage is enabled
+1. Verify session is authenticated: check browser DevTools for `admin_session` cookie
+2. Verify CGI scripts are executable: `ls -la admin/cgi-bin/`
+3. Check browser console for POST errors
 4. In S3 mode, verify AWS credentials and bucket permissions
+
+### Admin login not working
+
+1. Verify `ADMIN_TOKEN` environment variable is set correctly
+2. In dev, check `dev.sh` sets `ADMIN_TOKEN` (default: SHA-256 of "Password123")
+3. For Lambda, verify `ADMIN_TOKEN` is set via `generate-credentials.sh --apply`
+4. Check CGI logs: `podman logs <container-id>`
 
 ## License
 

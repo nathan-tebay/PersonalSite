@@ -75,7 +75,7 @@
 
         (async function init() {
           try {
-            const r = await fetch("/blog/posts/manifest.json");
+            const r = await fetch("/blog/posts/manifest.json?v=" + Date.now());
             renderPosts(r.ok ? await r.json() : []);
           } catch (_) {
             listEl.innerHTML = '<p class="blog-empty">Could not load posts.</p>';

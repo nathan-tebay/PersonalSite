@@ -119,8 +119,9 @@
 
   // Top-level links
   [
-    { label: "Home",    href: basePath + "index.html", id: "home" },
-    { label: "Blog",    href: basePath + "blog.html",  id: "blog" },
+    { label: "Home",    href: basePath + "index.html",  id: "home" },
+    { label: "Blog",    href: basePath + "blog.html",   id: "blog" },
+    { label: "Links",   href: basePath + "links.html",  id: "links" },
     { label: "Contact", href: "mailto:nathan@tebay.dev", id: "" },
   ].forEach(({ label, href, id }) => {
     const listItem = document.createElement("li");

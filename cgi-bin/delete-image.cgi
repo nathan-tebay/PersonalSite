@@ -1,9 +1,10 @@
 #!/bin/sh
+. /var/www/html/cgi-bin/session.sh
 # CGI: delete an image from a blog post's directory.
 # POST fields: slug, filename
 # Returns: {"ok":true}
 
-. /var/www/html/admin/cgi-bin/storage.sh
+. /var/www/html/cgi-bin/storage.sh
 
 TMP_DIR="/tmp/blog-$$"
 mkdir -p "$TMP_DIR"

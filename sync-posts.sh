@@ -1,21 +1,16 @@
 #!/bin/sh
 # Sync blog posts from S3 to the local cache directory.
-# Uses mc diff to check whether anything has changed before downloading.
-# Exits silently (exit 0) if no changes are detected.
+# Uses aws s3 sync to pull any changes from S3 to LOCAL_DIR.
 
-. /var/www/html/admin/cgi-bin/storage.sh   # sets MC_PREFIX, LOCAL_DIR
+. /var/www/html/cgi-bin/storage.sh   # sets S3_PREFIX, LOCAL_DIR, _aws_endpoint_arg
 
 [ "$STORAGE" != "s3" ] && exit 0
 
 mkdir -p "$LOCAL_DIR"
 
-# ── Check for changes ─────────────────────────────────────────────────────────
-if ! mc diff "$MC_PREFIX/" "$LOCAL_DIR/" 2>/dev/null | grep -q .; then
-  exit 0  # nothing changed
-fi
-
-# ── Sync ─────────────────────────────────────────────────────────────────────
-echo "[sync] Changes detected; syncing..."
-mc mirror --overwrite --remove "$MC_PREFIX/" "$LOCAL_DIR/" >/dev/null 2>&1 \
+echo "[sync] Syncing from S3..."
+aws s3 sync "${S3_PREFIX}/" "$LOCAL_DIR/" \
+  --region "${AWS_REGION:-us-east-1}" \
+  ${_aws_endpoint_arg} 2>&1 \
   && echo "[sync] Sync complete." \
   || echo "[sync] Sync failed."

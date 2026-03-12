@@ -1,10 +1,11 @@
 #!/bin/sh
+. /var/www/html/cgi-bin/session.sh
 # CGI: upload an image for a blog post.
 # POST fields: slug, filename, image_b64 (base64-encoded image data)
 # Stores to blogs/<slug>/<filename> and caches locally.
 # Returns: {"ok":true,"url":"/blog/posts/<slug>/<filename>"}
 
-. /var/www/html/admin/cgi-bin/storage.sh
+. /var/www/html/cgi-bin/storage.sh
 
 TMP_DIR="/tmp/blog-$$"
 mkdir -p "$TMP_DIR"

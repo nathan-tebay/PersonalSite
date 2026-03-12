@@ -171,3 +171,47 @@ if (swatchContainer) {
 }
 
 applyTheme(savedHex);
+
+// ── Shared video modal ────────────────────────────────────────────────
+(function () {
+  var modal = document.createElement("div");
+  modal.className = "video-modal";
+  modal.hidden = true;
+  modal.innerHTML =
+    '<div class="video-modal__backdrop"></div>' +
+    '<div class="video-modal__box">' +
+      '<button class="video-modal__close" aria-label="Close">&#x2715;</button>' +
+      '<video class="video-modal__video" playsinline controls></video>' +
+      '<p class="video-modal__caption"></p>' +
+    "</div>";
+  document.body.appendChild(modal);
+
+  var video = modal.querySelector(".video-modal__video");
+  var caption = modal.querySelector(".video-modal__caption");
+
+  function openModal(src, label) {
+    video.src = src;
+    caption.textContent = label || "";
+    modal.hidden = false;
+    video.play();
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    video.pause();
+    video.src = "";
+  }
+
+  modal.querySelector(".video-modal__backdrop").addEventListener("click", closeModal);
+  modal.querySelector(".video-modal__close").addEventListener("click", closeModal);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) closeModal();
+  });
+
+  document.addEventListener("click", function (e) {
+    var trigger = e.target.closest("[data-video-src]");
+    if (!trigger) return;
+    openModal(trigger.dataset.videoSrc, trigger.dataset.videoCaption || "");
+  });
+})();

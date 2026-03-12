@@ -1,0 +1,115 @@
+Blog Post Saving — Problem Synopsis
+====================================
+Date: 2026-03-11
+
+
+## The Problem
+
+Blog posts saved via the admin UI were not persisting across Lambda cold starts
+and were not appearing on the public blog page. The admin panel also showed no
+posts after saving.
+
+
+## Root Causes (in order of discovery)
+
+### 1. Lambda read-only filesystem
+Lambda container images are mounted read-only at runtime. Only /tmp is writable.
+The CGI scripts were trying to write blog posts to /var/www/html/blog/posts/,
+which is part of the image filesystem and therefore read-only.
+
+Error seen:
+  mkdir: can't create directory '/var/www/html/blog/posts/slug': Read-only file system
+
+Attempts:
+- Created a symlink in the Dockerfile (before COPY): overwritten by COPY step.
+- Added rm/ln in docker-entrypoint.sh at runtime: rm -rf fails because
+  /var/www/html itself is read-only, so the symlink was never created.
+- Changed LOCAL_DIR in storage.sh to /tmp/blog/posts: files were written to /tmp
+  but httpd still served from /var/www/html, so saved posts were invisible to the browser.
+
+User input:
+- Pointed out that httpd is the blocker and asked if a different server would
+  allow blog/links pages to be served from /tmp with the main site in a base dir,
+  while keeping things as lightweight as possible.
+
+Final fix:
+- At container startup (docker-entrypoint.sh), copy the entire web root to /tmp/www
+  with `cp -a /var/www/html/. /tmp/www/`. httpd now serves from /tmp/www, which is
+  fully writable. LOCAL_DIR set to /tmp/www/blog/posts.
+
+
+### 2. Stale path in sync-posts.sh
+sync-posts.sh still sourced /var/www/html/admin/cgi-bin/storage.sh after the
+CGI scripts were moved from admin/cgi-bin/ to cgi-bin/. The source failed
+silently, so the S3 sync never ran on cold start.
+
+Fix: updated the source path to /var/www/html/cgi-bin/storage.sh.
+
+
+### 3. links.json written to the wrong path
+docker-entrypoint.sh copied links.json from S3 to /var/www/html/links.json.
+links.cgi read/wrote /var/www/html/links.json. After the web root moved to
+/tmp/www, neither path was served by httpd.
+
+User input:
+- Reported that link saves were not being retained on reload and asked for S3
+  sync to be added for links.
+
+Fix: updated both docker-entrypoint.sh and links.cgi to use /tmp/www/links.json.
+
+
+### 4. mc not uploading to S3 — missing session token
+All mc cp calls in CGI scripts were silently failing. The saves returned ok:true
+because storage_put did not check mc's exit code, and the local cache write
+succeeded even when the S3 upload failed. S3 remained empty throughout.
+
+Investigation:
+- Added stderr debug logging to storage_put and storage.sh.
+- User reported no CloudWatch logs initially; after the debug deploy, logs appeared.
+- Confirmed S3 was completely empty (aws s3 ls showed only zero-byte placeholder
+  directory objects, no actual content).
+
+Attempts:
+- Used mc alias set with MC_CONFIG_DIR=/tmp/.mc: mc config file not reliably
+  visible in CGI subprocess context.
+- Used MC_HOST_s3r environment variable (URL-embedded credentials): does not
+  support AWS_SESSION_TOKEN, which Lambda requires for its temporary IAM role
+  credentials.
+
+CloudWatch error that identified the root cause:
+  mc: <ERROR> Failed to copy `/tmp/blog-84/post.html`.
+  The AWS Access Key Id you provided does not exist in our records.
+
+Lambda uses temporary STS credentials (from its IAM execution role). These
+credentials include AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and
+AWS_SESSION_TOKEN. Without the session token, S3 rejects the access key as
+invalid. The MC_HOST URL format has no field for a session token.
+
+Fix: switched back to `mc alias set` with the `--session-token` flag:
+  mc alias set s3r "$_endpoint" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" \
+    --api S3v4 ${AWS_SESSION_TOKEN:+--session-token "$AWS_SESSION_TOKEN"}
+This is done in storage.sh (for every CGI invocation) and in docker-entrypoint.sh
+(for the startup sync). MC_CONFIG_DIR=/tmp/.mc ensures mc can write its config.
+
+
+## Files Changed
+
+- docker-entrypoint.sh   — cp web root to /tmp/www; mc session token; links.json path
+- cgi-bin/storage.sh     — LOCAL_DIR=/tmp/www/blog/posts; mc alias with session token;
+                           storage_put error checking and debug logging
+- cgi-bin/links.cgi      — LOCAL_FILE=/tmp/www/links.json
+- sync-posts.sh          — fixed source path to cgi-bin/storage.sh
+- Dockerfile             — CMD serves from /tmp/www
+- Dockerfile.dev         — CMD serves from /tmp/www
+
+
+## Key Lessons
+
+- Lambda container images are read-only at runtime; /tmp is the only writable path.
+- Copying the web root to /tmp at startup is the simplest way to get a writable
+  document root without changing the HTTP server.
+- Lambda's IAM role credentials are temporary STS tokens. Any tool that signs AWS
+  requests must receive the session token, not just the key ID and secret.
+- Silently discarding mc error output (>/dev/null 2>&1) masked failures for the
+  entire debugging session. Error propagation in storage_put was essential to
+  diagnosing the real cause.

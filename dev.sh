@@ -6,6 +6,7 @@ MINIO=personalsite-minio
 SITE=personalsite
 MINIO_USER=minioadmin
 MINIO_PASS=minioadmin
+ADMIN_TOKEN=008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601  # Password123
 BUCKET=ntebay-personal-site
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -55,13 +56,13 @@ podman run -d \
   --name "$SITE" \
   --network "$NETWORK" \
   -p 8888:8888 \
-  -e STORAGE=s3 \
+  -e STORAGE=local \
   -e AWS_ACCESS_KEY_ID="$MINIO_USER" \
   -e AWS_SECRET_ACCESS_KEY="$MINIO_PASS" \
   -e AWS_BUCKET="$BUCKET" \
   -e AWS_REGION=us-east-1 \
   -e MINIO_ENDPOINT="http://$MINIO:9000" \
-  -v "$SCRIPT_DIR:/var/www/html:Z" \
+  -e ADMIN_TOKEN="$ADMIN_TOKEN" \
   personalsite-dev
 
 printf '\n'

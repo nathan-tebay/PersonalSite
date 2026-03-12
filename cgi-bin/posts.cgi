@@ -1,8 +1,9 @@
 #!/bin/sh
+. /var/www/html/cgi-bin/session.sh
 # CGI: return manifest-all.json (all posts including drafts) for the admin UI.
-# Protected by /admin/cgi-bin/.htpasswd — not directly accessible without credentials.
 
-. /var/www/html/admin/cgi-bin/storage.sh
+
+. /var/www/html/cgi-bin/storage.sh
 
 TMP_DIR="/tmp/blog-$$"
 mkdir -p "$TMP_DIR"

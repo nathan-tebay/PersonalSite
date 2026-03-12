@@ -1,10 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache busybox-extras && \
-    ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') && \
-    wget -qO /usr/local/bin/mc \
-      "https://dl.min.io/client/mc/release/linux-${ARCH}/mc" && \
-    chmod +x /usr/local/bin/mc
+RUN apk add --no-cache busybox-extras aws-cli
 
 RUN mkdir -p /var/www/html /var/www/html/blog/posts
 COPY . /var/www/html/
@@ -16,17 +12,10 @@ RUN cp /var/www/html/docker-entrypoint.sh /usr/local/bin/entrypoint.sh && \
       /usr/local/bin/entrypoint.sh \
       /usr/local/bin/sync-posts.sh \
       /var/www/html/config.cgi \
-      /var/www/html/admin/cgi-bin/save.cgi \
-      /var/www/html/admin/cgi-bin/delete.cgi \
-      /var/www/html/admin/cgi-bin/publish.cgi \
-      /var/www/html/admin/cgi-bin/posts.cgi \
-      /var/www/html/admin/cgi-bin/upload.cgi \
-      /var/www/html/admin/cgi-bin/images.cgi \
-      /var/www/html/admin/cgi-bin/delete-image.cgi
+      /var/www/html/cgi-bin/*.cgi \
+      /var/www/html/cgi-bin/*.sh
 
-
-COPY .credentials /etc/httpd.conf
-RUN printf '.webp:image/webp\n.mp4:video/mp4\n' >> /etc/httpd.conf
+RUN printf '.webp:image/webp\n.mp4:video/mp4\n' > /etc/httpd.conf
 
 EXPOSE 8080
 
@@ -38,7 +27,12 @@ EXPOSE 8080
 # Required env var for the S3 target:
 #   AWS_BUCKET            — plain bucket name (e.g. my-bucket)
 #
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.4 /lambda-adapter /opt/extensions/lambda-adapter
+
 ENV STORAGE=s3
+ENV PORT=8080
+# Give the entrypoint time to fetch index files before accepting requests
+ENV AWS_LWA_READINESS_CHECK_TIMEOUT=15
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["httpd", "-f", "-p", "8080", "-h", "/var/www/html", "-c", "/etc/httpd.conf"]
+CMD ["httpd", "-f", "-p", "8080", "-h", "/tmp/www", "-c", "/etc/httpd.conf"]

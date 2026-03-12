@@ -86,7 +86,8 @@
               <div class="render-center">
                 <button
                   class="render-open-btn render-open-btn--lg"
-                  id="arProtoBtn">
+                  data-video-src="/videos/autorejection-prototype.mp4"
+                  data-video-caption="First prototype in action">
                   See Prototype
                 </button>
               </div>
@@ -169,49 +170,7 @@
       </div>
     </div>
 
-    <div class="video-modal" id="arProtoModal" hidden>
-      <div class="video-modal__backdrop" id="arProtoBackdrop"></div>
-      <div class="video-modal__box">
-        <button class="video-modal__close" id="arProtoClose">&#x2715;</button>
-        <video
-          class="video-modal__video"
-          id="arProtoVideo"
-          src="../assets/images/first-prototype.mp4"
-          playsinline
-          controls></video>
-        <p class="video-modal__caption">First prototype in action</p>
-      </div>
-    </div>
-
     <script src="../assets/layout.js"></script>
     <script src="../assets/script.js"></script>
-    <script>
-      (function () {
-        var modal = document.getElementById("arProtoModal");
-        var video = document.getElementById("arProtoVideo");
-        var openBtn = document.getElementById("arProtoBtn");
-        var closeBtn = document.getElementById("arProtoClose");
-        var backdrop = document.getElementById("arProtoBackdrop");
-        if (!modal) return;
-
-        function openModal() {
-          modal.hidden = false;
-          video.play();
-        }
-
-        function closeModal() {
-          modal.hidden = true;
-          video.pause();
-          video.currentTime = 0;
-        }
-
-        openBtn.addEventListener("click", openModal);
-        closeBtn.addEventListener("click", closeModal);
-        backdrop.addEventListener("click", closeModal);
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape") closeModal();
-        });
-      })();
-    </script>
   </body>
 </html>

@@ -38,14 +38,17 @@
               <h3>Overview</h3>
               <p>
                 A hand-rolled personal site with no frameworks or build tools.
-                Layout, theming, navigation, and blog functionality are all
-                implemented in plain HTML, CSS, and vanilla JavaScript.
+                Layout, theming, navigation, blog, and links are all implemented
+                in plain HTML, CSS, and vanilla JavaScript served by a
+                containerised BusyBox httpd instance.
               </p>
               <p>
+                Blog posts and links are stored in an S3-compatible object store
+                (AWS S3 in production, MinIO locally) and managed through a
+                password-protected admin panel backed by POSIX shell CGI scripts.
                 The nav panel is generated dynamically by a shared
                 <code>layout.js</code> script injected on every page, keeping
-                navigation consistent without a build step. A theme picker
-                persists the selected colour scheme via localStorage.
+                navigation consistent without a build step.
               </p>
             </div>
 
@@ -55,14 +58,47 @@
                 <span class="tag">HTML5</span>
                 <span class="tag">CSS3</span>
                 <span class="tag">Vanilla JS</span>
+                <span class="tag">Shell / CGI</span>
+                <span class="tag">BusyBox httpd</span>
+                <span class="tag">S3 / MinIO</span>
                 <span class="tag">Podman</span>
               </div>
             </div>
 
             <div class="project-section">
+              <h3>Key Features</h3>
+              <ul>
+                <li>Dynamic nav and header injected via a shared layout script — no build step</li>
+                <li>Multi-theme colour picker with WCAG-derived text contrast, persisted to localStorage</li>
+                <li>Blog system: draft/publish workflow, WIP placeholder cards, per-post image uploads</li>
+                <li>Categorised links page, admin-editable via a JSON file in the object store</li>
+                <li>Password-protected admin panel with blog editor and links editor tabs</li>
+                <li>All dynamic content backed by POSIX shell CGI scripts — no Node, no PHP, no runtime</li>
+                <li>S3-compatible storage with atomic local cache mirror for zero-latency reads</li>
+                <li>Mobile-responsive layout with hamburger nav drawer</li>
+              </ul>
+            </div>
+
+            <div class="project-section">
               <h3>Challenges</h3>
               <ul>
-                <li></li>
+                <li>
+                  BusyBox httpd v1.37 only executes CGI from URLs with
+                  <code>/cgi-bin/</code> as the first path component — scripts
+                  at nested paths like <code>/admin/cgi-bin/</code> are served
+                  as static text. Solved with a root-level symlink.
+                </li>
+                <li>
+                  <code>mc ls</code> returns exit 0 when <em>any</em> object
+                  exists under a bucket prefix, not just the specific key queried
+                  — causing every post to appear published on first save. Replaced
+                  the S3 existence check with a local filesystem check against the
+                  always-in-sync cache.
+                </li>
+                <li>
+                  Keeping a manifest JSON file consistent across concurrent saves
+                  using only POSIX shell — no locking primitives, no jq.
+                </li>
               </ul>
             </div>
 
@@ -70,17 +106,6 @@
               <h3>Learnings</h3>
               <ul>
                 <li></li>
-              </ul>
-            </div>
-
-            <div class="project-section">
-              <h3>Key Features</h3>
-              <ul>
-                <li>Dynamic nav and header injected via a shared layout script</li>
-                <li>Multi-theme colour picker persisted to localStorage</li>
-                <li>Blog with localStorage-backed post storage and admin panel</li>
-                <li>Mobile-responsive layout with hamburger nav drawer</li>
-                <li>No build step — deploy by copying static files</li>
               </ul>
             </div>
           </div>
