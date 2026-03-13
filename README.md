@@ -1,6 +1,6 @@
 # Tebay.dev — Personal Portfolio Site
 
-A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—no frameworks, no build step. Features a dynamic navigation system, multi-theme colour picker, a blog with localStorage-backed storage and admin panel, and containerised deployment options.
+A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—no frameworks, no build step. Features a dynamic navigation system, multi-theme colour picker, a blog and links system with S3-backed storage, admin panel, and containerised deployment options.
 
 **Live site:** https://tebay.dev
 
@@ -14,6 +14,10 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
   - Admin panel at `/admin/` for creating, editing, and publishing posts
   - Public blog listing at `/blog.html` with post detail pages
   - WIP (work-in-progress) placeholder posts support
+- **Links system**
+  - Public links page at `/links.html` with categorized bookmarks
+  - Admin panel for managing link categories and cards
+  - S3-backed storage with cold-start reliability
 - **Project portfolio** — Dedicated project pages in `projects/` subdirectory:
   - DBFirstDataGrid
   - AutoRejection
@@ -46,19 +50,27 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
 │   └── personalsite.html      # This project
 │
 ├── admin/
-│   ├── index.html             # Admin panel (protected by session auth)
-│   └── cgi-bin/
-│       ├── login.cgi          # Login form and credential validation
-│       ├── logout.cgi         # Logout and clear session cookie
-│       ├── save.cgi           # Save draft post (session-protected)
-│       ├── delete.cgi         # Delete post (session-protected)
-│       ├── publish.cgi        # Publish/unpublish post (session-protected)
-│       ├── posts.cgi          # List all posts (session-protected)
-│       ├── session.sh         # Session auth enforcement (sourced by CGI scripts)
-│       └── storage.sh         # Storage backend helper
+│   └── index.html             # Admin panel (protected by session auth; tabs: Blog, Links)
+│
+├── cgi-bin/
+│   ├── login.cgi              # Login form and credential validation
+│   ├── logout.cgi             # Logout and clear session cookie
+│   ├── save.cgi               # Save draft post (session-protected)
+│   ├── delete.cgi             # Delete post (session-protected)
+│   ├── publish.cgi            # Publish/unpublish post (session-protected)
+│   ├── posts.cgi              # List all posts (session-protected)
+│   ├── links.cgi              # Load/save links.json (session-protected)
+│   ├── upload.cgi             # Upload images (session-protected)
+│   ├── images.cgi             # List uploaded images (session-protected)
+│   ├── delete-image.cgi       # Delete image (session-protected)
+│   ├── session.sh             # Session auth enforcement (sourced by CGI scripts)
+│   └── storage.sh             # Storage backend helper
 │
 ├── blog/
 │   └── posts/                 # Post files (created at runtime)
+│
+├── links.html                 # Public links/bookmarks page
+├── links.json                 # Links data file (categories and link cards)
 │
 ├── dev.sh                     # Start dev containers (site + MinIO S3)
 ├── Dockerfile                 # Prod image (Lambda, S3 storage, AWS Lambda Web Adapter)
@@ -104,7 +116,7 @@ Both containers run in the background (detached) and are non-blocking.
 
 **Admin authentication:**
 
-The site uses cookie-based session authentication:
+The site uses cookie-based session authentication (located at root `/cgi-bin/`, not under `/admin/`):
 - `/cgi-bin/login.cgi` — Login form and credential validation
 - `/cgi-bin/logout.cgi` — Clears session cookie
 - Session token is SHA-256(password), passed in `admin_session` cookie
@@ -163,8 +175,10 @@ AWS_ACCESS_POINT_ARN=arn:aws:s3:us-east-1:123456789012:accesspoint/my-ap
 **Container behavior:**
 
 - Listens on port 8080 (inside Lambda, port is abstracted via Lambda Web Adapter)
-- Syncs posts between S3 and a local cache (`/var/www/html/blog/posts/`) on startup and periodically
-- Serves all blog posts from the local cache (never directly from S3)
+- Web root is copied to `/tmp/www` at startup; httpd serves from `/tmp/www`
+- Blog posts are cached locally at `/tmp/www/blog/posts` and synced from S3 on startup
+- `links.json` is fetched from S3 to `/tmp/www/links.json` on cold start (if missing)
+- All content is served from the local cache (never directly from S3)
 - Requires `STORAGE=s3` environment variable (set by default in `Dockerfile`)
 
 ## Configuration
@@ -207,33 +221,12 @@ This automatically updates the Lambda function's `ADMIN_TOKEN` environment varia
 
 ### Theme Customization
 
-Colours are defined in `assets/style.css` as CSS custom properties:
+The site features six curated colour swatches (dark tones) accessible via swatch buttons in the navigation. The theme picker (injected by `layout.js`) persists the selection to localStorage under the key `tebay_theme`.
 
-```css
-:root {
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #2d2d2d;
-  --text-high: #ffffff;
-  --text-mid: #b3b3b3;
-  --text-low: #808080;
-  --divider: #404040;
-  --accent: #6366f1;
-  /* ... more colours ... */
-}
+CSS custom properties are dynamically computed from the selected swatch:
+- `--text-high`, `--text-mid`, `--text-low`, `--text-link`, `--divider`, `--hover-bg` are calculated based on the swatch's relative luminance for optimal contrast
 
-[data-theme="light"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f5;
-  --text-high: #1a1a1a;
-  --text-mid: #4d4d4d;
-  --text-low: #808080;
-  --divider: #e0e0e0;
-  --accent: #4f46e5;
-  /* ... more colours ... */
-}
-```
-
-The theme picker in the navigation (injected by `layout.js`) cycles through available themes and saves the selection to localStorage under the key `tebay_theme`.
+See `CLAUDE.md` for details on the colour computation algorithm.
 
 ### Blog Post Schema
 
@@ -260,17 +253,17 @@ Blog posts (stored as JSON) have the following structure:
 - `published` — Whether the post is visible to the public
 - `wip` — Work-in-progress flag; shows as "Coming soon" on public listing
 
-**Local storage key:** `tebay_blog_posts` (JSON array)
-
 ## Admin Panel
 
 Access at `/admin/index.html` — redirects to `/cgi-bin/login.cgi` if not authenticated.
 
 **Features:**
-- Create and edit blog posts
-- Preview posts before publishing
-- Toggle publish/draft status
-- Delete posts
+- **Blog tab** — Create, edit, publish, and delete blog posts with preview
+- **Links tab** — Manage categorized links:
+  - Add/rename/delete/reorder categories (with ▲/▼ buttons)
+  - Add link cards with title, URL, and multi-line description
+  - New links appear at the top of the list
+  - Save posts and links with session-protected endpoints
 - WIP placeholder posts (shown on public listing with "Coming soon" label)
 
 **Login flow:**
@@ -284,12 +277,15 @@ The admin panel uses the following API endpoints (all session-protected):
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET/POST | `/cgi-bin/login.cgi` | Login form and credential validation |
-| GET | `/cgi-bin/logout.cgi` | Clear session cookie |
 | POST | `/cgi-bin/save.cgi` | Save draft post |
 | POST | `/cgi-bin/publish.cgi` | Toggle published state |
 | POST | `/cgi-bin/delete.cgi` | Delete post |
 | GET | `/cgi-bin/posts.cgi` | List all posts (including drafts) |
+| GET | `/cgi-bin/links.cgi` | Load links data (categories and cards) |
+| POST | `/cgi-bin/links.cgi` | Save links data to storage |
+| POST | `/cgi-bin/upload.cgi` | Upload images |
+| GET | `/cgi-bin/images.cgi` | List uploaded images |
+| POST | `/cgi-bin/delete-image.cgi` | Delete image |
 
 ## Navigation
 
@@ -505,12 +501,13 @@ podman logs personalsite-minio
 2. Verify `tebay_theme` key in browser DevTools → Application → Local Storage
 3. Try clearing cache and reloading
 
-### Admin panel not saving posts
+### Admin panel not saving posts or links
 
 1. Verify session is authenticated: check browser DevTools for `admin_session` cookie
-2. Verify CGI scripts are executable: `ls -la admin/cgi-bin/`
+2. Verify CGI scripts are executable: `ls -la cgi-bin/`
 3. Check browser console for POST errors
 4. In S3 mode, verify AWS credentials and bucket permissions
+5. If saving links returns "s3 upload failed": check AWS credentials, bucket permissions, and IAM role. Note that changes revert on container restart if S3 upload fails
 
 ### Admin login not working
 

@@ -82,11 +82,6 @@
       "Projects",
       [
         {
-          label: "DBFirstDataGrid",
-          href: basePath + "projects/dbfirstgrid.html",
-          id: "dbfirstgrid",
-        },
-        {
           label: "AutoRejection",
           href: basePath + "projects/autorejection.html",
           id: "autorejection",

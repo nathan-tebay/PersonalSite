@@ -20,13 +20,15 @@
                 push-to-talk
               </p>
             </div>
-            <a
-              href="https://github.com/nathan-tebay/MicrophoneController"
-              class="github-link"
-              target="_blank"
-              rel="noopener">
-              View on GitHub
-            </a>
+            <div class="header-actions">
+              <a
+                href="https://github.com/nathan-tebay/MicrophoneController"
+                class="github-link"
+                target="_blank"
+                rel="noopener">
+                View on GitHub
+              </a>
+            </div>
           </div>
 
           <div class="renders-row renders-row--2">
@@ -55,42 +57,27 @@
           <div class="divider"></div>
 
           <div class="project-body">
-            <div class="project-section project-section--stack">
-              <h3>Problem</h3>
+            <div class="project-section project-section--overview">
+              <h3>Overview</h3>
               <p>
                 In many games and communication apps, you can control multiple
                 microphone channels, such as team and proximity chat. This
-                controller is intended to solve that problem while also allowing
-                you to push-to-talk or hold-to-talk on multiple channels without
+                controller solves that problem while also allowing you to
+                push-to-talk or toggle-to-talk on multiple channels without
                 guessing if a chat channel is currently active. The mode switch
                 on the bottom lets you use the same hardware for either keyboard
                 or gamepad input, depending on the app's support for each HID
                 type.
               </p>
               <p>
-                I also found this useful for controlling my WhisperTranscription
-                application, as the dual buttons and tap-or-hold functionality
-                are perfect for distinguishing between transcribing my text and
-                issuing commands to an AI model. This is my current setup,
-                though I am considering updating the hotkeys, as this
-                application is far more flexible for using obscure keys or key
-                combinations.
-              </p>
-            </div>
-            <div class="project-section project-section--overview">
-              <h3>Overview</h3>
-              <p>
-                <br />A custom USB device built using the nullbits Bit-C PRO. It
-                has two buttons: one can be tapped to turn on or off, and the
-                other is held down for push-to-talk. A switch changes between
-                acting like a keyboard (Scroll Lock/Pause) and a gamepad
-                (buttons 8-9). LEDs show the current state of each button. The
-                game controller mode is configured directly using the AVR core's
-                HID feature, without additional libraries.
-              </p>
-              <p>
-                The gamepad HID descriptor is implemented directly via the AVR
-                core's HID.h — no third-party joystick library required.
+                I have also found this useful for controlling my
+                WhisperTranscription application, as the dual buttons and
+                tap-or-hold functionality are perfect for distinguishing between
+                transcribing my text and issuing commands to an AI model. I have
+                been happy with this use case, though I am considering changing
+                the hotkeys, possibly making them configurable via the WebUSB
+                protocol. Since this requires an external application, I am
+                looking at hosting it in Lambda alongside this site.
               </p>
             </div>
 
@@ -105,17 +92,20 @@
               </div>
             </div>
 
-            <div class="project-section">
+            <div class="project-section project-section--challenges">
               <h3>Challenges</h3>
               <ul>
-                <li></li>
+                <li>When playing a game with a controller, having this act a keyboard was causing it change the input.</li>
+                <li>I used AI to do this intitial implmentation of hold-or-toggle functionality, I was not working as intended so I wrote that instead.</li>
+
               </ul>
             </div>
 
-            <div class="project-section">
+            <div class="project-section project-section--learnings">
               <h3>Learnings</h3>
               <ul>
-                <li></li>
+                <li>Claude Code had trouble with the hold-or-toggle logic, my rewrite was much simpler as it tried to implement latching logic separately from the hold logic. I implemented a single toggle state which is much easier to read and debug.</li>
+                <li>The dual keyboard and joystick function was interesting in that the device gets two separate USB interfaces when connected. The switch just changes which function send the input, it doesn't reinitialize the device as I originally thought it should.</li>
               </ul>
             </div>
 

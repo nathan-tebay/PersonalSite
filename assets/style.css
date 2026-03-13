@@ -458,6 +458,13 @@ img {
   opacity: 0.72;
 }
 
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .github-link {
   display: inline-flex;
   align-items: center;
@@ -470,22 +477,14 @@ img {
 }
 
 .project-body {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
   margin-top: 1rem;
 }
 
-/* These sections always span the full row */
-.project-section--overview,
-.project-section--stack,
-.project-section--components,
-.project-section--wip {
-  grid-column: 1 / -1;
-}
-
 .project-section h3 {
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -561,6 +560,11 @@ img {
   display: block;
 }
 
+.renders-row--2 .render-card img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
 .render-card .render-label {
   font-size: 0.68rem;
   font-weight: 700;
@@ -585,9 +589,7 @@ img {
 
 .render-open-btn {
   font-size: 0.68rem;
-  font-weight: 700;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
   background: none;
   border-radius: 0.3rem;
   padding: 0.15rem 0.55rem;

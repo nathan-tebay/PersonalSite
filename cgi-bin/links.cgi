@@ -40,10 +40,16 @@ fi
 printf '%s\n' "$POST_DATA" > "$LOCAL_FILE"
 
 if [ "$STORAGE" = "s3" ] && [ -n "${AWS_BUCKET:-}" ]; then
-  aws s3 cp "$LOCAL_FILE" "s3://${AWS_BUCKET}/links.json" \
+  _out=$(aws s3 cp "$LOCAL_FILE" "s3://${AWS_BUCKET}/links.json" \
     --content-type "application/json" \
     --region "${AWS_REGION:-us-east-1}" \
-    ${_aws_endpoint_arg} >/dev/null 2>&1
+    ${_aws_endpoint_arg} 2>&1)
+  _rc=$?
+  echo "[links.cgi] aws s3 cp links.json rc=${_rc} out=${_out}" >&2
+  if [ "$_rc" != "0" ]; then
+    printf '\r\n{"ok":false,"error":"s3 upload failed"}\n'
+    exit 0
+  fi
 fi
 
 printf '\r\n{"ok":true}\n'

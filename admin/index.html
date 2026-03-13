@@ -501,6 +501,26 @@
 
       .cat-row input:focus { border-color: var(--text-link); }
 
+      .cat-move-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+        flex-shrink: 0;
+      }
+
+      .cat-move-btn {
+        background: none;
+        border: none;
+        color: var(--text-low);
+        cursor: pointer;
+        font-size: 0.6rem;
+        line-height: 1;
+        padding: 0 0.15rem;
+        transition: color 0.12s;
+      }
+
+      .cat-move-btn:hover { color: var(--text-high); }
+
       .link-card {
         background: rgba(0, 0, 0, 0.15);
         border: 1px solid var(--divider);
@@ -538,6 +558,12 @@
       }
 
       .link-input:focus { border-color: var(--text-link); }
+
+      textarea.link-input {
+        resize: vertical;
+        min-height: 3.5rem;
+        line-height: 1.4;
+      }
 
       .link-select {
         flex: 1;
@@ -1304,6 +1330,30 @@
           row.className = "cat-row";
           row.dataset.id = id;
 
+          var movebtns = document.createElement("div");
+          movebtns.className = "cat-move-btns";
+
+          var upBtn = document.createElement("button");
+          upBtn.className = "cat-move-btn";
+          upBtn.textContent = "▲";
+          upBtn.title = "Move up";
+          upBtn.addEventListener("click", function () {
+            var prev = row.previousElementSibling;
+            if (prev) catListEl.insertBefore(row, prev);
+          });
+
+          var downBtn = document.createElement("button");
+          downBtn.className = "cat-move-btn";
+          downBtn.textContent = "▼";
+          downBtn.title = "Move down";
+          downBtn.addEventListener("click", function () {
+            var next = row.nextElementSibling;
+            if (next) catListEl.insertBefore(next, row);
+          });
+
+          movebtns.appendChild(upBtn);
+          movebtns.appendChild(downBtn);
+
           var inp = document.createElement("input");
           inp.type = "text";
           inp.value = name;
@@ -1321,6 +1371,7 @@
             row.remove();
           });
 
+          row.appendChild(movebtns);
           row.appendChild(inp);
           row.appendChild(del);
           return row;
@@ -1349,8 +1400,7 @@
           row1.appendChild(titleInp);
           row1.appendChild(urlInp);
 
-          var descInp = document.createElement("input");
-          descInp.type = "text";
+          var descInp = document.createElement("textarea");
           descInp.className = "link-input link-desc";
           descInp.placeholder = "Description (optional)";
           descInp.value = link.desc || "";
@@ -1416,7 +1466,7 @@
         document.getElementById("add-link-btn").addEventListener("click", function () {
           var cats = getCurrentCategories();
           var card = buildLinkCard({ id: linkGenId(), url: "", title: "", desc: "", categoryId: "" }, cats);
-          linksListEl.appendChild(card);
+          linksListEl.prepend(card);
           card.querySelector(".link-title").focus();
         });
 

@@ -20,14 +20,31 @@
                 one button types, the other commands a local or cloud LLM
               </p>
             </div>
-            <a
-              href="https://github.com/nathan-tebay/whisper-transcribe"
-              class="github-link"
-              target="_blank"
-              rel="noopener"
-            >
-              View on GitHub
-            </a>
+            <div class="header-actions">
+              <a
+                href="https://github.com/nathan-tebay/whisper-transcribe"
+                class="github-link"
+                target="_blank"
+                rel="noopener"
+              >
+                View on GitHub
+              </a>
+            </div>
+          </div>
+
+          <div class="renders-row renders-row--2">
+            <div class="render-card">
+              <img
+                src="../assets/images/whisper-transcribe-tray-settings.jpg"
+                alt="WhisperTranscribe — tray settings" />
+              <span class="render-label">Tray Settings</span>
+            </div>
+            <div class="render-card">
+              <img
+                src="../assets/images/whisper-transcribe-tray-advanced-settings.jpg"
+                alt="WhisperTranscribe — tray advanced settings" />
+              <span class="render-label">Advanced Settings</span>
+            </div>
           </div>
 
           <div class="divider"></div>
@@ -60,6 +77,14 @@
                 even with the large-v3 model. A systemd user service handles
                 autostart and restart on failure.
               </p>
+              <p>
+                A GTK3 system tray application provides a persistent icon that
+                reflects the daemon's running state and a settings dialog for
+                configuring the keyboard device, hotkeys, LLM backend (Ollama
+                or Claude), Ollama model, binary paths, audio backend, language,
+                timeouts, and terminal emulator — all without editing config
+                files.
+              </p>
             </div>
 
             <div class="project-section project-section--stack">
@@ -83,14 +108,35 @@
             <div class="project-section">
               <h3>Challenges</h3>
               <ul>
-                <li></li>
+                <li>
+                  Integrating with multiple LLM backends (Ollama and Claude) required careful handling of API differences and error cases.
+                </li>
+                <li>
+                  Achieving low-latency transcription with whisper.cpp on a GPU involved optimizing the audio capture and processing pipeline, as well as fine-tuning the model parameters.
+                </li> 
+                <li>
+                  Implementing a robust keyboard grab with evdev while ensuring the daemon could recover gracefully from errors and maintain system stability was a complex task.
+                </li> 
+                <li>
+                    Building a user-friendly GTK3 system tray application with a comprehensive settings dialog required careful design and testing to ensure a smooth user experience.
               </ul>
             </div>
 
             <div class="project-section">
               <h3>Learnings</h3>
               <ul>
-                <li></li>
+                <li>
+                  Deepened my understanding of audio processing and real-time transcription, particularly with whisper.cpp and GPU acceleration.
+                </li>
+                <li>
+                  Gained experience working with multiple LLM APIs and handling their nuances in a unified application.
+                </li>
+                <li>
+                  Improved my skills in Python system programming, including process management, signal handling, and integration with systemd.
+                </li>
+                <li>
+                  Learned how to build a GTK3 system tray application with D-Bus integration for inter-process communication and dynamic UI updates. This was more difficult than expected as GTK's documentation is notoriously sparse and the StatusNotifierItem protocol is complex, but it was rewarding to see it all come together in a polished user interface. With Linux desktop environments lacking a standard API for system trays, implementing this feature required navigating a maze of compatibility issues and edge cases, but it was worth it to provide users with an intuitive way to control the daemon without needing to interact with the command line.
+                </li>
               </ul>
             </div>
 

@@ -20,16 +20,24 @@
                 custom dashboard UI
               </p>
             </div>
-            <a
-              href="https://github.com/nathan-tebay/AutoRejection"
-              class="github-link"
-              target="_blank"
-              rel="noopener">
-              View on GitHub
-            </a>
+            <div class="header-actions">
+              <button
+                class="render-open-btn render-open-btn--lg"
+                data-video-src="/videos/autorejection-prototype.mp4"
+                data-video-caption="First prototype in action">
+                See Prototype
+              </button>
+              <a
+                href="https://github.com/nathan-tebay/AutoRejection"
+                class="github-link"
+                target="_blank"
+                rel="noopener">
+                View on GitHub
+              </a>
+            </div>
           </div>
 
-          <div class="renders-row">
+          <div class="renders-row renders-row--2">
             <div class="render-card">
               <img
                 src="../assets/images/autorejection-front.webp"
@@ -48,49 +56,11 @@
                 alt="AutoRejection — back render" />
               <span class="render-label">Back</span>
             </div>
-          </div>
-
-          <div class="renders-row">
             <div class="render-card">
               <img
                 src="../assets/images/loadcell-pcb.jpg"
                 alt="AutoRejection — load cell PCB" />
               <span class="render-label">Load Cell PCB</span>
-            </div>
-            <div class="render-card render-card--span2">
-              <div class="render-placeholder">
-                These are the renderings of the auto-rejection machine and load
-                cell controller PCB. This machine can weigh 50+ cans of beer as
-                they come off a canning line. If the cans are under- or
-                overfilled, they will be ejected from the canning line by the
-                small puck on the left side of the machine. The star wheel
-                design allows for precise control over the ejection process,
-                ensuring the cans have enough time to fully stop for each
-                measurement. Achieving that stability was crucial to the
-                machine's performance and reliability, and it was one of the
-                most challenging aspects of the project.
-              </div>
-              <div class="render-placeholder">
-                The load cell controller PCB is built around an HX711 load cell
-                amplifier with an ATmega328P microcontroller to take consistent
-                weight samples. The PCB is designed to be compact and easily
-                integrated into the machine's enclosure, with mounting holes
-                that align with the Raspberry Pi's mounting holes. The
-                controller reads the weight measurements from the load cell and
-                communicates with the Node-RED automation system to determine
-                whether each can should be accepted or rejected. Node-Red also
-                hosts a web server accessible via Wi-Fi from the Raspberry Pi
-                that provides real-time weight data, calibration settings, and
-                historical records.
-              </div>
-              <div class="render-center">
-                <button
-                  class="render-open-btn render-open-btn--lg"
-                  data-video-src="/videos/autorejection-prototype.mp4"
-                  data-video-caption="First prototype in action">
-                  See Prototype
-                </button>
-              </div>
             </div>
           </div>
 
@@ -100,15 +70,38 @@
             <div class="project-section project-section--overview">
               <h3>Overview</h3>
               <p>
-                A Raspberry Pi-based system for industrial process automation,
-                UI integration, and data management. Integrates with physical
-                hardware via Arduino microcontrollers and exposes a live
-                dashboard through Node-RED's UIBuilder module.
+                The Autorejection project was a side project that became a
+                business concept. I worked on it for most of a year, building it
+                with my business partner under the company MAP Equipment, in
+                cooperation with Wild Goose Filling and several local breweries
+                in the Bozeman area. It was the second machine I programmed with
+                MAP Equipment, the first being a packaging machine capable of
+                boxing 12 packs or applying paktecs to 6 packs of beer with only
+                one prototype. Both of these were controlled by Raspberry Pi
+                single-board computers, with the UI presented over Wi-Fi.
               </p>
               <p>
-                Flow logic is defined visually in Node-RED and backed by
-                JavaScript processing scripts. Supports standalone operation and
-                networked deployment modes.
+                Aside from the technical challenges, many business challenges
+                made these projects full of hard-earned experience. Overall,
+                working with Wild Goose Filling was an incredible experience
+                that I had hoped would have turned into more; they ultimately
+                bought 5 of the 10 total units sold. They had a separate version
+                from the one pictured that integrated with the output feed of
+                their existing canning lines, a design that required extensive
+                prototyping to get working at 50+ cans per minute.
+              </p>
+              <p>
+                The Autorejection system included a UI with historical graphs of
+                beer weights, current can weights as they passed over the scale,
+                and a calibration routine. Stored data can be downloaded to a
+                connected device in CSV format for customer use. It also
+                communicated with AWS IoT to allow for over-the-air updates and
+                data storage in AWS RDS. Communicated with a load cell through
+                the Load Cell PCB I designed, and built custom firmware. The
+                Raspberry Pi is encrypted using a ZYMKEY - ZYMBIT for security
+                and real-time clock functionality. A UL-listed stainless steel
+                cabinet houses separate 5V and 24V power supplies for the
+                electronics and the machine's automation.
               </p>
             </div>
 
@@ -123,45 +116,182 @@
               </div>
             </div>
 
-            <div class="project-section">
+            <div class="project-section project-section--challenges">
               <h3>Challenges</h3>
               <ul>
-                <li></li>
+                <li>
+                  Providing a stable and reliable automation for weight
+                  measurements and can rejection at high speeds. Can stability
+                  on the scale was a major issue, and it took many iterations to
+                  get the system working reliably at 50+ cans per minute.
+                </li>
+                <li>
+                  Designing a user-friendly dashboard for real-time monitoring
+                  and historical data visualization that could be accessed over
+                  Wi-Fi and run on a minimal connecterd device such as a
+                  smartphone or tablet.
+                </li>
+                <li>
+                  Integrating with AWS IoT for data storage and over-the-air
+                  updates while ensuring security and reliability. This added
+                  complexity to the project, particularly with the need for
+                  encryption on the Raspberry Pi and secure communication
+                  practices.
+                </li>
+                <li>
+                  Ensuring the system could operate effectively in a brewery
+                  environment, which can be harsh on electronics due to moisture
+                  and temperature variations. Working with the existing Wild
+                  Goose canning line added additional constraints to the
+                  implementation as we had less control over the integration.
+                </li>
+                <li>
+                  Designing and building a custom load cell PCB with firmware
+                  for accurate weight measurement. This involved working with a
+                  local electrical engineer and PCB manufacturer to create a
+                  reliable and cost-effective solution.
+                </li>
+                <li>
+                  Working with a partner, Wild Goose Filling and brewery staff,
+                  to ensure the system met their needs and integrated well with
+                  their existing processes.
+                </li>
+                <li>
+                  Balancing the technical requirements with business
+                  considerations, such as cost and manufacturability. Much of
+                  the physical design was decided before I was involved, and it
+                  was not ideal for prototyping. It could have been built with a
+                  simpler design that would have been easier to iterate on while
+                  still meeting customer needs. Ensuring the security of the
+                  system, particularly with the use of AWS IoT and the need for
+                  encryption on the Raspberry Pi. Adding drive encryption too
+                  early increased the difficulty of prototyping.
+                </li>
               </ul>
             </div>
 
-            <div class="project-section">
+            <div class="project-section project-section--learnings">
               <h3>Learnings</h3>
               <ul>
-                <li></li>
+                <li>
+                  Don't over-engineer solutions; focus on the core requirements.
+                  This did not need to be as complex as initially envisioned. It
+                  could have run on a esp32 with a simpler UI and no AWS
+                  integration while meeting customer needs.
+                </li>
+                <li>
+                  Don't over-engineer solutions; focus on the core requirements.
+                  This project did not need to be as complex as initially
+                  envisioned. It could have run on an ESP32 with a simpler UI
+                  and no AWS integration while meeting customer needs.
+                </li>
+                <li>
+                  Prototyping and iteration are crucial, especially when working
+                  with hardware. The design went through many iterations to get
+                  the can rejection working reliably at high speeds.
+                </li>
+                <li>
+                  Communication and collaboration with partners and customers
+                  are key to ensuring the product meets their needs and
+                  integrates well with their existing processes. Working closely
+                  with Wild Goose Filling and brewery staff was essential to the
+                  project's success.
+                </li>
+                <li>
+                  Balancing technical requirements with business considerations
+                  is essential for creating a viable product. The system needed
+                  to be cost-effective and manufacturable while still meeting
+                  the technical requirements.
+                </li>
+                <li>
+                  Security is an important consideration, especially when
+                  dealing with IoT devices and cloud integration. Using
+                  encryption and secure communication practices is essential to
+                  protect the system and the data it handles.
+                </li>
+                <li>
+                  Building a product that can operate effectively in a harsh
+                  environment requires careful consideration of the materials
+                  and design. The use of a UL-listed stainless steel cabinet and
+                  separate power supplies helped ensure the system could
+                  withstand the brewery environment.
+                </li>
+                <li>
+                  Business timelines for getting a product to market are much
+                  longer than anticipated. Once a contract was in place, builder
+                  confidence in the technology took much longer than expected.
+                  This is not a reflection of the technical challenges, but
+                  rather the realities of manufacturing, testing, and working
+                  with partners to get a product ready for market.
+                </li>
+                <li>
+                  Supply chains can be unpredictable. Raspberry Pi shortages add
+                  stress to the project as orders started coming in. We were
+                  buying one or two at a time, but as demand increased, it
+                  became more difficult to source them promptly.
+                </li>
+                <li>
+                  Document the experience, GitHub repos and code are not enough.
+                  I haGId a lot of great experience building this project, but
+                  much of it is lost to history. I have very few pictures to
+                  document the process and nearly nothing to show for the
+                  orginal packaging machine.
+                </li>
+                <li>
+                  Don't undervalue yourself in a partnership. An exciting
+                  project is not enough to offset rising expectations when no
+                  contract is in place. It stresses the relationship and makes
+                  for an unhappy wife when money isn't coming in. If you give
+                  your labor for free to move things forward, you won’t be a
+                  business partner.
+                </li>
               </ul>
             </div>
 
             <div class="project-section">
               <h3>Components</h3>
               <ul>
-                <li>Node-RED flows for visual automation logic</li>
+                <li>Node-RED flows for automation logic and AWS integration</li>
                 <li>
-                  Arduino hardware modules (standalone and networked variants)
+                  StandAlone and WildGoose designs for the weight measurement
+                  and rejection systems.
                 </li>
-                <li>JavaScript file processing scripts</li>
+                <li>
+                  Custom JavaScript for data processing and UI interactions
+                </li>
                 <li>UIBuilder dashboard for real-time monitoring</li>
                 <li>
                   AWS IoT integration for data storage and over the air updates.
+                </li>
+
+                <li>
+                  Air powered pneumatic system for can rejection and automation
+                  of the canning line.
                 </li>
               </ul>
             </div>
             <div class="project-section">
               <h3>Hardware</h3>
               <ul>
-                <li>Arduino microcontrollers for physical I/O</li>
                 <li>
-                  StandAlone and WildGoose designs for the weight measurement
-                  and rejection systems.
+                  Arduino based Load Cell PCB with custom firmware for weight
+                  measurement
                 </li>
                 <li>
                   Raspberry Pi for networked deployment and control through two
                   separate wifi networks.
+                </li>
+                <li>
+                  UL-listed stainless steel cabinet for housing electronics and
+                  automation components.
+                </li>
+                <li>
+                  Separate 5V and 24V power supplies for the electronics and the
+                  machine's automation.
+                </li>
+                <li>
+                  ZYMKEY - ZYMBIT for security and real-time clock
+                  functionality.
                 </li>
               </ul>
             </div>
