@@ -243,6 +243,8 @@ img {
   position: relative;
   max-width: max(800px, calc(100% - 40px));
   height: auto;
+  width: auto;
+  overflow: auto;
 }
 
 a:focus-visible,
@@ -312,12 +314,17 @@ summary:focus-visible {
   margin-bottom: 0;
 }
 
+
 /* ── Content panel ───────────────────────────────────────────────────── */
 #content-panel {
   padding: 2rem;
   display: flex;
   flex-direction: column;
   max-width: 80ch;
+}
+
+#content-panel.intro {
+  max-width: unset;
 }
 
 #li-embed {
