@@ -122,15 +122,14 @@ function isValidHex(s) {
 }
 
 function getSavedTheme() {
-  console.log("Checking for saved theme...");
-  const theme = localStorage.getItem("theme");
-  console.log("localStorage theme:", theme);
+  const theme = localStorage.getItem("tebay_theme") || localStorage.getItem("theme");
   if (theme && isValidHex(theme)) return theme;
   return THEMES[0].hex;
 }
 
 function saveTheme(hex) {
-  localStorage.setItem("theme", hex);
+  localStorage.setItem("tebay_theme", hex);
+  localStorage.removeItem("theme");
   window.name = hex; // persists across same-tab file:// navigations
 }
 
@@ -172,46 +171,202 @@ if (swatchContainer) {
 
 applyTheme(savedHex);
 
+// ── Project media fallbacks ────────────────────────────────────────────
+(function () {
+  document.querySelectorAll(".render-card img").forEach(function (img) {
+    img.loading = img.loading || "lazy";
+    img.decoding = img.decoding || "async";
+    img.tabIndex = 0;
+    img.setAttribute("role", "button");
+    img.setAttribute("aria-label", "Open image preview");
+    img.addEventListener("error", function () {
+      const card = img.closest(".render-card");
+      if (!card) return;
+      img.remove();
+      if (!card.querySelector(".render-card--image-error")) {
+        const fallback = document.createElement("div");
+        fallback.className = "render-card--image-error";
+        fallback.textContent = "Image unavailable";
+        card.insertBefore(fallback, card.firstChild);
+      }
+    });
+  });
+})();
+
+// ── Shared image modal ────────────────────────────────────────────────
+(function () {
+  var modal = document.createElement("div");
+  modal.className = "image-modal";
+  modal.hidden = true;
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-label", "Image preview");
+  modal.innerHTML =
+    '<div class="image-modal__backdrop"></div>' +
+    '<div class="image-modal__box">' +
+      '<button class="image-modal__close" aria-label="Close">&#x2715;</button>' +
+      '<button class="image-modal__nav image-modal__nav--prev" aria-label="Previous image">&#x2039;</button>' +
+      '<img class="image-modal__image" alt="" />' +
+      '<button class="image-modal__nav image-modal__nav--next" aria-label="Next image">&#x203a;</button>' +
+      '<p class="image-modal__caption"></p>' +
+    "</div>";
+  document.body.appendChild(modal);
+
+  var preview = modal.querySelector(".image-modal__image");
+  var caption = modal.querySelector(".image-modal__caption");
+  var closeButton = modal.querySelector(".image-modal__close");
+  var prevButton = modal.querySelector(".image-modal__nav--prev");
+  var nextButton = modal.querySelector(".image-modal__nav--next");
+  var images = [];
+  var currentIndex = 0;
+  var lastFocused = null;
+
+  function getImageLabel(img) {
+    var card = img.closest(".render-card");
+    var label = card ? card.querySelector(".render-label") : null;
+    return (label && label.textContent.trim()) || img.alt || "Image preview";
+  }
+
+  function setActiveImage(index) {
+    if (!images.length) return;
+    currentIndex = (index + images.length) % images.length;
+    var img = images[currentIndex];
+    var label = getImageLabel(img);
+    preview.src = img.currentSrc || img.src;
+    preview.alt = img.alt || label;
+    caption.textContent =
+      images.length > 1 ? label + " (" + (currentIndex + 1) + " of " + images.length + ")" : label;
+    prevButton.hidden = images.length < 2;
+    nextButton.hidden = images.length < 2;
+  }
+
+  function openModal(img) {
+    images = Array.prototype.slice.call(document.querySelectorAll(".render-card img"));
+    var index = images.indexOf(img);
+    lastFocused = img || document.activeElement;
+    setActiveImage(index >= 0 ? index : 0);
+    modal.hidden = false;
+    closeButton.focus();
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    preview.src = "";
+    preview.alt = "";
+    if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
+    images = [];
+    currentIndex = 0;
+    lastFocused = null;
+  }
+
+  function showPrevious() {
+    setActiveImage(currentIndex - 1);
+  }
+
+  function showNext() {
+    setActiveImage(currentIndex + 1);
+  }
+
+  modal.querySelector(".image-modal__backdrop").addEventListener("click", closeModal);
+  closeButton.addEventListener("click", closeModal);
+  prevButton.addEventListener("click", showPrevious);
+  nextButton.addEventListener("click", showNext);
+
+  document.addEventListener("keydown", function (e) {
+    if (modal.hidden) return;
+    if (e.key === "Escape") closeModal();
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      showPrevious();
+    }
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      showNext();
+    }
+    if (e.key === "Tab") {
+      e.preventDefault();
+      closeButton.focus();
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    var img = e.target.closest(".render-card img");
+    if (!img) return;
+    openModal(img);
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var img = e.target.closest && e.target.closest(".render-card img");
+    if (!img) return;
+    e.preventDefault();
+    openModal(img);
+  });
+})();
+
 // ── Shared video modal ────────────────────────────────────────────────
 (function () {
   var modal = document.createElement("div");
   modal.className = "video-modal";
   modal.hidden = true;
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-label", "Video player");
   modal.innerHTML =
     '<div class="video-modal__backdrop"></div>' +
     '<div class="video-modal__box">' +
       '<button class="video-modal__close" aria-label="Close">&#x2715;</button>' +
       '<video class="video-modal__video" playsinline controls></video>' +
+      '<div class="video-modal__error">Video unavailable</div>' +
       '<p class="video-modal__caption"></p>' +
     "</div>";
   document.body.appendChild(modal);
 
   var video = modal.querySelector(".video-modal__video");
   var caption = modal.querySelector(".video-modal__caption");
+  var closeButton = modal.querySelector(".video-modal__close");
+  var lastFocused = null;
 
-  function openModal(src, label) {
+  function openModal(src, label, opener) {
+    lastFocused = opener || document.activeElement;
+    modal.classList.remove("video-modal--error");
     video.src = src;
     caption.textContent = label || "";
     modal.hidden = false;
-    video.play();
+    closeButton.focus();
+    video.play().catch(function () {
+      video.controls = true;
+    });
   }
 
   function closeModal() {
     modal.hidden = true;
     video.pause();
     video.src = "";
+    modal.classList.remove("video-modal--error");
+    if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
+    lastFocused = null;
   }
 
+  video.addEventListener("error", function () {
+    modal.classList.add("video-modal--error");
+  });
+
   modal.querySelector(".video-modal__backdrop").addEventListener("click", closeModal);
-  modal.querySelector(".video-modal__close").addEventListener("click", closeModal);
+  closeButton.addEventListener("click", closeModal);
 
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !modal.hidden) closeModal();
+    if (modal.hidden) return;
+    if (e.key === "Escape") closeModal();
+    if (e.key === "Tab") {
+      e.preventDefault();
+      closeButton.focus();
+    }
   });
 
   document.addEventListener("click", function (e) {
     var trigger = e.target.closest("[data-video-src]");
     if (!trigger) return;
-    openModal(trigger.dataset.videoSrc, trigger.dataset.videoCaption || "");
+    openModal(trigger.dataset.videoSrc, trigger.dataset.videoCaption || "", trigger);
   });
 })();

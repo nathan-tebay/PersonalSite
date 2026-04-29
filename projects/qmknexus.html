@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QMK Nexus - Tebay.dev</title>
+    <link rel="icon" type="image/png" href="../favicon.png" />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body data-page="qmknexus" data-basepath="../">
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+
+      <div class="main-col">
+        <div class="side-panel">
+          <div class="project-header">
+            <div>
+              <h1>QMK Nexus</h1>
+              <p class="tagline">
+                Browser-based custom keyboard firmware builder for QMK layouts,
+                keymaps, peripherals, and local firmware builds
+              </p>
+            </div>
+            <div class="header-actions">
+              <a
+                href="https://qmknexus.tebay.dev"
+                class="github-link"
+                target="_blank"
+                rel="noopener"
+              >
+                Open App
+              </a>
+              <a
+                href="https://github.com/nathan-tebay/qmk-nexus"
+                class="github-link"
+                target="_blank"
+                rel="noopener"
+              >
+                View on GitHub
+              </a>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="renders-row renders-row--2 renders-row--screens">
+            <div class="render-card render-card--span2">
+              <img
+                src="../assets/images/qmknexus-layout-screen.png"
+                width="1287"
+                height="620"
+                alt="QMK Nexus keyboard layout editor"
+                loading="lazy"
+                decoding="async" />
+              <div class="render-label">Layout Editor</div>
+            </div>
+            <div class="render-card">
+              <img
+                src="../assets/images/qmk-nexus-keymap-screen.png"
+                width="1287"
+                height="620"
+                alt="QMK Nexus keymap editor"
+                loading="lazy"
+                decoding="async" />
+              <div class="render-label">Keymap Editor</div>
+            </div>
+            <div class="render-card">
+              <img
+                src="../assets/images/qmknexus-build-screen.png"
+                width="1287"
+                height="620"
+                alt="QMK Nexus firmware build screen"
+                loading="lazy"
+                decoding="async" />
+              <div class="render-label">Build Screen</div>
+            </div>
+          </div>
+
+          <div class="project-body">
+            <div class="project-section project-section--overview">
+              <h3>Overview</h3>
+              <p>
+                QMK Nexus is a full-stack web app for designing custom keyboard
+                firmware without hand-editing every QMK source file. The
+                frontend walks through the major keyboard-building stages:
+                physical layout, matrix wiring, peripheral configuration,
+                keymap editing, metadata, feature toggles, and firmware build.
+              </p>
+              <p>
+                The backend persists user keyboards, validates build readiness,
+                generates QMK-compatible C and header files, and runs firmware
+                builds through an isolated Podman builder. It includes a QMK
+                keyboard index so existing boards can be loaded or inspected
+                before being adapted.
+              </p>
+            </div>
+
+            <div class="project-section project-section--stack">
+              <h3>Stack</h3>
+              <div class="tag-list">
+                <span class="tag">React 18</span>
+                <span class="tag">TypeScript</span>
+                <span class="tag">Vite</span>
+                <span class="tag">React Konva</span>
+                <span class="tag">Zustand</span>
+                <span class="tag">FastAPI</span>
+                <span class="tag">SQLite</span>
+                <span class="tag">AWS S3</span>
+                <span class="tag">DynamoDB</span>
+                <span class="tag">Podman</span>
+                <span class="tag">QMK</span>
+              </div>
+            </div>
+
+            <div class="project-section project-section--challenges">
+              <h3>Challenges</h3>
+              <ul>
+                <li>
+                  Translating a visual keyboard layout into valid QMK matrix
+                  definitions, keymap files, config headers, rules files, and
+                  layout macros.
+                </li>
+                <li>
+                  Keeping frontend camelCase models and backend Python models
+                  synchronized without leaking serialization details into every
+                  API endpoint.
+                </li>
+                <li>
+                  Building a layout editor that supports key placement,
+                  selection, resizing, rotation, matrix assignment, and
+                  peripheral placement while staying predictable.
+                </li>
+                <li>
+                  Running firmware builds safely from a web request by
+                  isolating QMK compilation inside a short-lived builder
+                  container or build proxy.
+                </li>
+                <li>
+                  Supporting QMK-native imports alongside generated keyboards
+                  without promising unsupported MCU and feature combinations.
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section project-section--learnings">
+              <h3>Learnings</h3>
+              <ul>
+                <li>
+                  Firmware generators need snapshot tests. Small formatting or
+                  macro changes can silently break generated C even when the web
+                  workflow still looks correct.
+                </li>
+                <li>
+                  Visual editors need a strict data model. It is easier to
+                  render from normalized keyboard data than to infer firmware
+                  structure from canvas state after the fact.
+                </li>
+                <li>
+                  Build status should be treated as durable application state,
+                  not a process-local dictionary, once builds may outlive a
+                  single backend worker.
+                </li>
+                <li>
+                  Feature support should be explicit in both the UI and backend
+                  validation so the build button cannot become the first place a
+                  user discovers an unsupported target.
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Key Systems</h3>
+              <ul>
+                <li>
+                  <strong>Layout editor</strong> - React Konva canvas for key
+                  geometry, matrix wiring, peripheral placement, selection, and
+                  transform controls.
+                </li>
+                <li>
+                  <strong>Keymap editor</strong> - layer manager, keycode
+                  picker, encoder mapping, OLED configuration, and
+                  feature-specific controls.
+                </li>
+                <li>
+                  <strong>Code generation</strong> - emits QMK source files for
+                  <code>config.h</code>, <code>rules.mk</code>,
+                  <code>keymap.c</code>, <code>keyboard.c</code>, and
+                  keyboard headers.
+                </li>
+                <li>
+                  <strong>Build pipeline</strong> - FastAPI route prepares a
+                  build directory, delegates to Podman or a build proxy, tracks
+                  status, and serves compiled artifacts.
+                </li>
+                <li>
+                  <strong>Persistence</strong> - local SQLite in development,
+                  S3-backed user database storage in production, and DynamoDB
+                  for build state.
+                </li>
+                <li>
+                  <strong>QMK index</strong> - generated keyboard metadata and
+                  conversion scripts for browsing and importing supported
+                  keyboard definitions.
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Current Scope</h3>
+              <ul>
+                <li>Authenticated web app with Google OAuth flow.</li>
+                <li>AVR builds supported; ARM targets are gated as planned work.</li>
+                <li>Generated firmware path plus QMK-native source import path.</li>
+                <li>
+                  Backend validation before build to catch missing matrix
+                  assignments and unsupported target combinations.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/project-data.js"></script>
+    <script src="../assets/layout.js"></script>
+    <script src="../assets/script.js" defer></script>
+  </body>
+</html>

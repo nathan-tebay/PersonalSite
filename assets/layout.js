@@ -1,16 +1,30 @@
 (function () {
   const currentPage = document.body.dataset.page || "";
   const basePath    = document.body.dataset.basepath || "";
+  const projects = window.TEBAY_PROJECTS || [];
+
+  // ── Skip-to-content link (a11y: first focusable element) ──────────────
+  const skipLink = document.createElement("a");
+  skipLink.href = "#main-content";
+  skipLink.className = "skip-nav";
+  skipLink.textContent = "Skip to main content";
+  document.body.insertBefore(skipLink, document.body.firstChild);
+
+  // Ensure main content area has an id for the skip link target
+  const mainCol = document.querySelector(".main-col");
+  if (mainCol && !mainCol.id) mainCol.id = "main-content";
 
   // ── Header (not shown on home page) ──────────────────────────────────
   if (currentPage !== "home") {
     const header = document.createElement("header");
     header.id = "site-header";
+    header.setAttribute("role", "banner");
     const headerInner = document.createElement("div");
     headerInner.id = "header-inner";
     const logoLink = document.createElement("a");
     logoLink.href = basePath + "index.html";
     logoLink.id = "header-logo-wrap";
+    logoLink.setAttribute("aria-label", "Tebay.dev — Home");
     const headerLogo = document.createElement("img");
     headerLogo.id = "header-logo";
     headerLogo.src = basePath + "tebay-dev.svg";
@@ -28,6 +42,7 @@
   const navPanel = document.createElement("nav");
   navPanel.id = "nav-panel";
   navPanel.className = "side-panel";
+  navPanel.setAttribute("aria-label", "Main navigation");
 
   /**
    * Creates an anchor element for the navigation tree.
@@ -80,28 +95,13 @@
   projectListItem.appendChild(
     createMenuGroup(
       "Projects",
-      [
-        {
-          label: "AutoRejection",
-          href: basePath + "projects/autorejection.html",
-          id: "autorejection",
-        },
-        {
-          label: "MicrophoneController",
-          href: basePath + "projects/microphonecontroller.html",
-          id: "microphonecontroller",
-        },
-        {
-          label: "WhisperTranscribe",
-          href: basePath + "projects/whispertranscribe.html",
-          id: "whispertranscribe",
-        },
-        {
-          label: "PersonalSite",
-          href: basePath + "projects/personalsite.html",
-          id: "personalsite",
-        },
-      ],
+      projects.map(function (project) {
+        return {
+          label: project.label,
+          href: basePath + project.path,
+          id: project.id,
+        };
+      }),
       true,
     ),
   );
@@ -157,6 +157,16 @@
 
   const navPlaceholder = document.getElementById("layout-nav");
   if (navPlaceholder) navPlaceholder.replaceWith(navPanel);
+
+  // ── Analytics beacon ──────────────────────────────────────────────────────
+  if (currentPage !== "admin" && navigator.sendBeacon) {
+    try {
+      navigator.sendBeacon("/cgi-bin/track.cgi", new URLSearchParams({
+        page: window.location.pathname,
+        ref: document.referrer || "",
+      }));
+    } catch (_) {}
+  }
 
   // ── Hamburger toggle (mobile) ─────────────────────────────────────────
   const navOverlay = document.createElement("div");

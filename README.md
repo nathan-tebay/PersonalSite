@@ -21,6 +21,7 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
 - **Project portfolio** — Dedicated project pages in `projects/` subdirectory:
   - DBFirstDataGrid
   - AutoRejection
+  - Fly Fishing Game
   - MicrophoneController
   - WhisperTranscribe
   - PersonalSite (this project)
@@ -33,18 +34,23 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
 ├── index.html                 # Home page
 ├── blog.html                  # Blog listing
 ├── blog-post.html             # Blog post detail page (slug-based routing)
-├── favicon.svg
+├── favicon.png
 ├── tebay-dev.svg              # Logo
 │
 ├── assets/
 │   ├── style.css              # Global styles and theme definitions
 │   ├── script.js              # General page interactions
 │   ├── layout.js              # Navigation injection & theme picker setup
+│   ├── project-data.js        # Shared project metadata for navigation
+│   ├── blog-list.js           # Blog listing renderer
+│   ├── blog-post.js           # Blog post renderer
+│   ├── links-page.js          # Public links renderer
 │   └── blog-storage.js        # localStorage-backed blog store (local mode only)
 │
 ├── projects/
 │   ├── dbfirstgrid.html       # DBFirstDataGrid project page
 │   ├── autorejection.html     # AutoRejection project page
+│   ├── flyfishinggame.html    # Fly Fishing Game project page
 │   ├── microphonecontroller.html
 │   ├── whispertranscribe.html
 │   └── personalsite.html      # This project
@@ -129,6 +135,20 @@ podman rm -f personalsite personalsite-minio
 ```
 
 This removes both containers. The network persists but will be cleaned up by Podman automatically.
+
+### Validation
+
+Run static checks before deployment:
+
+```bash
+./scripts/validate-site.py
+```
+
+Run deployment smoke checks against a live base URL:
+
+```bash
+./scripts/smoke-check.sh https://tebay.dev
+```
 
 ### Production Deployment
 
@@ -221,7 +241,7 @@ This automatically updates the Lambda function's `ADMIN_TOKEN` environment varia
 
 ### Theme Customization
 
-The site features six curated colour swatches (dark tones) accessible via swatch buttons in the navigation. The theme picker (injected by `layout.js`) persists the selection to localStorage under the key `tebay_theme`.
+The site features curated colour swatches accessible via swatch buttons in the navigation. The theme picker persists the selection to localStorage under the key `tebay_theme`.
 
 CSS custom properties are dynamically computed from the selected swatch:
 - `--text-high`, `--text-mid`, `--text-low`, `--text-link`, `--divider`, `--hover-bg` are calculated based on the swatch's relative luminance for optimal contrast

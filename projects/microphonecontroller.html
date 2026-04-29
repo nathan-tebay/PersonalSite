@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MicrophoneController — Tebay.dev</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
   <body data-page="microphonecontroller" data-basepath="../">
@@ -35,12 +35,16 @@
             <div class="render-card">
               <img
                 src="../assets/images/microphone-controller.jpg"
+                width="2885"
+                height="1691"
+                loading="lazy"
+                decoding="async"
                 alt="MicrophoneController — assembled" />
               <span class="render-label">Assembled</span>
               <div class="render-center">
                 <button
                   class="render-open-btn render-open-btn--lg"
-                  data-video-src="/videos/microphone-controller-demo.mp4"
+                  data-video-src="../assets/images/microphone-controller-demo.mp4"
                   data-video-caption="MicrophoneController demo">
                   Demo
                 </button>
@@ -49,6 +53,10 @@
             <div class="render-card">
               <img
                 src="../assets/images/microphone-controller-internal.jpg"
+                width="1542"
+                height="1208"
+                loading="lazy"
+                decoding="async"
                 alt="MicrophoneController — internal" />
               <span class="render-label">Internal</span>
             </div>
@@ -95,17 +103,16 @@
             <div class="project-section project-section--challenges">
               <h3>Challenges</h3>
               <ul>
-                <li>When playing a game with a controller, having this act a keyboard was causing it change the input.</li>
-                <li>I used AI to do this intitial implmentation of hold-or-toggle functionality, I was not working as intended so I wrote that instead.</li>
-
+                <li>As a keyboard HID, the device interfered with controller input detection in games.</li>
+                <li>AI-generated hold-or-toggle implementation didn't work as intended — rewrote it manually.</li>
               </ul>
             </div>
 
             <div class="project-section project-section--learnings">
               <h3>Learnings</h3>
               <ul>
-                <li>Claude Code had trouble with the hold-or-toggle logic, my rewrite was much simpler as it tried to implement latching logic separately from the hold logic. I implemented a single toggle state which is much easier to read and debug.</li>
-                <li>The dual keyboard and joystick function was interesting in that the device gets two separate USB interfaces when connected. The switch just changes which function send the input, it doesn't reinitialize the device as I originally thought it should.</li>
+                <li>Simpler model wins: a single toggle state is cleaner than separate latch and hold logic.</li>
+                <li>The mode switch changes which USB interface sends input — the device doesn't reinitialize.</li>
               </ul>
             </div>
 
@@ -146,6 +153,7 @@
       </div>
     </div>
 
+    <script src="../assets/project-data.js"></script>
     <script src="../assets/layout.js"></script>
     <script src="../assets/script.js"></script>
   </body>

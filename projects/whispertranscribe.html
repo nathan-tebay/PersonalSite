@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WhisperTranscribe — Tebay.dev</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
   <body data-page="whispertranscribe" data-basepath="../">
@@ -36,12 +36,20 @@
             <div class="render-card">
               <img
                 src="../assets/images/whisper-transcribe-tray-settings.jpg"
+                width="464"
+                height="329"
+                loading="lazy"
+                decoding="async"
                 alt="WhisperTranscribe — tray settings" />
               <span class="render-label">Tray Settings</span>
             </div>
             <div class="render-card">
               <img
                 src="../assets/images/whisper-transcribe-tray-advanced-settings.jpg"
+                width="525"
+                height="606"
+                loading="lazy"
+                decoding="async"
                 alt="WhisperTranscribe — tray advanced settings" />
               <span class="render-label">Advanced Settings</span>
             </div>
@@ -108,35 +116,20 @@
             <div class="project-section">
               <h3>Challenges</h3>
               <ul>
-                <li>
-                  Integrating with multiple LLM backends (Ollama and Claude) required careful handling of API differences and error cases.
-                </li>
-                <li>
-                  Achieving low-latency transcription with whisper.cpp on a GPU involved optimizing the audio capture and processing pipeline, as well as fine-tuning the model parameters.
-                </li> 
-                <li>
-                  Implementing a robust keyboard grab with evdev while ensuring the daemon could recover gracefully from errors and maintain system stability was a complex task.
-                </li> 
-                <li>
-                    Building a user-friendly GTK3 system tray application with a comprehensive settings dialog required careful design and testing to ensure a smooth user experience.
+                <li>Handling API differences and error cases between Ollama and Claude backends.</li>
+                <li>Optimizing the whisper.cpp audio pipeline for low-latency GPU transcription.</li>
+                <li>Robust evdev keyboard grab with clean error recovery and stable daemon behavior.</li>
+                <li>GTK3 system tray with a comprehensive settings dialog.</li>
               </ul>
             </div>
 
             <div class="project-section">
               <h3>Learnings</h3>
               <ul>
-                <li>
-                  Deepened my understanding of audio processing and real-time transcription, particularly with whisper.cpp and GPU acceleration.
-                </li>
-                <li>
-                  Gained experience working with multiple LLM APIs and handling their nuances in a unified application.
-                </li>
-                <li>
-                  Improved my skills in Python system programming, including process management, signal handling, and integration with systemd.
-                </li>
-                <li>
-                  Learned how to build a GTK3 system tray application with D-Bus integration for inter-process communication and dynamic UI updates. This was more difficult than expected as GTK's documentation is notoriously sparse and the StatusNotifierItem protocol is complex, but it was rewarding to see it all come together in a polished user interface. With Linux desktop environments lacking a standard API for system trays, implementing this feature required navigating a maze of compatibility issues and edge cases, but it was worth it to provide users with an intuitive way to control the daemon without needing to interact with the command line.
-                </li>
+                <li>Audio processing and GPU-accelerated transcription with whisper.cpp.</li>
+                <li>Unifying multiple LLM APIs under a single interface.</li>
+                <li>Python system programming — process management, signal handling, systemd integration.</li>
+                <li>GTK3 tray via StatusNotifierItem + DBusMenu — sparse docs and fragmented Linux tray standards make this harder than expected.</li>
               </ul>
             </div>
 
@@ -282,6 +275,7 @@
       </div>
     </div>
 
+    <script src="../assets/project-data.js"></script>
     <script src="../assets/layout.js"></script>
     <script src="../assets/script.js"></script>
   </body>

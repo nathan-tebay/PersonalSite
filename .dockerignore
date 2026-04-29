@@ -1,0 +1,48 @@
+# OS
+.git
+.gitignore
+.github
+
+# Dev
+.devcontainer
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Node (if any)
+node_modules
+package.json
+package-lock.json
+npm-debug.log
+
+# Build artifacts
+dist
+build
+
+# Local data
+blog/posts
+analytics
+/tmp
+
+# Secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Docker
+.dockerignore
+
+# Scripts (not needed in container)
+scripts/
+dev.sh
+
+# Docs
+README.md
+LICENSE
+SECURITY.md
+CLAUDE.md

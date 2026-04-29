@@ -5,9 +5,10 @@
 # Returns: {"images":["file1.jpg","file2.png",...]}
 # Reads from local cache (always in sync with S3 after upload).
 
+. /var/www/html/cgi-bin/common.sh
 . /var/www/html/cgi-bin/storage.sh
 
-printf 'Content-Type: application/json\r\n'
+emit_json_header
 
 SLUG=$(printf '%s' "${QUERY_STRING}" | tr '&' '\n' | grep '^slug=' | head -1 | cut -d= -f2- | tr -cd 'a-z0-9-')
 

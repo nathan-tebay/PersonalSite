@@ -6,27 +6,26 @@
 #   blogs/<slug>/draft.html    — draft
 #   blogs/<slug>/index.html   — published
 
+. /var/www/html/cgi-bin/common.sh
 . /var/www/html/cgi-bin/storage.sh
 
 TMP_DIR="/tmp/blog-$$"
 mkdir -p "$TMP_DIR"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-urldecode() {
-  printf '%b' "$(printf '%s' "$1" | sed 's/+/ /g; s/%/\\x/g')"
-}
-
-get_field() {
-  local raw
-  raw=$(printf '%s' "$1" | tr '&' '\n' | grep "^${2}=" | head -1 | cut -d= -f2-)
-  urldecode "$raw"
-}
-
-printf 'Content-Type: application/json\r\n'
+emit_json_header
 
 if [ "$REQUEST_METHOD" != "POST" ]; then
   printf '\r\n{"error":"method not allowed"}\n'; exit 0
 fi
+
+# ── Rate limiting: max 20 saves per 60s per IP ─────────────────────────
+rate_limit_check "save_${REMOTE_ADDR}" 20 60 || emit_error "429 Too Many Requests" "rate limited"
+# ───────────────────────────────────────────────────────────────────────
+
+# ── CSRF verification ──────────────────────────────────────────────────
+_verify_csrf || _fail_csrf
+# ───────────────────────────────────────────────────────────────────────
 
 if [ "$STORAGE" = "s3" ] && [ -z "$AWS_BUCKET" ]; then
   printf '\r\n{"error":"AWS_BUCKET not set"}\n'; exit 0
@@ -47,6 +46,33 @@ WIP="false"
 if [ -z "$SLUG" ] || [ -z "$TITLE" ]; then
   printf '\r\n{"error":"slug and title are required"}\n'; exit 0
 fi
+
+# ── Date validation ────────────────────────────────────────────────────
+# Accept ISO date (YYYY-MM-DD) or empty (defaults to today)
+if [ -n "$DATE" ]; then
+  # Validate format: must be YYYY-MM-DD with reasonable ranges
+  if ! printf '%s' "$DATE" | grep -qE '^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$'; then
+    printf '\r\n{"error":"invalid date format, use YYYY-MM-DD"}\n'; exit 0
+  fi
+else
+  DATE=$(date -u '+%Y-%m-%d')
+fi
+# ───────────────────────────────────────────────────────────────────────
+
+# ── Sanitize HTML content — strip dangerous tags/attributes ───────────────
+# Remove <script>, <iframe>, <object>, <embed>, <form>, <applet>, <base>, <link> tags
+# Remove event handler attributes (on*) and javascript: URLs
+sanitize_html() {
+  sed -E \
+    -e 's/<(script|iframe|object|embed|form|applet|base|link|meta|style)[^>]*>//gi' \
+    -e 's/<\/(script|iframe|object|embed|form|applet|base|link|meta|style)>//gi' \
+    -e 's/[[:space:]]+on[a-z]+="[^\"]*"//gi' \
+    -e 's/[[:space:]]+on[a-z]+='"'"'[^'"'"']*'"'"'//gi' \
+    -e 's/href="javascript:[^"]*"/href="#"/gi' \
+    -e 's/src="javascript:[^"]*"/src="#"/gi'
+}
+CONTENT=$(printf '%s' "$CONTENT" | sanitize_html)
+# ─────────────────────────────────────────────────────────────────────────
 
 # Determine whether this slug is currently published (ground truth = filename)
 PUBLISHED="false"
@@ -70,7 +96,7 @@ else
   }
 fi
 
-# ── Update manifests ──────────────────────────────────────────────────────────
+# ── Update manifests with file locking ────────────────────────────────────
 
 storage_get "manifest-all.json" "$TMP_DIR/manifest-all.json" \
   || printf '[\n]\n' > "$TMP_DIR/manifest-all.json"
@@ -85,8 +111,6 @@ META_PUB=$(printf '{"slug":"%s","title":"%s","date":"%s","desc":"%s","wip":%s}' 
   "$SLUG" "$(json_escape "$TITLE")" "$DATE" "$(json_escape "$DESC")" "$WIP")
 
 manifest_upsert "$TMP_DIR/manifest-all.json" "$SLUG" "$META_ALL"
-
-# Published posts and WIP posts both appear in the public manifest
 if [ "$PUBLISHED" = "true" ] || [ "$WIP" = "true" ]; then
   manifest_upsert "$TMP_DIR/manifest.json" "$SLUG" "$META_PUB"
 else
@@ -94,10 +118,11 @@ else
 fi
 
 storage_put "manifest-all.json" "$TMP_DIR/manifest-all.json" "application/json" || {
-  printf '\r\n{"error":"manifest-all upload failed"}\n'; exit 0
+  printf '\r\n{"error":"manifest update failed"}\n'; exit 0
 }
+
 storage_put "manifest.json" "$TMP_DIR/manifest.json" "application/json" || {
-  printf '\r\n{"error":"manifest upload failed"}\n'; exit 0
+  printf '\r\n{"error":"manifest update failed"}\n'; exit 0
 }
 
 printf '\r\n{"ok":true,"published":%s}\n' "$PUBLISHED"

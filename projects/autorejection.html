@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AutoRejection — Tebay.dev</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
   <body data-page="autorejection" data-basepath="../">
@@ -23,7 +23,7 @@
             <div class="header-actions">
               <button
                 class="render-open-btn render-open-btn--lg"
-                data-video-src="/videos/autorejection-prototype.mp4"
+                data-video-src="../assets/images/autorejection-prototype.mp4"
                 data-video-caption="First prototype in action">
                 See Prototype
               </button>
@@ -34,24 +34,40 @@
             <div class="render-card">
               <img
                 src="../assets/images/autorejection-front.webp"
+                width="436"
+                height="320"
+                loading="lazy"
+                decoding="async"
                 alt="AutoRejection — front render" />
               <span class="render-label">Front</span>
             </div>
             <div class="render-card">
               <img
                 src="../assets/images/autorejection-top.webp"
+                width="422"
+                height="312"
+                loading="lazy"
+                decoding="async"
                 alt="AutoRejection — top render" />
               <span class="render-label">Top</span>
             </div>
             <div class="render-card">
               <img
                 src="../assets/images/autorejection-back.webp"
+                width="428"
+                height="312"
+                loading="lazy"
+                decoding="async"
                 alt="AutoRejection — back render" />
               <span class="render-label">Back</span>
             </div>
             <div class="render-card">
               <img
                 src="../assets/images/loadcell-pcb.jpg"
+                width="972"
+                height="789"
+                loading="lazy"
+                decoding="async"
                 alt="AutoRejection — load cell PCB" />
               <span class="render-label">Load Cell PCB</span>
             </div>
@@ -113,52 +129,38 @@
               <h3>Challenges</h3>
               <ul>
                 <li>
-                  Providing a stable and reliable automation for weight
-                  measurements and can rejection at high speeds. Can stability
-                  on the scale was a major issue, and it took many iterations to
-                  get the system working reliably at 50+ cans per minute.
+                  Achieving stable, reliable weight measurements and can
+                  rejection at 50+ cans per minute required many iterations.
                 </li>
                 <li>
-                  Designing a user-friendly dashboard for real-time monitoring
-                  and historical data visualization that could be accessed over
-                  Wi-Fi and run on a minimal connecterd device such as a
-                  smartphone or tablet.
+                  Building a simple, mobile-friendly dashboard for real-time
+                  monitoring and historical data over Wi-Fi.
                 </li>
                 <li>
-                  Integrating with AWS IoT for data storage and over-the-air
-                  updates while ensuring security and reliability. This added
-                  complexity to the project, particularly with the need for
-                  encryption on the Raspberry Pi and secure communication
-                  practices.
+                  AWS IoT integration for OTA updates and data storage,
+                  complicated by encryption requirements on the Raspberry Pi.
                 </li>
                 <li>
-                  Ensuring the system could operate effectively in a brewery
-                  environment, which can be harsh on electronics due to moisture
-                  and temperature variations. Working with the existing Wild
-                  Goose canning line added additional constraints to the
-                  implementation as we had less control over the integration.
+                  Designing for a harsh brewery environment, including moisture,
+                  temperature changes, and limited control over the Wild Goose
+                  canning line integration.
                 </li>
                 <li>
-                  Designing and building a custom load cell PCB with firmware
-                  for accurate weight measurement. This involved working with a
-                  local electrical engineer and PCB manufacturer to create a
-                  reliable and cost-effective solution.
+                  Developing a custom load cell PCB and firmware for accurate,
+                  cost-effective weight measurement required working with a
+                  local electrical engineer and PCB manufacturer.
                 </li>
                 <li>
-                  Working with a partner, Wild Goose Filling and brewery staff,
-                  to ensure the system met their needs and integrated well with
-                  their existing processes.
+                  Coordinating with Wild Goose Filling and brewery staff to
+                  ensure the system fit existing workflows.
                 </li>
                 <li>
-                  Balancing the technical requirements with business
-                  considerations, such as cost and manufacturability. Much of
-                  the physical design was decided before I was involved, and it
-                  was not ideal for prototyping. It could have been built with a
-                  simpler design that would have been easier to iterate on while
-                  still meeting customer needs. Ensuring the security of the
-                  system, particularly with the use of AWS IoT and the need for
-                  encryption on the Raspberry Pi. Adding drive encryption too
-                  early increased the difficulty of prototyping.
+                  Balancing technical goals with cost, manufacturability, and a
+                  physical design that was not ideal for rapid prototyping.
+                </li>
+                <li>
+                  Adding security features like drive encryption too early made
+                  prototyping more difficult.
                 </li>
               </ul>
             </div>
@@ -167,76 +169,44 @@
               <h3>Learnings</h3>
               <ul>
                 <li>
-                  Don't over-engineer solutions; focus on the core requirements.
-                  This did not need to be as complex as initially envisioned. It
-                  could have run on a esp32 with a simpler UI and no AWS
-                  integration while meeting customer needs.
+                  Didn’t need to be this complex it could have been implemented
+                  with an ESP32, simpler UI and no AWS integration.
                 </li>
                 <li>
-                  Don't over-engineer solutions; focus on the core requirements.
-                  This project did not need to be as complex as initially
-                  envisioned. It could have run on an ESP32 with a simpler UI
-                  and no AWS integration while meeting customer needs.
+                  Hardware projects depend on rapid prototyping and iteration to
+                  reach reliable performance.
                 </li>
                 <li>
-                  Prototyping and iteration are crucial, especially when working
-                  with hardware. The design went through many iterations to get
-                  the can rejection working reliably at high speeds.
+                  Close collaboration with partners and customers is essential
+                  for successful integration.
                 </li>
                 <li>
-                  Communication and collaboration with partners and customers
-                  are key to ensuring the product meets their needs and
-                  integrates well with their existing processes. Working closely
-                  with Wild Goose Filling and brewery staff was essential to the
-                  project's success.
+                  Good products must balance technical performance with cost and
+                  manufacturability.
                 </li>
                 <li>
-                  Balancing technical requirements with business considerations
-                  is essential for creating a viable product. The system needed
-                  to be cost-effective and manufacturable while still meeting
-                  the technical requirements.
+                  Security matters, but adding it too early can slow
+                  development.
                 </li>
                 <li>
-                  Security is an important consideration, especially when
-                  dealing with IoT devices and cloud integration. Using
-                  encryption and secure communication practices is essential to
-                  protect the system and the data it handles.
+                  Harsh environments require thoughtful enclosure, power, and
+                  material choices.
                 </li>
                 <li>
-                  Building a product that can operate effectively in a harsh
-                  environment requires careful consideration of the materials
-                  and design. The use of a UL-listed stainless steel cabinet and
-                  separate power supplies helped ensure the system could
-                  withstand the brewery environment.
+                  Bringing hardware products to market takes longer than
+                  expected due to testing, manufacturing, and partner alignment.
                 </li>
                 <li>
-                  Business timelines for getting a product to market are much
-                  longer than anticipated. Once a contract was in place, builder
-                  confidence in the technology took much longer than expected.
-                  This is not a reflection of the technical challenges, but
-                  rather the realities of manufacturing, testing, and working
-                  with partners to get a product ready for market.
+                  Supply chain issues, like Raspberry Pi shortages, can quickly
+                  become major project risks.
                 </li>
                 <li>
-                  Supply chains can be unpredictable. Raspberry Pi shortages add
-                  stress to the project as orders started coming in. We were
-                  buying one or two at a time, but as demand increased, it
-                  became more difficult to source them promptly.
+                  Document the process thoroughly; code alone does not capture
+                  the full value of the work.
                 </li>
                 <li>
-                  Document the experience, GitHub repos and code are not enough.
-                  I haGId a lot of great experience building this project, but
-                  much of it is lost to history. I have very few pictures to
-                  document the process and nearly nothing to show for the
-                  orginal packaging machine.
-                </li>
-                <li>
-                  Don't undervalue yourself in a partnership. An exciting
-                  project is not enough to offset rising expectations when no
-                  contract is in place. It stresses the relationship and makes
-                  for an unhappy wife when money isn't coming in. If you give
-                  your labor for free to move things forward, you won’t be a
-                  business partner.
+                  In partnerships, protect your time and value—unpaid work
+                  without a contract creates strain.
                 </li>
               </ul>
             </div>
@@ -246,46 +216,23 @@
               <ul>
                 <li>Node-RED flows for automation logic and AWS integration</li>
                 <li>
-                  StandAlone and WildGoose designs for the weight measurement
-                  and rejection systems.
+                  StandAlone and WildGoose variants for weight measurement and
+                  rejection
                 </li>
-                <li>
-                  Custom JavaScript for data processing and UI interactions
-                </li>
+                <li>Custom JavaScript for data processing and UI</li>
                 <li>UIBuilder dashboard for real-time monitoring</li>
-                <li>
-                  AWS IoT integration for data storage and over the air updates.
-                </li>
-
-                <li>
-                  Air powered pneumatic system for can rejection and automation
-                  of the canning line.
-                </li>
+                <li>AWS IoT for data storage and OTA updates</li>
+                <li>Pneumatic rejection system for the canning line</li>
               </ul>
             </div>
             <div class="project-section">
               <h3>Hardware</h3>
               <ul>
-                <li>
-                  Arduino based Load Cell PCB with custom firmware for weight
-                  measurement
-                </li>
-                <li>
-                  Raspberry Pi for networked deployment and control through two
-                  separate wifi networks.
-                </li>
-                <li>
-                  UL-listed stainless steel cabinet for housing electronics and
-                  automation components.
-                </li>
-                <li>
-                  Separate 5V and 24V power supplies for the electronics and the
-                  machine's automation.
-                </li>
-                <li>
-                  ZYMKEY - ZYMBIT for security and real-time clock
-                  functionality.
-                </li>
+                <li>Arduino-based Load Cell PCB with custom firmware</li>
+                <li>Raspberry Pi with dual Wi-Fi network control</li>
+                <li>UL-listed stainless steel enclosure</li>
+                <li>Separate 5V and 24V power supplies</li>
+                <li>ZYMKEY (ZYMBIT) for encryption and RTC</li>
               </ul>
             </div>
           </div>
@@ -293,6 +240,7 @@
       </div>
     </div>
 
+    <script src="../assets/project-data.js"></script>
     <script src="../assets/layout.js"></script>
     <script src="../assets/script.js"></script>
   </body>

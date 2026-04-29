@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DBFirstDataGrid — Tebay.dev</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
   <body data-page="dbfirstgrid" data-basepath="../">
@@ -26,13 +26,21 @@
                 href="https://github.com/nathan-tebay/DBFirstDatagrid"
                 class="github-link"
                 target="_blank"
-                rel="noopener"
-              >
+                rel="noopener">
                 View on GitHub
               </a>
             </div>
           </div>
-
+          <div class="renders-row renders-row--full">
+            <div class="render-card">
+              <img
+                src="../assets/images/dbfirstgridscreenshot.png"
+                loading="lazy"
+                decoding="async"
+                alt="DBFirstDataGrid - screenshot" />
+              <span class="render-label">Orders Screenshot</span>
+            </div>
+          </div>
           <div class="divider"></div>
 
           <div class="project-body">
@@ -66,17 +74,55 @@
               </div>
             </div>
 
-            <div class="project-section">
+            <div class="project-section project-section--challenges">
               <h3>Challenges</h3>
               <ul>
-                <li></li>
+                <li>
+                  Safely exposing arbitrary table columns to the frontend
+                  without enabling SQL injection required strict allowlisting
+                  and regex validation at the server boundary.
+                </li>
+                <li>
+                  Building recursive subgrids (orders → order items) from
+                  generic metadata meant the component needed to handle unknown
+                  nesting depth without hardcoded assumptions.
+                </li>
+                <li>
+                  Keeping SQLite and MySQL behaviours compatible across dev and
+                  prod required careful abstraction of dialect differences in
+                  the query layer.
+                </li>
+                <li>
+                  Writing meaningful tests against a live database without flaky
+                  state required isolating each suite with an in-memory SQLite
+                  instance seeded per run.
+                </li>
               </ul>
             </div>
 
-            <div class="project-section">
+            <div class="project-section project-section--learnings">
               <h3>Learnings</h3>
               <ul>
-                <li></li>
+                <li>
+                  Schema-driven UI is powerful but requires a well-defined
+                  contract between server and client — ambiguous column names
+                  produce confusing UI without clear naming conventions.
+                </li>
+                <li>
+                  SQL injection prevention at the framework level still requires
+                  explicit allowlisting for dynamic identifiers like column and
+                  table names; parameterised queries alone are not enough there.
+                </li>
+                <li>
+                  In-memory SQLite for test isolation is fast and reliable but
+                  needs schema parity with the production database to catch real
+                  migration issues.
+                </li>
+                <li>
+                  Containerising both SQLite and MySQL environments early
+                  eliminated environment-specific bugs that would otherwise
+                  surface only in production.
+                </li>
               </ul>
             </div>
 
@@ -124,6 +170,7 @@
       </div>
     </div>
 
+    <script src="../assets/project-data.js"></script>
     <script src="../assets/layout.js"></script>
     <script src="../assets/script.js" defer></script>
   </body>

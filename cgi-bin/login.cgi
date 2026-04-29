@@ -3,9 +3,7 @@
 # GET:  serve the login form.
 # POST: validate password; on success set session cookie and redirect to /admin/.
 
-urldecode() {
-  printf '%b' "$(printf '%s' "$1" | sed 's/+/ /g; s/%/\\x/g')"
-}
+. /var/www/html/cgi-bin/common.sh
 
 # Append "; Secure" only when the request arrived over HTTPS.
 SECURE_FLAG=""
@@ -16,21 +14,37 @@ fi
 ERROR=""
 
 if [ "${REQUEST_METHOD}" = "POST" ]; then
-  body=$(head -c "${CONTENT_LENGTH:-0}")
-  password=$(urldecode "$(printf '%s' "$body" | tr '&' '\n' | grep '^password=' | head -1 | cut -d= -f2-)")
-  submitted=$(printf '%s' "$password" | sha256sum | cut -d' ' -f1)
-
-  if [ -n "$ADMIN_TOKEN" ] && [ "$submitted" = "$ADMIN_TOKEN" ]; then
-    printf 'Status: 302 Found\r\n'
-    printf 'Set-Cookie: admin_session=%s; Path=/%s; SameSite=Strict\r\n' "$ADMIN_TOKEN" "$SECURE_FLAG"
-    printf 'Location: /admin/\r\n\r\n'
-    exit 0
+  # ── Rate limiting: max 5 attempts per 300s per client IP ──────────────
+  if ! rate_limit_check "login_${REMOTE_ADDR}" 5 300; then
+    ERROR="Too many attempts. Please wait."
   fi
+  # ─────────────────────────────────────────────────────────────────────
 
-  ERROR="Invalid password."
+  if [ -z "$ERROR" ]; then
+    body=$(head -c "${CONTENT_LENGTH:-0}")
+    password=$(urldecode "$(printf '%s' "$body" | tr '&' '\n' | grep '^password=' | head -1 | cut -d= -f2-)")
+    submitted=$(printf '%s' "$password" | sha256sum | cut -d' ' -f1)
+
+    if [ -n "$ADMIN_TOKEN" ] && [ "$submitted" = "$ADMIN_TOKEN" ]; then
+      # Generate CSRF token for this session
+      CSRF_TOKEN=$(od -An -tx1 -N16 /dev/urandom | tr -d ' \n')
+      _NOW=$(date +%s)
+      printf 'Status: 302 Found\r\n'
+      emit_security_headers
+      printf 'Set-Cookie: admin_session=%s; Path=/; SameSite=Strict; HttpOnly%s\r\n' "$ADMIN_TOKEN" "$SECURE_FLAG"
+      printf 'Set-Cookie: csrf_token=%s; Path=/; SameSite=Strict%s\r\n' "$CSRF_TOKEN" "$SECURE_FLAG"
+      printf 'Set-Cookie: _session_ts=%s; Path=/; SameSite=Strict%s\r\n' "$_NOW" "$SECURE_FLAG"
+      printf 'Location: /admin/\r\n\r\n'
+      exit 0
+    fi
+
+    ERROR="Invalid password."
+  fi
 fi
 
-printf 'Content-Type: text/html\r\n\r\n'
+printf 'Content-Type: text/html\r\n'
+emit_security_headers
+printf '\r\n'
 cat <<HTML
 <!doctype html>
 <html lang="en">

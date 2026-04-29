@@ -4,29 +4,71 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## Project Overview
 
-Static personal website for **tebay.dev** — a single-page portfolio/homepage with a circuit-board aesthetic.
-
-No build step. Open `index.html` directly in a browser or serve it with any static file server:
-
-```bash
-npx serve .
-# or
-python3 -m http.server 8080
-```
+Personal portfolio site for **tebay.dev** — vanilla HTML/CSS/JS, no build step, no framework. Features a circuit-board aesthetic, dynamic navigation, multi-theme colour picker, blog, links system, and admin panel. Served via containerised Apache httpd with CGI scripts; storage backed by MinIO (dev) or AWS S3 (prod).
 
 ## File Structure
 
-| File | Purpose |
-|------|---------|
-| `index.html` | Single-file page (HTML + CSS + JS, no external dependencies) |
-| `tebay-dev.svg` | Logo — self-contained SVG with embedded base64 PNG; 960×541px |
-| `background.jpeg` | Circuit-board tile used as a repeating panel background; 960×960px |
+```
+/
+├── index.html              # Home page
+├── blog.html               # Blog listing
+├── blog-post.html          # Blog post detail (slug-based routing)
+├── links.html              # Public links/bookmarks page
+├── links.json              # Links data (categories and link cards)
+├── favicon.png
+├── tebay-dev.svg           # Logo
+├── config.cgi              # Public API: returns storage mode & posts URL
+│
+├── assets/
+│   ├── style.css           # Global styles and theme definitions
+│   ├── script.js           # General page interactions
+│   ├── layout.js           # Navigation injection & theme picker
+│   └── blog-storage.js     # localStorage blog store (local dev fallback)
+│
+├── projects/               # Individual project pages
+│   ├── dbfirstgrid.html
+│   ├── autorejection.html
+│   ├── microphonecontroller.html
+│   ├── whispertranscribe.html
+│   └── personalsite.html
+│
+├── admin/
+│   └── index.html          # Admin panel (Blog + Links tabs; session-protected)
+│
+├── cgi-bin/                # CGI scripts (session-protected except login/logout)
+│   ├── login.cgi / logout.cgi
+│   ├── save.cgi / delete.cgi / publish.cgi / posts.cgi
+│   ├── links.cgi
+│   ├── upload.cgi / images.cgi / delete-image.cgi
+│   ├── session.sh          # Auth helper (sourced by CGI scripts)
+│   └── storage.sh          # Storage backend helper
+│
+├── dev.sh                  # Start dev containers (site + MinIO)
+├── Dockerfile              # Prod image (Lambda + AWS S3)
+├── Dockerfile.dev          # Dev image (local or MinIO storage)
+├── docker-entrypoint.sh    # Container startup (S3 sync, cache init)
+├── sync-posts.sh           # S3 ↔ local cache sync (prod)
+│
+└── scripts/
+    ├── deploy-lambda.sh        # Build, push to ECR, update Lambda
+    ├── generate-credentials.sh # Generate/apply ADMIN_TOKEN
+    └── aws-setup.sh            # Configure AWS IAM, S3, CloudFront
+```
 
 ## Architecture
 
-Everything is in `index.html` — no bundler, no framework, no npm. Keep this as light weight as possible. I prefere to avoid dependencies whenever possible. Prioritize KISS principles and code readablity. 
+### Pages and Navigation
 
-### Layout (flex)
+Navigation is injected into every page by `assets/layout.js` — do **not** duplicate nav markup in individual HTML files. Pages declare routing context via `<body>` attributes:
+
+```html
+<body data-page="dbfirstgrid" data-basepath="../">
+```
+
+- `data-page` — marks the active nav link
+- `data-basepath` — used to build correct URLs for pages in subdirectories (e.g. `projects/`)
+
+### Layout (flex — index.html)
 
 ```
 .page-layout
@@ -35,18 +77,35 @@ Everything is in `index.html` — no bundler, no framework, no npm. Keep this as
     ├── .top-row
     │   ├── #panel      logo panel with tiled circuit-board background
     │   └── #info-panel bio / personal info (right column)
-    └── #content-panel  long-form content (lorem ipsum placeholder)
+    └── #content-panel  long-form content
 ```
 
 ### Theming
 
-Six curated swatch buttons (bottom-right) choose the background color. All swatches are dark tones selected to complement the green PCB logo: Navy, Forest, Abyss, Void, Obsidian, Gunmetal.
+Six curated swatch buttons (bottom-right) choose the background colour. All swatches are dark tones selected to complement the green PCB logo: Navy, Forest, Abyss, Void, Obsidian, Gunmetal.
 
-JS derives colors from the chosen hex:
+JS derives colours from the chosen hex:
 
 - **border/outline**: `darken(base, 0.5)` — 50% darker, applied to `#panel` and all `.side-panel` outlines
 - **panel fill**: `lighten(base, 0.18)` — 18% toward white, applied to `.side-panel` backgrounds
-- **text CSS variables**: computed from WCAG relative luminance of the panel fill; if luminance > 0.18 the panel is considered "light" and dark text vars are applied, otherwise white text vars are used. Variables: `--text-high`, `--text-mid`, `--text-low`, `--text-link`, `--divider`, `--hover-bg`.
+- **text CSS variables**: computed from WCAG relative luminance of the panel fill; if luminance > 0.18 the panel is "light" and dark text vars are applied, otherwise white. Variables: `--text-high`, `--text-mid`, `--text-low`, `--text-link`, `--divider`, `--hover-bg`.
+
+Theme selection is persisted to localStorage under the key `tebay_theme`.
+
+### Storage Backends
+
+Set via `STORAGE` environment variable:
+
+| Mode    | Location          | Use case |
+|---------|-------------------|----------|
+| `local` | Local filesystem  | Dev      |
+| `s3`    | AWS S3 / MinIO    | Prod     |
+
+`config.cgi` exposes the active storage mode to the frontend: `GET /config.cgi` → `{"postsUrl":"/blog/posts","storage":"local"}`.
+
+### Admin Authentication
+
+Session is cookie-based (`admin_session` cookie = SHA-256 of password). `ADMIN_TOKEN` env var holds the hash. CGI scripts source `session.sh` to enforce auth.
 
 ### Logo (`tebay-dev.svg`)
 
@@ -57,19 +116,40 @@ Generated by Python (PIL + NumPy) from the original JPEG:
 - "Tebay.dev" text saturation reduced to 55%, value reduced to 70%
 - Transparent rows cropped; final size 960×541
 
+## Development
+
+### Local Dev
+
+```bash
+./dev.sh
+```
+
+Starts two containers: **MinIO** (S3-compatible, ports 9000/9001) and the **site** (`http://localhost:8888`). Dev password: `Password123`.
+
+```bash
+# Stop dev environment
+podman rm -f personalsite personalsite-minio
+```
+
+### Adding a New Project
+
+1. Create `projects/mynewproject.html` with `<body data-page="mynewproject" data-basepath="../">`
+2. Add the project to the Projects menu group in `assets/layout.js`
+
 ## Tooling
 
 Always use `podman` instead of `docker` for all container commands.
 
 ## Formatting
+
 Maintain consistent 2-space indentation (matching the existing file).
-Use StandardJS for linting JS files. 
-Use Prettier
+Use StandardJS for linting JS files.
+Use Prettier.
 
 ## Coding Standards
 
-Use camelCase for function names and variables. 
-Do not abreviate variable names. Keep them descriptive.
+Use camelCase for function names and variables.
+Do not abbreviate variable names. Keep them descriptive.
 Use JSDoc for function and interface documentation.
-Minmize, compress and bundle Javascript and CSS files for the browser
-
+Minimize, compress and bundle JavaScript and CSS files for the browser.
+Keep it lightweight — no frameworks, no npm, no build step. Prefer KISS and readability.

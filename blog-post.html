@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blog — Tebay.dev</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="stylesheet" href="assets/style.css" />
   </head>
   <body data-page="blog">
@@ -17,60 +17,9 @@
       </div>
     </div>
 
+    <script src="assets/project-data.js"></script>
     <script src="assets/layout.js"></script>
     <script src="assets/script.js"></script>
-    <script>
-      (function () {
-        const panel = document.getElementById("post-panel");
-
-        /**
-         * Parse the slug from the page's query string.
-         * @returns {string|null}
-         */
-        function getSlug() {
-          return new URLSearchParams(window.location.search).get("slug");
-        }
-
-        /**
-         * Render a loaded post into the content panel.
-         * @param {{slug:string,title:string,date:string,desc:string}} meta
-         * @param {string} bodyHtml
-         */
-        function renderPost(meta, bodyHtml) {
-          document.title = meta.title + " — Tebay.dev";
-          panel.innerHTML =
-            '<div class="project-header">' +
-              '<div>' +
-                '<h1>' + meta.title + '</h1>' +
-                '<p class="tagline">' + meta.date + '</p>' +
-              '</div>' +
-              '<a href="blog.html" class="github-link">← Blog</a>' +
-            '</div>' +
-            // Post body — content is admin-authored, innerHTML is intentional
-            '<div class="blog-post-content">' + bodyHtml + '</div>';
-        }
-
-        (async function init() {
-          const slug = getSlug();
-          if (!slug) {
-            panel.innerHTML = '<p class="blog-empty">No post specified.</p>';
-            return;
-          }
-          try {
-            const postResponse = await fetch("/blog/posts/" + encodeURIComponent(slug) + "/index.html");
-            if (!postResponse.ok) throw new Error("Post not found.");
-            const text = await postResponse.text();
-            const newlineIndex = text.indexOf("\n");
-            const metaMatch = text.substring(0, newlineIndex).match(/^<!-- (.*) -->$/);
-            if (!metaMatch) throw new Error("Invalid post format.");
-            const meta     = JSON.parse(metaMatch[1]);
-            const bodyHtml = text.substring(newlineIndex + 1);
-            renderPost(meta, bodyHtml);
-          } catch (error) {
-            panel.innerHTML = '<p class="blog-empty">' + error.message + '</p>';
-          }
-        })();
-      })();
-    </script>
+    <script src="assets/blog-post.js"></script>
   </body>
 </html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PersonalSite — Tebay.dev</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
   <body data-page="personalsite" data-basepath="../">
@@ -101,179 +101,44 @@
             <div class="project-section project-section--challenges">
               <h3>Challenges</h3>
               <ul>
-                <li>
-                  Lambda's filesystem is read-only except for <code>/tmp</code>.
-                  The web root is copied to <code>/tmp/www</code> at startup so
-                  httpd can serve dynamically written blog posts and manifests
-                  without a separate writable volume. Spent too much time trying
-                  to use symlinks and bind mounts to make the web root writable
-                  as Claude suggested.
-                </li>
-                <li>
-                  Found out the MinIO client I was testing with does not support
-                  AWS STS temporary credentials — the
-                  <code>--session-token</code> flag simply does not exist. Every
-                  S3 write silently failed in Lambda making debugging difficult.
-                  Replaced with the AWS CLI, which handles the full Lambda
-                  credential chain natively however it increase the overall
-                  container size by ~100 MB.
-                </li>
-                <li>
-                  At 128 MB, Lambda allocates 1/16th of a vCPU. Python startup
-                  for each <code>AWS</code> CLI invocation consumed the entire
-                  30-second timeout. Increasing to 512 MB (1/4 vCPU) reduced
-                  startup to under 2 seconds per call. This is a great example
-                  of how insufficient memory can masquerade as a completely
-                  different class of bug.
-                </li>
-                <li>
-                  Running the initial S3 sync synchronously in the entrypoint
-                  blocked httpd from starting, causing Lambda Web Adapter
-                  readiness timeouts. Moving the sync before
-                  <code>exec</code> while raising
-                  <code>AWS_LWA_READINESS_CHECK_TIMEOUT</code>
-                  solved both availability and ordering.
-                </li>
-                <li>
-                  Using <code>grep</code> on a manifest preserves the leading
-                  comma from non-first entries. Passing that directly to
-                  <code>manifest_upsert</code>
-                  produced double commas and invalid JSON. Fixed with a
-                  <code>sed 's/^,*//'</code> strip before use. It took a while
-                  to get Claude on the right track with this since it kept
-                  trying to use more complex JSON parsing tools that aren't
-                  available in BusyBox.
-                </li>
+                <li>Lambda's read-only filesystem requires copying the web root to <code>/tmp/www</code> at startup — symlinks and bind mounts don't work here.</li>
+                <li>MinIO client silently fails with STS temporary credentials — replaced with AWS CLI, adding ~100 MB to the image.</li>
+                <li>128 MB Lambda = 1/16th vCPU — AWS CLI Python startup hit the 30s timeout. 512 MB fixed it.</li>
+                <li>Synchronous S3 sync in the entrypoint blocked httpd startup. Moved before <code>exec</code> and raised <code>AWS_LWA_READINESS_CHECK_TIMEOUT</code>.</li>
+                <li><code>grep</code> on the manifest preserves leading commas, producing invalid JSON — fixed with <code>sed 's/^,*//'</code> before inserting.</li>
               </ul>
             </div>
 
             <div class="project-section project-section--learnings">
               <h3>Learnings</h3>
               <ul>
-                <li>
-                  Lambda container images are a natural fit for CGI-style
-                  workloads — the process-per-request model maps directly onto
-                  Lambda invocations. This architecture is ideal for a small
-                  personal website with low to moderate traffic, and allows for
-                  a simple, stateless design. However the cold start caused by
-                  the S3 sync on startup is a significant drawback that required
-                  significant churn with Claude Code to solve.
-                </li>
-                <li>
-                  Small videos will run locally but fail to play from the
-                  container due to the 6 MB Lambda payload limit. This required
-                  moving them to S3 and referencing them via CloudFront URLs,
-                  which added complexity to the deployment process.
-                </li>
-                <li>
-                  Working with Claude Code has been effective for frontend
-                  development and CGI script implementation, creating and
-                  maintaining Dockerfiles and deployment scripts, and
-                  interacting with AWS to create profiles and debug issues. It
-                  failed when using Busybox httpd; it got confused with Apache's
-                  full version. I had to remind it that it had to serve CGI
-                  scripts from <code>/var/www/http/cgi-bin</code>; it kept
-                  trying to use the <code>/admin/cgi-bin</code> path and getting
-                  confused. Setting up simple authentication, it used the wrong
-                  file structure, requiring a lot of coaching to get it correct.
-                  Also, it would often leave remnants behind when refactoring
-                  and get confused when it found them later. Often Claude would
-                  stick with its original implementation and spin debugging
-                  until I gave it a different approach, which it was usually
-                  able to implement successfully. This was a good example of how
-                  AI can be a powerful tool for development, but also has
-                  limitations and requires careful guidance and oversight to
-                  ensure it produces correct and efficient code.
-                </li>
-                <li>
-                  AWS temporary credentials (STS) are a hidden incompatibility
-                  surface for third-party S3 clients. The AWS CLI is the only
-                  safe choice inside Lambda. I intitial was testing with MinIO
-                  client locally, which worked fine with my long-term
-                  credentials, but failed silently in Lambda due to the use of
-                  temporary credentials. This was a major gotcha that cost a lot
-                  of time to debug.
-                </li>
-                <li>
-                  Lambda CPU is strictly proportional to allocated memory.
-                  Inadequate memory manifests as slow Python startup, not OOM
-                  errors — making it look like a network or timeout bug.
-                </li>
-                <li>
-                  Bundling sensible placeholder content in the container image
-                  is a cheap way to avoid blank-page states during cold starts
-                  without adding client-side retry logic. Since this is hosted
-                  on Lambda I couldn't store blog content or manifests in the
-                  image, but I was able to include placeholder manifests that
-                  are copied to the writable <code>/tmp</code> at startup. This
-                  way even if the S3 sync hasn't completed yet, the site can
-                  still serve content and avoid blank states.
-                </li>
+                <li>Lambda + CGI is a natural fit — one invocation per request, stateless by default. Cold-start S3 sync is the main drawback.</li>
+                <li>Lambda's 6 MB payload limit breaks video delivery — serve via S3/CloudFront instead.</li>
+                <li>Claude Code works well for frontend, CGI scripts, Dockerfiles, and AWS setup. It struggled with BusyBox httpd vs Apache, CGI path conventions, and simple auth — required coaching and tended to leave refactoring remnants.</li>
+                <li>Third-party S3 clients may silently drop STS credentials — AWS CLI is the only safe choice inside Lambda.</li>
+                <li>Lambda CPU is strictly proportional to allocated memory. Inadequate memory manifests as slow Python startup, not OOM errors — making it look like a network or timeout bug.</li>
+                <li>Ship placeholder manifests in the image — copied to <code>/tmp</code> on startup, they prevent blank pages if the S3 sync is slow.</li>
               </ul>
             </div>
 
             <div class="project-section project-section--features">
               <h3>Key Features</h3>
               <ul>
-                <li>
-                  Dynamic nav and header injected via a shared layout script
-                  requiring no build step allowed for consistent updates across
-                  pages with minimal effort.
-                </li>
-                <li>
-                  Multi-theme colour picker with WCAG-derived text contrast,
-                  persisted to localStorage. This was initially implemented for
-                  my development, but I decided to make it available to users as
-                  well since it was a fun feature and added a nice touch of
-                  personalization.
-                </li>
-                <li>
-                  Blog system with draft/publish workflow, WIP placeholder cards
-                  and per-post image uploads. These are controlled via a simple
-                  admin panel that writes blog content and metadata to S3, which
-                  is then served by the site. This allows me to easily add new
-                  posts and update existing ones without needing to redeploy the
-                  site.
-                </li>
-                <li>
-                  Categorised links page, admin-editable via the same CMS as the
-                  blog. This allows me to maintain a curated list of resources
-                  and links that I find interesting, and easily update them as
-                  needed. The links are organized into categories for easy
-                  navigation, and the admin panel allows me to quickly add,
-                  edit, or remove links as my interests evolve.
-                </li>
-                <li>
-                  Cookie session for authentication to the admin panel with blog
-                  editor and links editor tabs. This provides a simple way to
-                  secure the admin functionality of the site without needing a
-                  full user management system. The session is stored in a cookie
-                  and checked on each request to the admin panel, allowing me to
-                  control access to the blog and links editing features.
-                </li>
-                <li>
-                  All dynamic content backed by POSIX shell CGI scripts to my S3
-                  bucket to keep costs low and avoid larger runtime
-                  dependencies. The AWS CLI and Lambda Web Adapter are the
-                  dependencies installed in the container image -- no Node, no
-                  PHP, no runtime.
-                </li>
-                <li>
-                  S3-compatible storage with atomic local cache mirror for
-                  zero-latency reads to allow for this to scale should it become
-                  necessary as it goes viral.
-                </li>
-                <li>
-                  Full S3 sync on cold start ensures content is available from
-                  the first request without needing to wait for individual
-                  fetches to populate the cache.
-                </li>
+                <li>Shared layout script injects nav/header — no build step, consistent across all pages.</li>
+                <li>Multi-theme colour picker with WCAG contrast, persisted to localStorage.</li>
+                <li>Blog with draft/publish workflow, WIP placeholders, and per-post image uploads.</li>
+                <li>Categorised links page managed via the same admin CMS as the blog.</li>
+                <li>Cookie-based session auth for the admin panel.</li>
+                <li>POSIX shell CGI scripts — no Node, no PHP, no runtime beyond AWS CLI and Lambda Web Adapter.</li>
+                <li>S3-backed local cache for zero-latency reads.</li>
+                <li>Full S3 sync on cold start prevents blank pages on first request.</li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <script src="../assets/project-data.js"></script>
     <script src="../assets/layout.js"></script>
     <script src="../assets/script.js"></script>
   </body>

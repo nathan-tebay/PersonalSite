@@ -4,11 +4,12 @@
 # GET:  returns {"categories":[...],"links":[...]}
 # POST: body is full JSON — saves to local cache and S3.
 
+. /var/www/html/cgi-bin/common.sh
 . /var/www/html/cgi-bin/storage.sh
 
 LOCAL_FILE="/tmp/www/links.json"
 
-printf 'Content-Type: application/json\r\n'
+emit_json_header
 
 if [ "$REQUEST_METHOD" = "GET" ]; then
   printf '\r\n'
@@ -29,6 +30,14 @@ fi
 if [ "$REQUEST_METHOD" != "POST" ]; then
   printf '\r\n{"error":"method not allowed"}\n'; exit 0
 fi
+
+# ── Rate limiting: max 15 saves per 60s per IP ────────────────────────
+rate_limit_check "links_${REMOTE_ADDR}" 15 60 || emit_error "429 Too Many Requests" "rate limited"
+# ──────────────────────────────────────────────────────────────────────
+
+# ── CSRF verification ──────────────────────────────────────────────────
+_verify_csrf || _fail_csrf
+# ───────────────────────────────────────────────────────────────────────
 
 POST_DATA=""
 [ -n "$CONTENT_LENGTH" ] && POST_DATA=$(head -c "$CONTENT_LENGTH")

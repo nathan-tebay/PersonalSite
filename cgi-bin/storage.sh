@@ -116,11 +116,59 @@ storage_exists() {
   [ -f "$LOCAL_DIR/$filename" ]
 }
 
+# ── File locking (for manifest read-modify-write safety) ──────────────────────
+#
+# Simple advisory lock using /tmp lock files. Prevents concurrent CGI scripts
+# from corrupting manifests when two requests hit simultaneously.
+#
+# _acquire_lock <lock_name> — blocks until lock acquired (max 10s)
+_acquire_lock() {
+  local _lock_file="/tmp/storage_lock_$1"
+  local _tries=0
+  while ! mkdir "$_lock_file" 2>/dev/null; do
+    _tries=$((_tries + 1))
+    [ "$_tries" -gt 100 ] && return 1  # timeout after ~10s
+    sleep 0.1
+  done
+  # Store PID for debugging
+  echo "$$" > "$_lock_file/pid"
+}
+
+# _release_lock <lock_name> — releases previously acquired lock
+_release_lock() {
+  local _lock_file="/tmp/storage_lock_$1"
+  rm -rf "$_lock_file"
+}
+
 # ── JSON helpers ──────────────────────────────────────────────────────────────
 
-# Escape backslashes and double-quotes for embedding in a JSON string.
+# Escape a string for safe embedding in a JSON value.
+# Handles backslashes, double quotes, newlines, tabs, and control characters.
 json_escape() {
-  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+  if command -v jq >/dev/null 2>&1; then
+    printf '%s' "$1" | jq -Rs . | sed 's/^"//; s/"$//' | tr -d '\n'
+  elif command -v perl >/dev/null 2>&1; then
+    printf '%s' "$1" | perl -pe '
+      s/\\/\\\\/g;
+      s/"/\\"/g;
+      s/\n/\\n/g;
+      s/\r/\\r/g;
+      s/\t/\\t/g;
+      s/([\x00-\x08\x0b\x0c\x0e-\x1f])/sprintf("\\u%04x", ord($1))/eg;
+    '
+  else
+    printf '%s' "$1" | awk '
+      {
+        if (NR > 1) printf "\\n"
+        for (i = 1; i <= length($0); i++) {
+          c = substr($0, i, 1)
+          if (c == "\\") printf "\\\\"
+          else if (c == "\"") printf "\\\""
+          else if (c == "\t") printf "\\t"
+          else printf "%s", c
+        }
+      }'
+  fi
 }
 
 # ── Manifest helpers (operate on local temp files) ────────────────────────────
