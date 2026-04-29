@@ -17,8 +17,8 @@
             <div>
               <h1>Fly Fishing Game</h1>
               <p class="tagline">
-                16-bit style 2D fly fishing simulation set on the Madison River,
-                Montana — built in Godot 4
+                Playable Godot 4.3 fly-fishing prototype with procedural river
+                ecology, hatch-driven fish behaviour, and SNES-style terrain art
               </p>
             </div>
             <div class="header-actions">
@@ -45,8 +45,9 @@
                 loading="lazy"
                 decoding="async" />
               <span class="render-label">
-                Work in progress. River generation at beta; working on other
-                visual elements and gameplay.
+                Current prototype: complete fishing loop with procedural river
+                sections, sprite-driven angler/fish systems, and an active
+                terrain-module rendering pass.
               </span>
             </div>
           </div>
@@ -55,73 +56,103 @@
             <div class="project-section project-section--overview">
               <h3>Overview</h3>
               <p>
-                A 16-bit pixel art fly fishing game grounded in realistic
-                angling principles: hatch-driven fish behaviour, directional
-                fish vision cones, edge feeding philosophy, and skill-based
-                casting with a false-cast rhythm system. The river cross-section
-                is side-scrolling, showing depth layers from surface film to
-                riverbed, with fish holding in hydraulic pockets behind
-                boulders and in eddies.
+                A 16-bit style fly-fishing game set on a Madison River-inspired
+                side-scrolling river. The current build has moved beyond a river
+                generator demo into a playable proof of concept: configure a
+                session, scout water, approach fish, manage line, cast, mend,
+                match the hatch, react to takes, and record catches in a
+                logbook.
               </p>
               <p>
-                The river is procedurally generated from a seed using
-                FastNoiseLite depth profiles, rock and boulder placement, eddy
-                currents, island generation, and a hold-scoring algorithm that
-                identifies the prime feeding lies. A depth-field rendering
-                pipeline blends tile colours through a multi-stop gradient with
-                two passes of box blur, rock bow-wave and wake zones, and
-                caustic sparkle in shallows. Three difficulty tiers (Arcade,
-                Standard, Sim) tune spook radii, fish counts, and fly-matching
-                strictness through a single DifficultyConfig resource.
+                The river simulation now models pool-riffle-run cycles, fords,
+                pocket water, exposure, species-specific holding preferences,
+                V-seam spawn offsets, boulder/rock eddies, and seeded section
+                streaming. Fish behaviour uses directional vision, intrusion
+                memory, exposure-adjusted spook sensitivity, hatch state, fly
+                matching, and hookset timing rather than a simple bite chance.
               </p>
               <p>
-                Initial scope targets the Mother's Day Caddis hatch on a single
-                river section, with the hatch cycle driving fish feeding mode
-                from subsurface emergers to surface dry flies.
+                The newest work is focused on replacing the earlier continuous
+                colour-field river look with authored SNES-style terrain
+                modules. The production renderer is still <code>RiverRenderer</code>,
+                but it now loads water, shoreline, gravel-bar, land-fill, and
+                curated transition tiles from the terrain asset tree while
+                preserving the procedural <code>RiverData</code> gameplay map.
               </p>
             </div>
 
             <div class="project-section project-section--stack">
               <h3>Stack</h3>
               <div class="tag-list">
-                <span class="tag">Godot 4</span>
+                <span class="tag">Godot 4.3</span>
                 <span class="tag">GDScript</span>
                 <span class="tag">SQLite</span>
                 <span class="tag">godot-sqlite</span>
                 <span class="tag">FastNoiseLite</span>
-                <span class="tag">Podman</span>
+                <span class="tag">Sprite sheets</span>
+                <span class="tag">Procedural generation</span>
+                <span class="tag">GL Compatibility</span>
               </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Current Status</h3>
+              <ul>
+                <li>
+                  Playable PoC loop is implemented: session configuration,
+                  exploration, fish approach, casting, drift/mending, fly
+                  matching, hookset, catch confirmation, and logbook entries.
+                </li>
+                <li>
+                  Three difficulty tiers flow through the systems: fish counts,
+                  spook radius, blind spot size, strike windows, fly-matching
+                  strictness, and UI assistance.
+                </li>
+                <li>
+                  Procedural sections stream ahead of the player at 70% progress
+                  and despawn old sections while preserving section-relative fish
+                  state and angler context.
+                </li>
+                <li>
+                  Terrain art is in active integration: water and shoreline
+                  modules are wired, shallow-to-mid and mid-to-deep transitions
+                  are loaded, and bank material transitions remain the next
+                  visual pass.
+                </li>
+              </ul>
             </div>
 
             <div class="project-section project-section--challenges">
               <h3>Challenges</h3>
               <ul>
                 <li>
-                  Procedural river generation that produces realistic hydraulics
-                  — depth profiles, holding lies, eddy currents, and boulder
-                  wake zones — from a single integer seed.
+                  Making procedural rivers feel like fishable water instead of
+                  random noise: pool heads, pool bellies, tailouts, riffles,
+                  fords, pocket water, exposure, and current speed all have to
+                  influence where fish should hold.
                 </li>
                 <li>
-                  Rendering a depth-field river cross-section with smooth
-                  colour transitions, rock disturbance zones, and caustic
-                  sparkle using only Godot's 2D drawing API (no shaders for the
-                  base terrain).
+                  Keeping the renderer and simulation decoupled. <code>RiverData</code>
+                  remains the source of truth for gameplay, while the current
+                  renderer maps that data onto authored terrain modules and
+                  sprite props.
                 </li>
                 <li>
-                  Implementing fish spook logic that respects directional vision
-                  cones, approach angle, wading vibration, shadow projection,
-                  and cast quality — all routed through a single SpookCalculator
-                  to prevent divergence.
+                  Tuning fish behaviour so approach angle, water exposure,
+                  cover, time of day, fly rejection, line slap, and wading
+                  vibration all affect fish without creating contradictory
+                  spook rules.
                 </li>
                 <li>
-                  Designing a casting state machine with false-cast rhythm,
-                  line-length timing scaling, and mend detection that feels
-                  skill-expressive without being obtuse.
+                  Building a casting loop that is readable without becoming a
+                  timing minigame detached from fishing: line length changes the
+                  rhythm, loop quality affects presentation, and mends affect
+                  drag during the drift.
                 </li>
                 <li>
-                  Streaming infinite procedural river sections seamlessly while
-                  preserving fish state, angler position, and camera limits
-                  across section boundaries.
+                  Integrating generated pixel-art terrain assets without
+                  introducing visual seams at water transitions, shoreline
+                  corners, bank material changes, or section boundaries.
                 </li>
               </ul>
             </div>
@@ -130,27 +161,24 @@
               <h3>Learnings</h3>
               <ul>
                 <li>
-                  Centralising all spook radius calculations in one module
-                  (SpookCalculator) early paid off — difficulty tuning and
-                  new spook sources could be added without touching AI or
-                  movement code.
+                  Centralising spook calculations in <code>SpookCalculator</code>
+                  made later additions, especially exposure-based sensitivity,
+                  much cheaper to integrate.
                 </li>
                 <li>
-                  Godot's <code>_draw()</code> API is capable of complex
-                  terrain rendering but requires careful batching into Sprite2D
-                  chunks to avoid per-frame redraw cost on large maps.
+                  The river generator became much more convincing once it used
+                  explicit river anatomy templates. Noise is useful texture, but
+                  pool-riffle-run structure needs to be intentional.
                 </li>
                 <li>
-                  Separating river data generation (RiverGenerator) from
-                  rendering (RiverRenderer) made it possible to unit-test hold
-                  scoring and section streaming logic independently of the
-                  visual layer.
+                  Separating generation from rendering paid off during the art
+                  transition: the same hold scores, fish placement, current map,
+                  and section streaming logic can survive renderer rewrites.
                 </li>
                 <li>
-                  Planning sessions documented as GDD sections before
-                  implementation prevented scope creep and gave a stable
-                  reference when revisiting systems after weeks away from the
-                  codebase.
+                  Terrain tile work needs deterministic selection and validation
+                  rules before blending. Good module choice prevents many seams
+                  that would otherwise be hidden with expensive pixel blending.
                 </li>
               </ul>
             </div>
@@ -159,15 +187,16 @@
               <h3>Key Systems</h3>
               <ul>
                 <li>
-                  <strong>RiverGenerator</strong> — depth profile via
-                  FastNoiseLite → tile map → current map → structure placement
-                  → eddy currents → hold scoring → top holds, seeded
-                  deterministically
+                  <strong>RiverGenerator</strong> — deterministic pipeline:
+                  noise texture, pool-riffle-run template, ford injection,
+                  habitat classification, tile map, structures, eddies, pocket
+                  water, hold scoring, and annotated top holds
                 </li>
                 <li>
-                  <strong>RiverRenderer</strong> — continuous depth-field
-                  pipeline: blur passes, rock wake zones, current lightening,
-                  Sprite2D chunk baking, and wake seam Line2D overlays
+                  <strong>RiverRenderer</strong> — production renderer that maps
+                  <code>RiverData</code> onto authored terrain modules: land
+                  fills, water depth modules, shoreline edge/corner modules,
+                  gravel bars, transition tiles, and sprite-based props
                 </li>
                 <li>
                   <strong>CastingController</strong> — state machine
@@ -175,19 +204,26 @@
                   line-length timing scaling and mouse mend detection
                 </li>
                 <li>
-                  <strong>SpookCalculator</strong> — all spook radius checks
-                  route here; formula accounts for fish size, cover, time of
-                  day, approach angle, and difficulty tier
+                  <strong>SpookCalculator</strong> — all spook checks route
+                  here; formula accounts for fish size, cover, time of day,
+                  approach angle, difficulty, wading vibration, and habitat
+                  exposure
                 </li>
                 <li>
                   <strong>FishAI</strong> — FEEDING → ALERT → SPOOKED →
-                  RELOCATING → HOLDING state machine driven by SpookCalculator
-                  and FlyMatcher rejection events
+                  RELOCATING → HOLDING state machine driven by hold selection,
+                  feeding edges, SpookCalculator, and FlyMatcher rejection
+                  events
                 </li>
                 <li>
                   <strong>HatchManager</strong> — time-of-day hatch state
                   machine shifts fish feeding mode between emerger and dry fly
                   windows; drives FlyMatcher best-match fly
+                </li>
+                <li>
+                  <strong>HooksetController + CatchLog</strong> — dry-fly rise
+                  and nymph indicator takes, strike-window timing, hard spooks,
+                  catch confirmation, fish snapshots, and logbook storage
                 </li>
                 <li>
                   <strong>DatabaseManager</strong> — autoload; opens

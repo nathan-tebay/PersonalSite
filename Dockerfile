@@ -40,10 +40,15 @@ RUN printf '.webp:image/webp\n.mp4:video/mp4\n' > /etc/httpd.conf
 
 EXPOSE 8080
 
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.4 /lambda-adapter /opt/extensions/lambda-adapter
+
 # STORAGE=s3: CGI scripts read/write via AWS CLI (Lambda STS credentials).
 # Mount a local directory to persist posts across invocations:
 #   podman run -p 8080:8080 -v ./posts:/var/www/html/blog/posts:Z tebay-site
 ENV STORAGE=s3
+ENV PORT=8080
+# Give the entrypoint time to fetch index files before accepting requests.
+ENV AWS_LWA_READINESS_CHECK_TIMEOUT=15
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["httpd", "-f", "-p", "8080", "-h", "/tmp/www", "-c", "/etc/httpd.conf"]
