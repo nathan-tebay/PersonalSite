@@ -79,15 +79,16 @@
             <div class="project-section project-section--overview">
               <h3>Overview</h3>
               <p>
-                The Autorejection project was a side project that became a
+                The AutoRejection project was a side project that became a
                 business concept. I worked on it for most of a year, building it
                 with my business partner under the company MAP Equipment, in
                 cooperation with Wild Goose Filling and several local breweries
                 in the Bozeman area. It was the second machine I programmed with
                 MAP Equipment, the first being a packaging machine capable of
-                boxing 12 packs or applying paktecs to 6 packs of beer with only
-                one prototype. Both of these were controlled by Raspberry Pi
-                single-board computers, with the UI presented over Wi-Fi.
+                boxing 12 packs or applying PakTech carriers to 6 packs of beer
+                with only one prototype. Both of these were controlled by
+                Raspberry Pi single-board computers, with the UI presented over
+                Wi-Fi.
               </p>
               <p>
                 Aside from the technical challenges, many business challenges
@@ -100,17 +101,17 @@
                 prototyping to get working at 50+ cans per minute.
               </p>
               <p>
-                The Autorejection system included a UI with historical graphs of
+                The AutoRejection system included a UI with historical graphs of
                 beer weights, current can weights as they passed over the scale,
                 and a calibration routine. Stored data can be downloaded to a
                 connected device in CSV format for customer use. It also
                 communicated with AWS IoT to allow for over-the-air updates and
-                data storage in AWS RDS. Communicated with a load cell through
-                the Load Cell PCB I designed, and built custom firmware. The
-                Raspberry Pi is encrypted using a ZYMKEY - ZYMBIT for security
-                and real-time clock functionality. A UL-listed stainless steel
-                cabinet houses separate 5V and 24V power supplies for the
-                electronics and the machine's automation.
+                data storage in AWS RDS. It communicated with a load cell
+                through a custom PCB I designed and programmed. The Raspberry Pi
+                is encrypted using a ZYMKEY - ZYMBIT for security and real-time
+                clock functionality. A UL-listed stainless steel cabinet houses
+                separate 5V and 24V power supplies for the electronics and the
+                machine's automation.
               </p>
             </div>
 
@@ -169,8 +170,9 @@
               <h3>Learnings</h3>
               <ul>
                 <li>
-                  Didn’t need to be this complex it could have been implemented
-                  with an ESP32, simpler UI and no AWS integration.
+                  It didn’t need to be this complex; it could have been
+                  implemented with an ESP32, a simpler UI, and no AWS
+                  integration.
                 </li>
                 <li>
                   Hardware projects depend on rapid prototyping and iteration to
