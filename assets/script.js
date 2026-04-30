@@ -11,20 +11,108 @@
 })();
 
 // ── Theme definitions ─────────────────────────────────────────────────
-// All chosen to complement the green PCB circuit-board logo.
+// Each theme has a distinct accent so the picker changes more than backdrop.
 const THEMES = [
-  { name: "Forest", hex: "#0d1f14" }, // deep PCB green
-  { name: "Abyss", hex: "#0a1520" }, // deep ocean blue
-  { name: "Void", hex: "#18102e" }, // dark violet
-  { name: "Obsidian", hex: "#111111" }, // near-black neutral
-  { name: "Gunmetal", hex: "#14181e" }, // dark blue-gray
-  { name: "Ember", hex: "#7a2800" }, // burnt orange
-  { name: "Rust", hex: "#a84518" }, // lighter burnt orange
-  { name: "Cobalt", hex: "#0d1a3a" }, // deep blue — safe for red-green colour blindness
-  { name: "Graphite", hex: "#1c1c1c" }, // neutral gray — hue-free, works for all CVD types
-  { name: "Fog", hex: "#b8c4cc" }, // light blue-gray
-  { name: "Parchment", hex: "#c8b89a" }, // warm tan/cream
-  { name: "Sage", hex: "#8aad92" }, // muted sage green
+  {
+    name: "Circuit",
+    hex: "#081f16",
+    panel: "#123427",
+    border: "#03110c",
+    accent: "#56f28f",
+    focus: "#a7f3d0",
+  },
+  {
+    name: "Midnight",
+    hex: "#071426",
+    panel: "#102a46",
+    border: "#020914",
+    accent: "#64d2ff",
+    focus: "#bae6fd",
+  },
+  {
+    name: "Aubergine",
+    hex: "#211137",
+    panel: "#382052",
+    border: "#11071e",
+    accent: "#d8b4fe",
+    focus: "#f0abfc",
+  },
+  {
+    name: "Carbon",
+    hex: "#111315",
+    panel: "#252a2d",
+    border: "#050607",
+    accent: "#f3f4f6",
+    focus: "#cbd5e1",
+  },
+  {
+    name: "Ember",
+    hex: "#4a1208",
+    panel: "#6f2414",
+    border: "#1f0703",
+    accent: "#ffb86b",
+    focus: "#fed7aa",
+  },
+  {
+    name: "Oxide",
+    hex: "#5b2a12",
+    panel: "#7a3d1c",
+    border: "#241006",
+    accent: "#facc15",
+    focus: "#fde68a",
+  },
+  {
+    name: "Cobalt",
+    hex: "#0d1a3a",
+    panel: "#1a3170",
+    border: "#040917",
+    accent: "#93c5fd",
+    focus: "#bfdbfe",
+  },
+  {
+    name: "Spruce",
+    hex: "#163327",
+    panel: "#285244",
+    border: "#08140f",
+    accent: "#7dd3fc",
+    focus: "#bbf7d0",
+  },
+  {
+    name: "Glacier",
+    hex: "#d7e6ed",
+    panel: "#f5fbfd",
+    border: "#8aa7b6",
+    accent: "#075985",
+    focus: "#0284c7",
+    light: true,
+  },
+  {
+    name: "Parchment",
+    hex: "#eadfc9",
+    panel: "#fff8ea",
+    border: "#aa8d5c",
+    accent: "#854d0e",
+    focus: "#b45309",
+    light: true,
+  },
+  {
+    name: "Moss",
+    hex: "#c9ddc4",
+    panel: "#f4fbf1",
+    border: "#73956b",
+    accent: "#166534",
+    focus: "#15803d",
+    light: true,
+  },
+  {
+    name: "Rosewood",
+    hex: "#efe0df",
+    panel: "#fff7f6",
+    border: "#b57b78",
+    accent: "#9f1239",
+    focus: "#be123c",
+    light: true,
+  },
 ];
 
 // ── Colour helpers ────────────────────────────────────────────────────
@@ -52,6 +140,10 @@ function toCss([r, g, b]) {
   return `rgb(${r},${g},${b})`;
 }
 
+function findTheme(hex) {
+  return THEMES.find((theme) => theme.hex.toLowerCase() === hex.toLowerCase());
+}
+
 // WCAG relative luminance
 function luminance([r, g, b]) {
   const lin = (v) => {
@@ -66,34 +158,37 @@ const body = document.body;
 const root = document.documentElement;
 
 function applyTheme(hex) {
-  const base = hexToRgb(hex);
-  const isLight = luminance(base) > 0.15; // background is light → panels go darker
-
-  // Light themes: darken panels; dark themes: lighten panels
-  const fill = isLight ? darken(base, 0.78) : lighten(base, 0.18);
+  const theme = findTheme(hex) || THEMES[0];
+  const base = hexToRgb(theme.hex);
+  const panel = hexToRgb(theme.panel);
+  const border = hexToRgb(theme.border);
+  const isLight = theme.light || luminance(panel) > 0.55;
 
   if (isLight) {
     root.style.setProperty("--text-high", "rgba(0,0,0,0.87)");
     root.style.setProperty("--text-mid", "rgba(0,0,0,0.60)");
     root.style.setProperty("--text-low", "rgba(0,0,0,0.40)");
-    root.style.setProperty("--text-link", "#166534");
+    root.style.setProperty("--text-link", theme.accent);
     root.style.setProperty("--divider", "rgba(0,0,0,0.10)");
     root.style.setProperty("--hover-bg", "rgba(0,0,0,0.06)");
+    root.style.setProperty("--swatch-active-border", "rgba(0,0,0,0.70)");
   } else {
     root.style.setProperty("--text-high", "rgba(255,255,255,0.90)");
     root.style.setProperty("--text-mid", "rgba(255,255,255,0.65)");
     root.style.setProperty("--text-low", "rgba(255,255,255,0.38)");
-    root.style.setProperty("--text-link", "#4ade80");
+    root.style.setProperty("--text-link", theme.accent);
     root.style.setProperty("--divider", "rgba(255,255,255,0.08)");
     root.style.setProperty("--hover-bg", "rgba(255,255,255,0.07)");
+    root.style.setProperty("--swatch-active-border", "rgba(255,255,255,0.82)");
   }
+  root.style.setProperty("--focus-ring", theme.focus);
 
   // Drive panel colours via CSS custom properties so every panel on every page
   // picks up the theme, including those injected by layout.js after this runs.
-  root.style.setProperty("--info-bg", toCss(fill));
-  root.style.setProperty("--panel-border", toCss(darken(base, 0.5)));
-  root.style.setProperty("--bg", hex);
-  body.style.backgroundColor = hex;
+  root.style.setProperty("--info-bg", toCss(panel));
+  root.style.setProperty("--panel-border", toCss(border));
+  root.style.setProperty("--bg", theme.hex);
+  body.style.backgroundColor = toCss(base);
 }
 
 // ── Tooltip (body-level, escapes backdrop-filter stacking context) ────
@@ -144,6 +239,7 @@ if (swatchContainer) {
     const btn = document.createElement("button");
     btn.className = "swatch";
     btn.style.backgroundColor = theme.hex;
+    btn.style.setProperty("--swatch-accent", theme.accent);
     btn.setAttribute("aria-label", theme.name);
     btn.addEventListener("mouseenter", () => showTip(btn, theme.name));
     btn.addEventListener("mouseleave", hideTip);

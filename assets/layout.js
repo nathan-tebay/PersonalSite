@@ -62,7 +62,7 @@
   /**
    * Creates a collapsible <details> group containing navigation links.
    * @param {string} label - Group heading text.
-   * @param {{ label: string, href: string, id: string }[]} items - Nav items.
+   * @param {{ label: string, href: string, id: string, description?: string }[]} items - Nav items.
    * @param {boolean} [open=false] - Whether the group starts expanded.
    * @returns {HTMLDetailsElement}
    */
@@ -73,9 +73,15 @@
     summaryElement.textContent = label;
     detailsElement.appendChild(summaryElement);
     const listElement = document.createElement("ul");
-    items.forEach(({ label: itemLabel, href, id }) => {
+    items.forEach(({ label: itemLabel, href, id, description }) => {
       const listItem = document.createElement("li");
       listItem.appendChild(makeLink(itemLabel, href, id));
+      if (description) {
+        const descriptionElement = document.createElement("p");
+        descriptionElement.className = "nav-description";
+        descriptionElement.textContent = description;
+        listItem.appendChild(descriptionElement);
+      }
       listElement.appendChild(listItem);
     });
     detailsElement.appendChild(listElement);
@@ -100,6 +106,7 @@
           label: project.label,
           href: basePath + project.path,
           id: project.id,
+          description: project.description,
         };
       }),
       true,

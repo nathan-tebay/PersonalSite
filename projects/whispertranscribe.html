@@ -16,8 +16,8 @@
             <div>
               <h1>WhisperTranscribe</h1>
               <p class="tagline">
-                GPU-accelerated push-to-talk transcription and voice command daemon —
-                one button types, the other commands a local or cloud LLM
+                Linux push-to-talk transcription and voice command daemon —
+                one button types, the other routes speech into configurable LLMs
               </p>
             </div>
             <div class="header-actions">
@@ -61,44 +61,81 @@
             <div class="project-section project-section--overview">
               <h3>Overview</h3>
               <p>
-                A Python daemon driven by the two-button
+                WhisperTranscribe turns a custom two-button HID controller into
+                a practical voice interface for the Linux desktop: one button
+                types into whatever window is focused, while the other turns
+                spoken instructions into GUI launches, terminal commands, or
+                injected key sequences.
+              </p>
+              <p>
+                It is a Python daemon driven by the two-button
                 <a href="microphonecontroller.html">MicrophoneController</a> USB
-                HID device. Both buttons share the same hold-to-record flow —
-                audio is captured via PipeWire while the key is held and
-                transcribed by whisper.cpp on release — but diverge in what
-                happens with the result.
+                HID device. Both buttons share the same hold-to-record flow:
+                audio is captured while the key is held, transcribed by
+                whisper.cpp on release, and then routed based on the trigger.
               </p>
               <p>
                 <strong>Scroll Lock</strong> injects the transcription directly
                 into the focused window via ydotool with no clipboard
                 interaction. <strong>Pause</strong> routes the text through a
-                configurable LLM (local Ollama or Claude CLI) which interprets
-                the spoken instruction and returns an executable action —
-                launching an app, running a shell command in a terminal, or
-                injecting a key sequence.
+                configurable LLM backend, which interprets the spoken
+                instruction and returns an executable action: launching an app,
+                running a shell command in a terminal, or injecting a key
+                sequence.
               </p>
               <p>
-                The daemon grabs the keyboard exclusively via evdev so neither
-                key ever reaches the desktop. A 0.5-second tap guard discards
-                accidental presses. Transcription runs on the GPU via
-                whisper.cpp built with the Vulkan backend, keeping latency low
-                even with the large-v3 model. A systemd user service handles
-                autostart and restart on failure.
+                The daemon watches evdev keyboard devices with hotplug support,
+                deduplicates duplicate event nodes from the same physical
+                keyboard, and can now filter by a configured input device name.
+                A 0.5-second tap guard discards accidental presses. A systemd
+                user service handles autostart and restart on failure.
               </p>
               <p>
                 A GTK3 system tray application provides a persistent icon that
                 reflects the daemon's running state and a settings dialog for
-                configuring the keyboard device, hotkeys, LLM backend (Ollama
-                or Claude), Ollama model, binary paths, audio backend, language,
-                timeouts, and terminal emulator — all without editing config
+                configuring hotkeys, LLM backend, model, binary paths, language,
+                timeouts, terminal emulator, target input device, and whether
+                whisper.cpp should use GPU offload — all without editing config
                 files.
               </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Current Status</h3>
+              <ul>
+                <li>
+                  Active branch: <code>other-models</code>, focused on making
+                  command mode work across more LLM providers and machine
+                  configurations.
+                </li>
+                <li>
+                  Command backends now include Ollama, Claude CLI, OpenAI, Groq,
+                  LM Studio, and OpenRouter through a shared OpenAI-compatible
+                  chat-completions path.
+                </li>
+                <li>
+                  Advanced settings now include an input-device name filter and
+                  a <code>whisper_gpu</code> toggle, allowing the daemon to
+                  target a specific keyboard and run whisper.cpp with or without
+                  GPU acceleration.
+                </li>
+                <li>
+                  The tray adapts its model field by backend: Ollama gets a live
+                  local model picker, while OpenAI-compatible providers get a
+                  model text entry.
+                </li>
+                <li>
+                  The README documents Python 3.9+ support, systemd user
+                  services, install/uninstall flow, and cloud/local model
+                  configuration through <code>config.json</code>.
+                </li>
+              </ul>
             </div>
 
             <div class="project-section project-section--stack">
               <h3>Stack</h3>
               <div class="tag-list">
-                <span class="tag">Python 3.14</span>
+                <span class="tag">Python 3.9+</span>
                 <span class="tag">whisper.cpp</span>
                 <span class="tag">Vulkan</span>
                 <span class="tag">python-evdev</span>
@@ -106,6 +143,10 @@
                 <span class="tag">ydotool</span>
                 <span class="tag">Ollama</span>
                 <span class="tag">Claude</span>
+                <span class="tag">OpenAI</span>
+                <span class="tag">Groq</span>
+                <span class="tag">OpenRouter</span>
+                <span class="tag">LM Studio</span>
                 <span class="tag">GTK3</span>
                 <span class="tag">D-Bus</span>
                 <span class="tag">systemd</span>
@@ -116,20 +157,51 @@
             <div class="project-section">
               <h3>Challenges</h3>
               <ul>
-                <li>Handling API differences and error cases between Ollama and Claude backends.</li>
-                <li>Optimizing the whisper.cpp audio pipeline for low-latency GPU transcription.</li>
-                <li>Robust evdev keyboard grab with clean error recovery and stable daemon behavior.</li>
-                <li>GTK3 system tray with a comprehensive settings dialog.</li>
+                <li>
+                  Normalizing local and cloud LLM providers into one command
+                  interface while keeping response parsing strict enough to be
+                  safe and predictable.
+                </li>
+                <li>
+                  Keeping evdev device handling reliable across hotplug events,
+                  duplicate physical interfaces, permission errors, and
+                  user-selected device filters.
+                </li>
+                <li>
+                  Supporting both GPU and CPU whisper.cpp execution paths
+                  without turning install/configuration into a hardware-specific
+                  maze.
+                </li>
+                <li>
+                  Building a GTK3 tray that works with Linux tray standards and
+                  exposes enough configuration to avoid hand-editing JSON for
+                  normal use.
+                </li>
               </ul>
             </div>
 
             <div class="project-section">
               <h3>Learnings</h3>
               <ul>
-                <li>Audio processing and GPU-accelerated transcription with whisper.cpp.</li>
-                <li>Unifying multiple LLM APIs under a single interface.</li>
-                <li>Python system programming — process management, signal handling, systemd integration.</li>
-                <li>GTK3 tray via StatusNotifierItem + DBusMenu — sparse docs and fragmented Linux tray standards make this harder than expected.</li>
+                <li>
+                  OpenAI-compatible APIs reduce backend code, but defaults still
+                  matter: each provider needs sensible URL/model behavior and
+                  clear API-key handling.
+                </li>
+                <li>
+                  Desktop automation is most useful when it never touches the
+                  clipboard; ydotool text and raw key injection keep the focused
+                  application as the integration point.
+                </li>
+                <li>
+                  Hotplug-aware keyboard watching needs physical-device
+                  deduplication, not just event-node enumeration.
+                </li>
+                <li>
+                  GTK3 tray via StatusNotifierItem + DBusMenu works, but sparse
+                  docs and fragmented Linux tray standards make it harder than
+                  the actual daemon logic.
+                </li>
               </ul>
             </div>
 
@@ -155,10 +227,11 @@
                 </li>
               </ul>
               <p>
-                The Scroll Lock button also doubles as a command trigger: if the
-                transcribed text begins with the configured prefix word (default:
-                <code>command</code>), the remainder is routed through the LLM
-                pipeline instead of being typed.
+                Backends are selected through config or the tray UI. Ollama
+                remains the default local path; Claude CLI is supported for
+                command-line use; OpenAI, Groq, OpenRouter, and LM Studio share
+                the OpenAI-compatible request path with configurable URL, model,
+                API key, and timeout.
               </p>
             </div>
 
@@ -176,9 +249,10 @@
                 The tray menu provides start/stop toggle and a settings dialog
                 covering: keyboard device selection (dropdown of all
                 evdev-capable devices), hotkey capture (click the button then
-                press any key), LLM backend selection (Ollama or Claude), live
-                Ollama model picker (queries the local instance for installed
-                models), and an advanced panel for binary paths, audio backend,
+                press any key), LLM backend selection, live Ollama model picker
+                (queries the local instance for installed models), an
+                OpenAI-compatible model field, and an advanced panel for binary
+                paths, API settings, input device name filtering, GPU toggle,
                 language, timeouts, and terminal emulator. Works natively on
                 KDE; GNOME requires the AppIndicator shell extension.
               </p>
@@ -198,13 +272,14 @@
                 </li>
                 <li>
                   <code>transcriber</code> — invokes whisper.cpp with
-                  <code>--no-timestamps -np</code>; strips and returns clean
-                  text, or None on failure
+                  <code>--no-timestamps -np</code>, appending
+                  <code>--no-gpu</code> when GPU offload is disabled; strips and
+                  returns clean text, or None on failure
                 </li>
                 <li>
                   <code>commander</code> — builds a structured prompt, queries
-                  Ollama or Claude CLI, parses the response, and dispatches
-                  GUI/TERMINAL/KEYS actions
+                  Ollama, Claude CLI, or an OpenAI-compatible backend, parses
+                  the response, and dispatches GUI/TERMINAL/KEYS actions
                 </li>
                 <li>
                   <code>typer</code> — calls ydotool to inject transcribed text
@@ -222,35 +297,35 @@
             </div>
 
             <div class="project-section project-section--wip">
-              <h3>Work in Progress</h3>
-              <p>The <code>ubuntu-debian-support</code> branch broadens platform compatibility:</p>
+              <h3>Branch Work</h3>
+              <p>
+                The older <code>ubuntu-debian-support</code> work broadened
+                platform compatibility. The current <code>other-models</code>
+                branch is focused on LLM provider flexibility and machine-level
+                configuration.
+              </p>
               <ul>
                 <li>
-                  <strong>PulseAudio fallback</strong> — <code>recorder.py</code> now
-                  auto-detects the available audio backend at startup; uses
-                  <code>pw-record</code> on PipeWire systems (Fedora) and falls back to
-                  <code>parecord</code> on PulseAudio systems (Ubuntu/Debian). Backend can
-                  also be pinned explicitly via config.
+                  <strong>Multi-provider command mode</strong> — OpenAI, Groq,
+                  OpenRouter, and LM Studio now share an OpenAI-compatible
+                  backend alongside Ollama and Claude CLI.
                 </li>
                 <li>
-                  <strong>NVIDIA and CPU whisper.cpp builds</strong> — alongside the
-                  existing Vulkan/AMD build, the branch documents and supports building
-                  whisper.cpp with CUDA for NVIDIA GPUs
-                  (<code>-DGGML_CUDA=ON</code>) and a plain CPU-only build for
-                  machines without a supported GPU.
+                  <strong>Device targeting</strong> — the daemon can filter
+                  watched evdev devices by configured device-name substring,
+                  which helps when multiple keyboards or HID devices are
+                  present.
                 </li>
                 <li>
-                  <strong>WAV finalisation fix</strong> — recording is now stopped with
-                  SIGINT instead of SIGTERM. SIGTERM caused both pw-record and parecord to
-                  leave <code>data_size=0</code> in the WAV header, which whisper.cpp
-                  rejects silently. SIGINT triggers a proper flush and correct header write.
+                  <strong>GPU toggle</strong> — the tray and config can disable
+                  whisper.cpp GPU offload, causing transcription to pass
+                  <code>--no-gpu</code> for CPU-only or troubleshooting cases.
                 </li>
                 <li>
-                  <strong>Keyboard enumeration refactor</strong> — device listing
-                  extracted into a shared <code>list_keyboard_devices()</code>
-                  function, removing duplication between the daemon and the system
-                  tray. The tray also gains a clearer error message when
-                  <code>StatusNotifierWatcher</code> is unavailable on GNOME.
+                  <strong>OpenAI-compatible model controls</strong> — the tray
+                  shows provider-specific model controls and stores the chosen
+                  model, URL, API key, and timeout in
+                  <code>~/.config/whisper-transcribe/config.json</code>.
                 </li>
               </ul>
             </div>
