@@ -17,8 +17,8 @@
             <div>
               <h1>PersonalSite</h1>
               <p class="tagline">
-                This site — a personal portfolio and documentation platform
-                built from scratch with vanilla HTML, CSS, and JavaScript
+                This site — a hand-rolled portfolio, project archive, CMS, and
+                Lambda-hosted deployment target built without a frontend framework
               </p>
             </div>
             <div class="header-actions">
@@ -38,49 +38,117 @@
             <div class="project-section project-section--overview">
               <h3>Overview</h3>
               <p>
-                For this project I decided to utilize Claude Code as much as
-                possible in designing, implementing, and documenting my personal
-                website. I had several requirements in mind:
+                PersonalSite started as a constraint-driven portfolio rebuild:
+                no frontend framework, no Node runtime, no build step, and no
+                heavyweight CMS. It has since become the operating surface for
+                <code>tebay.dev</code>: project documentation, a blog, a curated
+                links page, an admin panel, deployment scripts, smoke checks,
+                and a small analytics pipeline.
+              </p>
+              <p>
+                The public side is still plain HTML, CSS, and vanilla
+                JavaScript. Shared navigation is injected by
+                <code>assets/layout.js</code>, project metadata lives in
+                <code>assets/project-data.js</code>, and page-specific scripts
+                render blog posts, links, and theme state without a bundler. The
+                admin side is implemented as POSIX shell CGI scripts behind
+                cookie-based session auth.
+              </p>
+              <p>
+                Production runs as an AWS Lambda container behind CloudFront.
+                BusyBox <code>httpd</code> serves from <code>/tmp/www</code>,
+                the AWS Lambda Web Adapter bridges Lambda events to HTTP on
+                port 8080, and S3 stores blog posts, images, links, and
+                analytics data. On cold start the container syncs S3 content
+                into a local cache so normal page reads stay fast and simple.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Current Status</h3>
+              <ul>
+                <li>
+                  Live at <code>tebay.dev</code> with project pages, responsive
+                  navigation, persistent theme swatches, blog rendering, links
+                  rendering, and an admin panel.
+                </li>
+                <li>
+                  Blog and links content are managed through CGI endpoints and
+                  mirrored between S3 and the Lambda-local cache for immediate
+                  reads after writes.
+                </li>
+                <li>
+                  Admin workflows include login/logout, draft save, publish,
+                  delete, image upload/list/delete, link management, and
+                  analytics review.
+                </li>
+                <li>
+                  Deployment is scripted: <code>deploy-lambda.sh</code> builds a
+                  linux/amd64 container with Podman, pushes to ECR, updates the
+                  Lambda function, waits for completion, and reports the
+                  resolved image digest.
+                </li>
+                <li>
+                  Validation is split between static site checks
+                  (<code>validate-site.py</code>) and production smoke checks
+                  (<code>smoke-check.sh https://tebay.dev</code>).
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Design Constraints</h3>
+              <ul>
+                <li>
+                  Use no frontend frameworks, libraries, or build tools — just
+                  plain HTML, CSS, and JavaScript.
+                </li>
+                <li>
+                  Keep the runtime small and transparent: BusyBox
+                  <code>httpd</code>, shell CGI, AWS CLI, and the Lambda Web
+                  Adapter.
+                </li>
+                <li>
+                  Support local development with Podman and MinIO while keeping
+                  production storage on AWS S3.
+                </li>
+                <li>
+                  Make publishing possible from the site itself without adding a
+                  database server, Node application, or external CMS.
+                </li>
+                <li>
+                  Keep deployment repeatable enough that production fixes can be
+                  built, pushed, and verified from one script.
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>AI-Assisted Build</h3>
+              <p>
+                I used Claude Code heavily while designing, implementing, and
+                documenting the site. That was useful for quickly iterating on
+                CGI scripts, Dockerfiles, AWS setup, admin UI, and validation
+                tooling, but it also exposed places where AI needs tight
+                supervision:
               </p>
               <ul>
                 <li>
-                  Use no frameworks, libraries, or build tools — just plain
-                  HTML, CSS, and JavaScript
+                  It was effective at generating small, testable shell and
+                  frontend changes when the constraints were explicit.
                 </li>
                 <li>
-                  Host the site on AWS Lambda using a container that could be
-                  hosted for free within the AWS Free Tier limits
+                  It tended to confuse BusyBox <code>httpd</code>, Apache-style
+                  CGI assumptions, Lambda filesystem limits, and auth/session
+                  edge cases unless corrected with real runtime feedback.
                 </li>
                 <li>
-                  Implement a simple CMS for blog posts and links as lightweight
-                  as possible.
-                </li>
-                <li>
-                  Ensure the site was performant and responsive, with a good
-                  user experience on both desktop and mobile devices.
-                </li>
-                <li>
-                  Utilize AI as much as possible in the development and
-                  documentation process.
+                  It was most valuable as a fast implementation partner, not as
+                  an autopilot. The important work was constraining the design,
+                  reading the generated code, and verifying behavior in the real
+                  deployment environment.
                 </li>
               </ul>
-
-              <p>
-                This approach allowed me to get familiar with Claude Code while
-                creating a highly optimized personal website. I would not have
-                implemented this with CGI, as I haven't used it before. However,
-                I am very happy with the result, as it is clean, fast, and
-                perfectly meets my needs. I'm not sure Claude Code saved much
-                time, but it allowed me to take a different approach and
-                produced a less bloated codebase than a framework would have. It
-                also eased some interactions with AWS, largely by taking me out
-                of the console and resulting in an automated deployment script.
-                Overall, this was a fun and rewarding project that I'm happy
-                with, and it was a great way to learn more about web development
-                and AI-assisted coding. I also learned a lot about the
-                limitations and gotchas of AWS Lambda, which was a valuable
-                experience in itself.
-              </p>
             </div>
 
             <div class="project-section project-section--stack">
@@ -89,49 +157,132 @@
                 <span class="tag">HTML5</span>
                 <span class="tag">CSS3</span>
                 <span class="tag">Vanilla JS</span>
-                <span class="tag">Shell / CGI</span>
+                <span class="tag">Shell CGI</span>
                 <span class="tag">BusyBox httpd</span>
                 <span class="tag">AWS Lambda</span>
+                <span class="tag">Lambda Web Adapter</span>
                 <span class="tag">AWS S3</span>
                 <span class="tag">CloudFront</span>
+                <span class="tag">ECR</span>
                 <span class="tag">Podman</span>
+                <span class="tag">MinIO</span>
               </div>
             </div>
 
             <div class="project-section project-section--challenges">
               <h3>Challenges</h3>
               <ul>
-                <li>Lambda's read-only filesystem requires copying the web root to <code>/tmp/www</code> at startup — symlinks and bind mounts don't work here.</li>
-                <li>MinIO client silently fails with STS temporary credentials — replaced with AWS CLI, adding ~100 MB to the image.</li>
-                <li>128 MB Lambda = 1/16th vCPU — AWS CLI Python startup hit the 30s timeout. 512 MB fixed it.</li>
-                <li>Synchronous S3 sync in the entrypoint blocked httpd startup. Moved before <code>exec</code> and raised <code>AWS_LWA_READINESS_CHECK_TIMEOUT</code>.</li>
-                <li><code>grep</code> on the manifest preserves leading commas, producing invalid JSON — fixed with <code>sed 's/^,*//'</code> before inserting.</li>
+                <li>
+                  Lambda's read-only filesystem means the image web root cannot
+                  be modified in place. Startup copies the site to
+                  <code>/tmp/www</code>, then <code>httpd</code> serves from
+                  there so posts, manifests, links, and generated CGI files can
+                  be updated.
+                </li>
+                <li>
+                  Lambda containers need the AWS Lambda Web Adapter. A Dockerfile
+                  refactor accidentally removed the adapter copy and
+                  <code>PORT=8080</code>, which produced production
+                  <code>502</code> responses until the adapter layer and
+                  readiness timeout were restored.
+                </li>
+                <li>
+                  Third-party S3 clients and Lambda temporary credentials were
+                  brittle in this environment. The production image uses AWS CLI
+                  despite the size cost because it reliably follows the standard
+                  credential chain.
+                </li>
+                <li>
+                  The first request after a cold start depends on content
+                  availability. The entrypoint performs a synchronous S3 sync
+                  before starting <code>httpd</code>, then refreshes the cache in
+                  the background every 10 minutes.
+                </li>
+                <li>
+                  Shell-based JSON handling is fragile. Manifest updates use
+                  small line-oriented helpers, advisory locks in <code>/tmp</code>,
+                  and explicit cleanup of leading commas before re-inserting
+                  entries.
+                </li>
+                <li>
+                  Lambda CPU is proportional to memory. Too little memory looked
+                  like AWS CLI/network slowness rather than an obvious resource
+                  issue.
+                </li>
               </ul>
             </div>
 
             <div class="project-section project-section--learnings">
               <h3>Learnings</h3>
               <ul>
-                <li>Lambda + CGI is a natural fit — one invocation per request, stateless by default. Cold-start S3 sync is the main drawback.</li>
-                <li>Lambda's 6 MB payload limit breaks video delivery — serve via S3/CloudFront instead.</li>
-                <li>Claude Code works well for frontend, CGI scripts, Dockerfiles, and AWS setup. It struggled with BusyBox httpd vs Apache, CGI path conventions, and simple auth — required coaching and tended to leave refactoring remnants.</li>
-                <li>Third-party S3 clients may silently drop STS credentials — AWS CLI is the only safe choice inside Lambda.</li>
-                <li>Lambda CPU is strictly proportional to allocated memory. Inadequate memory manifests as slow Python startup, not OOM errors — making it look like a network or timeout bug.</li>
-                <li>Ship placeholder manifests in the image — copied to <code>/tmp</code> on startup, they prevent blank pages if the S3 sync is slow.</li>
+                <li>
+                  Lambda plus CGI is viable for a low-traffic personal site:
+                  each request is isolated, the runtime is understandable, and
+                  persistence can be pushed to S3.
+                </li>
+                <li>
+                  Cold-start behavior matters more than steady-state behavior.
+                  The site needs placeholder manifests, synchronous startup
+                  sync, and smoke checks because a broken cold start looks like
+                  a broken website.
+                </li>
+                <li>
+                  A local MinIO-backed dev environment is worth the setup. It
+                  lets the same storage code path run locally without touching
+                  production S3.
+                </li>
+                <li>
+                  Static validation catches broken links and markup, but the
+                  deployment surface also needs live route checks because
+                  CloudFront, Lambda, ECR, and the adapter can fail independently
+                  of the HTML.
+                </li>
+                <li>
+                  Keeping the frontend framework-free made the project easier to
+                  reason about. Most complexity lives where it belongs: storage,
+                  auth, deployment, and Lambda startup behavior.
+                </li>
               </ul>
             </div>
 
             <div class="project-section project-section--features">
               <h3>Key Features</h3>
               <ul>
-                <li>Shared layout script injects nav/header — no build step, consistent across all pages.</li>
-                <li>Multi-theme colour picker with WCAG contrast, persisted to localStorage.</li>
-                <li>Blog with draft/publish workflow, WIP placeholders, and per-post image uploads.</li>
-                <li>Categorised links page managed via the same admin CMS as the blog.</li>
-                <li>Cookie-based session auth for the admin panel.</li>
-                <li>POSIX shell CGI scripts — no Node, no PHP, no runtime beyond AWS CLI and Lambda Web Adapter.</li>
-                <li>S3-backed local cache for zero-latency reads.</li>
-                <li>Full S3 sync on cold start prevents blank pages on first request.</li>
+                <li>
+                  Shared layout script injects responsive navigation and keeps
+                  project pages consistent without a build step.
+                </li>
+                <li>
+                  Multi-theme color picker derives readable text/link colors
+                  from selected swatches and persists the choice in
+                  <code>localStorage</code>.
+                </li>
+                <li>
+                  Blog CMS supports drafts, publishing, WIP placeholders,
+                  per-post images, public manifests, and admin-only manifests.
+                </li>
+                <li>
+                  Links CMS manages categorized bookmark cards through the same
+                  admin surface.
+                </li>
+                <li>
+                  Cookie-based admin session auth with shared session utilities,
+                  refresh timestamps, and rate limiting helpers.
+                </li>
+                <li>
+                  Lightweight analytics beacon logs privacy-truncated IP,
+                  page/referrer/user-agent, optional geo data, and admin-only
+                  JSON reporting.
+                </li>
+                <li>
+                  Production deployment script handles ECR login, no-cache
+                  linux/amd64 image build, push, Lambda update, waiter, and
+                  deployed digest reporting.
+                </li>
+                <li>
+                  Static validation and live smoke checks cover the homepage,
+                  project pages, blog manifests, links, and admin route.
+                </li>
               </ul>
             </div>
           </div>
