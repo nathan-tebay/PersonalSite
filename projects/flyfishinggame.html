@@ -4,6 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fly Fishing Game — Tebay.dev</title>
+    <meta
+      name="description"
+      content="Fly Fishing Game project write-up: a playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules."
+    />
+    <meta name="author" content="Nathan Tebay" />
+    <link rel="canonical" href="https://tebay.dev/projects/flyfishinggame.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tebay.dev" />
+    <meta property="og:title" content="Fly Fishing Game - Tebay.dev" />
+    <meta
+      property="og:description"
+      content="A playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules."
+    />
+    <meta property="og:url" content="https://tebay.dev/projects/flyfishinggame.html" />
+    <meta property="og:image" content="https://tebay.dev/assets/images/flyfishinggame.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Fly Fishing Game - Tebay.dev" />
+    <meta
+      name="twitter:description"
+      content="A playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules."
+    />
+    <meta name="twitter:image" content="https://tebay.dev/assets/images/flyfishinggame.png" />
     <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
@@ -18,7 +40,8 @@
               <h1>Fly Fishing Game</h1>
               <p class="tagline">
                 Playable Godot 4.3 fly-fishing prototype with procedural river
-                ecology, hatch-driven fish behaviour, and SNES-style terrain art
+                ecology, hatch-driven fish behaviour, and authored SNES-style
+                terrain modules
               </p>
             </div>
             <div class="header-actions">
@@ -46,8 +69,9 @@
                 decoding="async" />
               <span class="render-label">
                 Current prototype: complete fishing loop with procedural river
-                sections, sprite-driven angler/fish systems, and an active
-                terrain-module rendering pass.
+                sections, sprite-driven angler/fish systems, and a custom
+                renderer now pulling water, shoreline, gravel, terrain, and prop
+                art from checked-in module atlases.
               </span>
             </div>
           </div>
@@ -72,12 +96,20 @@
                 matching, and hookset timing rather than a simple bite chance.
               </p>
               <p>
-                The newest work is focused on replacing the earlier continuous
-                colour-field river look with authored SNES-style terrain
-                modules. The production renderer is still <code>RiverRenderer</code>,
-                but it now loads water, shoreline, gravel-bar, land-fill, and
-                curated transition tiles from the terrain asset tree while
-                preserving the procedural <code>RiverData</code> gameplay map.
+                The newest work is the terrain-module rendering pass. The game
+                still treats procedural <code>RiverData</code> as the gameplay
+                source of truth, but the production <code>RiverRenderer</code>
+                now maps that data onto authored water, shoreline, gravel-bar,
+                terrain-fill, transition, and prop sprites instead of relying on
+                the earlier continuous colour-field river look.
+              </p>
+              <p>
+                A normalized packed atlas and TileSet also live in the repo for
+                editor painting and TileMap experiments, but they are not the
+                active renderer path. <code>RiverWorld</code> still uses the
+                custom section renderer so procedural streaming, fish placement,
+                hold scores, and wading logic stay coupled to the simulation
+                rather than to a hand-painted map.
               </p>
             </div>
 
@@ -90,6 +122,7 @@
                 <span class="tag">godot-sqlite</span>
                 <span class="tag">FastNoiseLite</span>
                 <span class="tag">Sprite sheets</span>
+                <span class="tag">Authored terrain modules</span>
                 <span class="tag">Procedural generation</span>
                 <span class="tag">GL Compatibility</span>
               </div>
@@ -114,10 +147,26 @@
                   state and angler context.
                 </li>
                 <li>
-                  Terrain art is in active integration: water and shoreline
-                  modules are wired, shallow-to-mid and mid-to-deep transitions
-                  are loaded, and bank material transitions remain the next
-                  visual pass.
+                  The production renderer loads active water, shoreline,
+                  terrain-fill, gravel-bar, and decorative prop modules from the
+                  checked-in asset tree.
+                </li>
+                <li>
+                  Curated shallow-to-mid and mid-to-deep water transition tiles
+                  are wired into the chunk render pass, with directional depth
+                  blending kept as the fallback when an authored transition does
+                  not apply.
+                </li>
+                <li>
+                  Shoreline placement now validates 2x2 water footprints before
+                  drawing corners, prioritizing outer corners, inner corners,
+                  then straight edges to avoid obvious wrong-corner artifacts.
+                </li>
+                <li>
+                  The remaining terrain work is visual polish: bank material
+                  transitions, seam reduction, section-boundary continuity, and
+                  a visual smoke pass across bends, islands, gravel bars, and
+                  concave banks.
                 </li>
               </ul>
             </div>
@@ -134,8 +183,8 @@
                 <li>
                   Keeping the renderer and simulation decoupled. <code>RiverData</code>
                   remains the source of truth for gameplay, while the current
-                  renderer maps that data onto authored terrain modules and
-                  sprite props.
+                  renderer maps that data onto authored terrain modules, runtime
+                  transition tiles, and sprite props.
                 </li>
                 <li>
                   Tuning fish behaviour so approach angle, water exposure,
@@ -153,6 +202,11 @@
                   Integrating generated pixel-art terrain assets without
                   introducing visual seams at water transitions, shoreline
                   corners, bank material changes, or section boundaries.
+                </li>
+                <li>
+                  Maintaining two useful terrain paths without confusing their
+                  roles: the custom renderer is production, while the packed
+                  TileSet is a normalized comparison and prototyping asset.
                 </li>
               </ul>
             </div>
@@ -180,6 +234,11 @@
                   rules before blending. Good module choice prevents many seams
                   that would otherwise be hidden with expensive pixel blending.
                 </li>
+                <li>
+                  Shoreline tiles need geometry-aware placement, not just
+                  neighbor checks. The renderer now validates water-facing
+                  contact and quadrant fit before committing corner modules.
+                </li>
               </ul>
             </div>
 
@@ -196,7 +255,15 @@
                   <strong>RiverRenderer</strong> — production renderer that maps
                   <code>RiverData</code> onto authored terrain modules: land
                   fills, water depth modules, shoreline edge/corner modules,
-                  gravel bars, transition tiles, and sprite-based props
+                  gravel bars, runtime water transition tiles, and sprite-based
+                  props
+                </li>
+                <li>
+                  <strong>Terrain asset pipeline</strong> — checked-in
+                  <code>assets/terrain/modules</code> and
+                  <code>assets/terrain/runtime</code> pools feed the live
+                  renderer; the generated packed atlas and TileSet remain
+                  available for TileMap experiments and visual comparison
                 </li>
                 <li>
                   <strong>CastingController</strong> — state machine

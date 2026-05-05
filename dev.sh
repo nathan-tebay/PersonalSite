@@ -6,7 +6,8 @@ MINIO=personalsite-minio
 SITE=personalsite
 MINIO_USER=minioadmin
 MINIO_PASS=minioadmin
-ADMIN_TOKEN=008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601  # Password123
+DEFAULT_ADMIN_TOKEN=008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601
+ADMIN_TOKEN="${ADMIN_TOKEN:-$DEFAULT_ADMIN_TOKEN}"
 BUCKET=ntebay-personal-site
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 

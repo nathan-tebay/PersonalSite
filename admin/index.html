@@ -3,9 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
     <title>Blog Admin — Tebay.dev</title>
   <script>
-    if (!document.cookie.split(';').some(function(c){return c.trim().startsWith('admin_session=')}))
+    if (!document.cookie.split(';').some(function(c){return c.trim().startsWith('admin_ui=1')}))
       window.location.replace('/cgi-bin/login.cgi')
   </script>
     <link rel="icon" type="image/png" href="../favicon.png" />
@@ -711,7 +712,7 @@
         flex-shrink: 0;
       }
 
-      #recent-visits-panel {
+      #unique-visitors-panel {
         background: rgba(0, 0, 0, 0.15);
         border: 1px solid var(--divider);
         border-radius: 0.5rem;
@@ -719,7 +720,7 @@
         overflow: hidden;
       }
 
-      #recent-visits-panel h3 {
+      #unique-visitors-panel h3 {
         font-size: 0.62rem;
         font-weight: 700;
         letter-spacing: 0.08em;
@@ -728,18 +729,18 @@
         margin: 0 0 0.55rem;
       }
 
-      .visits-scroll {
+      .visitors-scroll {
         overflow-y: auto;
-        max-height: 280px;
+        max-height: 320px;
       }
 
-      .visits-table {
+      .visitors-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 0.74rem;
       }
 
-      .visits-table th {
+      .visitors-table th {
         text-align: left;
         padding: 0.28rem 0.45rem;
         color: var(--text-low);
@@ -752,7 +753,7 @@
         backdrop-filter: blur(4px);
       }
 
-      .visits-table td {
+      .visitors-table td {
         padding: 0.28rem 0.45rem;
         color: var(--text-mid);
         border-bottom: 1px solid rgba(255, 255, 255, 0.03);
@@ -762,9 +763,10 @@
         white-space: nowrap;
       }
 
-      .visits-table tr:last-child td { border-bottom: none; }
-      .visits-table td.td-ts { color: var(--text-low); white-space: nowrap; }
-      .visits-table td.td-ip { font-family: monospace; font-size: 0.7rem; }
+      .visitors-table tr:last-child td { border-bottom: none; }
+      .visitors-table td.td-ip    { font-family: monospace; font-size: 0.7rem; color: var(--text-high); }
+      .visitors-table td.td-ts    { color: var(--text-low); white-space: nowrap; }
+      .visitors-table td.td-count { color: var(--text-link); font-weight: 600; text-align: right; }
 
       #analytics-status {
         font-size: 0.8rem;
@@ -916,19 +918,20 @@
                 <div id="analytics-countries"></div>
               </div>
             </div>
-            <div id="recent-visits-panel">
-              <h3>Recent Visits</h3>
-              <div class="visits-scroll">
-                <table class="visits-table">
+            <div id="unique-visitors-panel">
+              <h3>Unique Visitors</h3>
+              <div class="visitors-scroll">
+                <table class="visitors-table">
                   <thead>
                     <tr>
-                      <th>Time (UTC)</th>
-                      <th>Page</th>
-                      <th>Location</th>
                       <th>IP</th>
+                      <th>Location</th>
+                      <th>First Seen (UTC)</th>
+                      <th>Last Seen (UTC)</th>
+                      <th style="text-align:right">Visits</th>
                     </tr>
                   </thead>
-                  <tbody id="visits-tbody"></tbody>
+                  <tbody id="unique-visitors-tbody"></tbody>
                 </table>
               </div>
             </div>
@@ -1832,30 +1835,49 @@
           renderBarList("analytics-pages", pageCounts, 10);
           renderBarList("analytics-countries", countryCounts, 10);
 
-          var tbody = document.getElementById("visits-tbody");
-          tbody.innerHTML = "";
-          var recent = visits.slice(-100).reverse();
-          recent.forEach(function (v) {
+          var visitorMap = {};
+          visits.forEach(function (v) {
+            var ip = v.ip || "unknown";
+            if (!visitorMap[ip]) {
+              visitorMap[ip] = {
+                ip: ip,
+                location: [v.city, v.country].filter(Boolean).join(", ") || "—",
+                first: v.ts || "",
+                last: v.ts || "",
+                count: 0,
+              };
+            }
+            var entry = visitorMap[ip];
+            if (!entry.location || entry.location === "—") {
+              entry.location = [v.city, v.country].filter(Boolean).join(", ") || "—";
+            }
+            if (v.ts && v.ts < entry.first) entry.first = v.ts;
+            if (v.ts && v.ts > entry.last)  entry.last  = v.ts;
+            entry.count++;
+          });
+
+          var sortedVisitors = Object.values(visitorMap)
+            .sort(function (a, b) { return b.last.localeCompare(a.last); });
+
+          var uvTbody = document.getElementById("unique-visitors-tbody");
+          uvTbody.innerHTML = "";
+          sortedVisitors.forEach(function (entry) {
             var tr = document.createElement("tr");
-
-            var ts = v.ts ? v.ts.replace("T", " ").replace("Z", "") : "";
-            var loc = [v.city, v.country].filter(Boolean).join(", ") || "—";
-            var ip = v.ip || "—";
-
+            var fmtTs = function (ts) { return ts ? ts.replace("T", " ").replace("Z", "") : "—"; };
             [
-              { cls: "td-ts", val: ts },
-              { cls: "",      val: v.page || "/" },
-              { cls: "",      val: loc },
-              { cls: "td-ip", val: ip },
+              { cls: "td-ip",    val: entry.ip },
+              { cls: "",         val: entry.location },
+              { cls: "td-ts",    val: fmtTs(entry.first) },
+              { cls: "td-ts",    val: fmtTs(entry.last) },
+              { cls: "td-count", val: entry.count },
             ].forEach(function (col) {
               var td = document.createElement("td");
               if (col.cls) td.className = col.cls;
               td.textContent = col.val;
-              td.title = col.val;
+              td.title = String(col.val);
               tr.appendChild(td);
             });
-
-            tbody.appendChild(tr);
+            uvTbody.appendChild(tr);
           });
         }
 

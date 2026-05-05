@@ -56,10 +56,30 @@ printf '\nADMIN_TOKEN: %s\n' "$TOKEN"
 
 if [ "$APPLY" = "1" ]; then
   printf '\nSetting ADMIN_TOKEN on Lambda function "%s"...\n' "$LAMBDA_FUNCTION"
+
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "Error: jq is required for --apply so existing Lambda environment variables can be preserved."
+    exit 1
+  fi
+
+  ENV_FILE=$(mktemp)
+  trap 'rm -f "$ENV_FILE"' EXIT INT HUP TERM
+
+  aws lambda get-function-configuration \
+    --function-name "$LAMBDA_FUNCTION" \
+    --region "$AWS_REGION" \
+    --query 'Environment.Variables' \
+    --output json \
+    | jq --arg token "$TOKEN" '{Variables: ((. // {}) + {ADMIN_TOKEN: $token})}' > "$ENV_FILE" \
+    || {
+      echo "Failed — could not read current Lambda environment."
+      exit 1
+    }
+
   aws lambda update-function-configuration \
     --function-name "$LAMBDA_FUNCTION" \
     --region "$AWS_REGION" \
-    --environment "Variables={ADMIN_TOKEN=${TOKEN}}" \
+    --environment "file://${ENV_FILE}" \
     --query 'LastUpdateStatus' --output text \
     && echo "Done." \
     || echo "Failed — check your AWS credentials and function name."
@@ -67,8 +87,15 @@ else
   printf '\nTo apply, run one of:\n'
   printf '  # Apply automatically:\n'
   printf '  ./scripts/generate-credentials.sh --apply\n\n'
-  printf '  # Or set manually via AWS CLI:\n'
+  printf '  # Or set manually without removing other Lambda environment variables:\n'
+  printf '  aws lambda get-function-configuration --function-name %s --region %s \\\n' "$LAMBDA_FUNCTION" "$AWS_REGION"
+  printf '    --query Environment.Variables --output json \\\n'
+  printf '    | jq --arg token "%s" '\''{Variables: ((. // {}) + {ADMIN_TOKEN: $token})}'\'' \\\n' "$TOKEN"
+  printf '    > /tmp/personalsite-env.json\n'
   printf '  aws lambda update-function-configuration \\\n'
   printf '    --function-name %s \\\n' "$LAMBDA_FUNCTION"
-  printf '    --environment "Variables={ADMIN_TOKEN=%s}"\n' "$TOKEN"
+  printf '    --region %s \\\n' "$AWS_REGION"
+  printf '    --environment file:///tmp/personalsite-env.json\n'
+  printf '\nFor local dev, run:\n'
+  printf '  ADMIN_TOKEN=%s ./dev.sh\n' "$TOKEN"
 fi

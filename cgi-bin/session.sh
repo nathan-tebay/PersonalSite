@@ -90,6 +90,7 @@ if [ -n "$_session_ts" ] && [ "$_session_ts" -gt 0 ] 2>/dev/null; then
     fi
     printf 'Status: 302 Found\r\n'
     printf 'Set-Cookie: admin_session=; Path=/%s; SameSite=Strict; Max-Age=0; HttpOnly\r\n' "$SECURE_FLAG"
+    printf 'Set-Cookie: admin_ui=; Path=/; SameSite=Strict; Max-Age=0%s\r\n' "$SECURE_FLAG"
     printf 'Set-Cookie: csrf_token=; Path=/; SameSite=Strict; Max-Age=0%s\r\n' "$SECURE_FLAG"
     printf 'Set-Cookie: _session_ts=; Path=/; SameSite=Strict; Max-Age=0%s\r\n' "$SECURE_FLAG"
     printf 'Location: /cgi-bin/login.cgi?expired=1\r\n\r\n'

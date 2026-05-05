@@ -26,7 +26,17 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://tebay.dev/projects/qmknexus.html</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://tebay.dev/projects/microphonecontroller.html</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tebay.dev/projects/flyfishinggame.html</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
   </url>

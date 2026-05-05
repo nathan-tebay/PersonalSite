@@ -13,6 +13,54 @@
     return new URLSearchParams(window.location.search).get("slug");
   }
 
+  function setMeta(selector, attribute, value) {
+    if (!value) return;
+    var element = document.head.querySelector(selector);
+    if (!element) {
+      element = document.createElement("meta");
+      if (selector.indexOf("property=") !== -1) {
+        element.setAttribute("property", selector.match(/property="([^"]+)"/)[1]);
+      } else {
+        element.setAttribute("name", selector.match(/name="([^"]+)"/)[1]);
+      }
+      document.head.appendChild(element);
+    }
+    element.setAttribute(attribute, value);
+  }
+
+  function setLink(selector, attribute, value) {
+    if (!value) return;
+    var element = document.head.querySelector(selector);
+    if (!element) {
+      element = document.createElement("link");
+      element.setAttribute("rel", selector.match(/rel="([^"]+)"/)[1]);
+      document.head.appendChild(element);
+    }
+    element.setAttribute(attribute, value);
+  }
+
+  function updatePostSeo(meta, slug) {
+    var title = String(meta.title || "Blog") + " - Tebay.dev";
+    var description = String(meta.desc || "A blog post by Nathan Tebay.");
+    var url = "https://tebay.dev/blog-post.html?slug=" + encodeURIComponent(slug || "");
+    var image = meta.image
+      ? new URL(meta.image, window.location.origin + "/").href
+      : "https://tebay.dev/background.jpeg";
+
+    document.title = title;
+    setMeta('meta[name="description"]', "content", description);
+    setLink('link[rel="canonical"]', "href", url);
+    setMeta('meta[property="og:title"]', "content", title);
+    setMeta('meta[property="og:description"]', "content", description);
+    setMeta('meta[property="og:url"]', "content", url);
+    setMeta('meta[property="og:image"]', "content", image);
+    setMeta('meta[property="article:author"]', "content", "Nathan Tebay");
+    setMeta('meta[name="twitter:title"]', "content", title);
+    setMeta('meta[name="twitter:description"]', "content", description);
+    setMeta('meta[name="twitter:image"]', "content", image);
+    if (meta.date) setMeta('meta[property="article:published_time"]', "content", meta.date);
+  }
+
   function formatDate(isoDate) {
     const parts = String(isoDate || "").split("-");
     if (parts.length !== 3) return isoDate || "";
@@ -81,8 +129,8 @@
     return template.innerHTML;
   }
 
-  function renderPost(meta, bodyHtml) {
-    document.title = String(meta.title || "Blog") + " - Tebay.dev";
+  function renderPost(meta, bodyHtml, slug) {
+    updatePostSeo(meta, slug);
     var safeBody = sanitizeHtml(bodyHtml);
     panel.innerHTML =
       '<div class="project-header">' +
@@ -111,7 +159,7 @@
       if (!metaMatch) throw new Error("Invalid post format.");
       const meta = JSON.parse(metaMatch[1]);
       const bodyHtml = text.substring(newlineIndex + 1);
-      renderPost(meta, bodyHtml);
+      renderPost(meta, bodyHtml, slug);
     } catch (error) {
       panel.innerHTML = '<p class="blog-empty">' + escapeHtml(error.message) + "</p>";
     }

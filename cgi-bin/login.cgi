@@ -32,6 +32,7 @@ if [ "${REQUEST_METHOD}" = "POST" ]; then
       printf 'Status: 302 Found\r\n'
       emit_security_headers
       printf 'Set-Cookie: admin_session=%s; Path=/; SameSite=Strict; HttpOnly%s\r\n' "$ADMIN_TOKEN" "$SECURE_FLAG"
+      printf 'Set-Cookie: admin_ui=1; Path=/; SameSite=Strict%s\r\n' "$SECURE_FLAG"
       printf 'Set-Cookie: csrf_token=%s; Path=/; SameSite=Strict%s\r\n' "$CSRF_TOKEN" "$SECURE_FLAG"
       printf 'Set-Cookie: _session_ts=%s; Path=/; SameSite=Strict%s\r\n' "$_NOW" "$SECURE_FLAG"
       printf 'Location: /admin/\r\n\r\n'
