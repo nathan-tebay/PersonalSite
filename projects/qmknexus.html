@@ -102,18 +102,17 @@
             <div class="project-section project-section--overview">
               <h3>Overview</h3>
               <p>
-                QMK Nexus is a full-stack web app for designing custom keyboard
-                firmware without hand-editing every QMK source file. The
-                frontend walks through the major keyboard-building stages:
-                physical layout, matrix wiring, peripheral configuration,
-                keymap editing, metadata, feature toggles, and firmware build.
+                QMK Nexus is a full-stack web app for building custom keyboard
+                firmware without hand-editing QMK source files. The frontend
+                guides users through the key design stages: physical layout,
+                matrix wiring, peripheral setup, keymap editing, metadata,
+                feature toggles, and firmware build.
               </p>
               <p>
-                The backend persists user keyboards, validates build readiness,
+                The backend stores user keyboards, checks build readiness,
                 generates QMK-compatible C and header files, and runs firmware
-                builds through an isolated Podman builder. It includes a QMK
-                keyboard index so existing boards can be loaded or inspected
-                before being adapted.
+                builds inside an isolated Podman builder. It also includes a
+                QMK keyboard index so existing boards can be loaded or adapted.
               </p>
             </div>
 

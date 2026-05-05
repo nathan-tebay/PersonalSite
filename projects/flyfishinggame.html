@@ -6,26 +6,31 @@
     <title>Fly Fishing Game — Tebay.dev</title>
     <meta
       name="description"
-      content="Fly Fishing Game project write-up: a playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules."
-    />
+      content="Fly Fishing Game project write-up: a playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules." />
     <meta name="author" content="Nathan Tebay" />
-    <link rel="canonical" href="https://tebay.dev/projects/flyfishinggame.html" />
+    <link
+      rel="canonical"
+      href="https://tebay.dev/projects/flyfishinggame.html" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tebay.dev" />
     <meta property="og:title" content="Fly Fishing Game - Tebay.dev" />
     <meta
       property="og:description"
-      content="A playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules."
-    />
-    <meta property="og:url" content="https://tebay.dev/projects/flyfishinggame.html" />
-    <meta property="og:image" content="https://tebay.dev/assets/images/flyfishinggame.png" />
+      content="A playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules." />
+    <meta
+      property="og:url"
+      content="https://tebay.dev/projects/flyfishinggame.html" />
+    <meta
+      property="og:image"
+      content="https://tebay.dev/assets/images/flyfishinggame.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Fly Fishing Game - Tebay.dev" />
     <meta
       name="twitter:description"
-      content="A playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules."
-    />
-    <meta name="twitter:image" content="https://tebay.dev/assets/images/flyfishinggame.png" />
+      content="A playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules." />
+    <meta
+      name="twitter:image"
+      content="https://tebay.dev/assets/images/flyfishinggame.png" />
     <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
@@ -49,8 +54,7 @@
                 href="https://github.com/nathan-tebay/flyfishinggame"
                 class="github-link"
                 target="_blank"
-                rel="noopener"
-              >
+                rel="noopener">
                 View on GitHub
               </a>
             </div>
@@ -69,9 +73,9 @@
                 decoding="async" />
               <span class="render-label">
                 Current prototype: complete fishing loop with procedural river
-                sections, sprite-driven angler/fish systems, and a custom
-                renderer now pulling water, shoreline, gravel, terrain, and prop
-                art from checked-in module atlases.
+                sections, sprite-driven angler and fish systems, and a custom
+                renderer pulling water, shoreline, gravel, terrain, and prop art
+                from checked-in module atlases.
               </span>
             </div>
           </div>
@@ -81,35 +85,35 @@
               <h3>Overview</h3>
               <p>
                 A 16-bit style fly-fishing game set on a Madison River-inspired
-                side-scrolling river. The current build has moved beyond a river
+                side-scrolling river. This build has moved beyond a river
                 generator demo into a playable proof of concept: configure a
-                session, scout water, approach fish, manage line, cast, mend,
-                match the hatch, react to takes, and record catches in a
-                logbook.
+                session, scout water, approach fish, manage your line, cast,
+                mend, match the hatch, respond to takes, and log your catches.
               </p>
               <p>
                 The river simulation now models pool-riffle-run cycles, fords,
                 pocket water, exposure, species-specific holding preferences,
-                V-seam spawn offsets, boulder/rock eddies, and seeded section
-                streaming. Fish behaviour uses directional vision, intrusion
-                memory, exposure-adjusted spook sensitivity, hatch state, fly
-                matching, and hookset timing rather than a simple bite chance.
+                V-seam spawn offsets, boulder and rock eddies, and seeded
+                section streaming. Fish behavior is driven by directional
+                vision, intrusion memory, exposure-adjusted spook sensitivity,
+                hatch state, fly matching, and hookset timing instead of a
+                simple bite probability.
               </p>
               <p>
-                The newest work is the terrain-module rendering pass. The game
+                The latest work is the terrain-module rendering pass. The game
                 still treats procedural <code>RiverData</code> as the gameplay
                 source of truth, but the production <code>RiverRenderer</code>
                 now maps that data onto authored water, shoreline, gravel-bar,
-                terrain-fill, transition, and prop sprites instead of relying on
-                the earlier continuous colour-field river look.
+                terrain-fill, transition, and prop sprites instead of the
+                earlier continuous colour-field river style.
               </p>
               <p>
                 A normalized packed atlas and TileSet also live in the repo for
                 editor painting and TileMap experiments, but they are not the
                 active renderer path. <code>RiverWorld</code> still uses the
                 custom section renderer so procedural streaming, fish placement,
-                hold scores, and wading logic stay coupled to the simulation
-                rather than to a hand-painted map.
+                hold scores, and wading logic remain tied to the simulation
+                instead of a hand-painted map.
               </p>
             </div>
 
@@ -143,8 +147,8 @@
                 </li>
                 <li>
                   Procedural sections stream ahead of the player at 70% progress
-                  and despawn old sections while preserving section-relative fish
-                  state and angler context.
+                  and despawn old sections while preserving section-relative
+                  fish state and angler context.
                 </li>
                 <li>
                   The production renderer loads active water, shoreline,
@@ -181,7 +185,8 @@
                   influence where fish should hold.
                 </li>
                 <li>
-                  Keeping the renderer and simulation decoupled. <code>RiverData</code>
+                  Keeping the renderer and simulation decoupled.
+                  <code>RiverData</code>
                   remains the source of truth for gameplay, while the current
                   renderer maps that data onto authored terrain modules, runtime
                   transition tiles, and sprite props.
@@ -189,8 +194,8 @@
                 <li>
                   Tuning fish behaviour so approach angle, water exposure,
                   cover, time of day, fly rejection, line slap, and wading
-                  vibration all affect fish without creating contradictory
-                  spook rules.
+                  vibration all affect fish without creating contradictory spook
+                  rules.
                 </li>
                 <li>
                   Building a casting loop that is readable without becoming a
@@ -215,7 +220,8 @@
               <h3>Learnings</h3>
               <ul>
                 <li>
-                  Centralising spook calculations in <code>SpookCalculator</code>
+                  Centralising spook calculations in
+                  <code>SpookCalculator</code>
                   made later additions, especially exposure-based sensitivity,
                   much cheaper to integrate.
                 </li>
@@ -266,8 +272,8 @@
                   available for TileMap experiments and visual comparison
                 </li>
                 <li>
-                  <strong>CastingController</strong> — state machine
-                  IDLE → FALSE_CASTING → PRESENTATION → RESULT → DRIFT, with
+                  <strong>CastingController</strong> — state machine IDLE →
+                  FALSE_CASTING → PRESENTATION → RESULT → DRIFT, with
                   line-length timing scaling and mouse mend detection
                 </li>
                 <li>

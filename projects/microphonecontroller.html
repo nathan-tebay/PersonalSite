@@ -6,26 +6,31 @@
     <title>MicrophoneController — Tebay.dev</title>
     <meta
       name="description"
-      content="MicrophoneController project write-up: a two-button USB HID microphone controller with tap-to-toggle and push-to-talk modes."
-    />
+      content="MicrophoneController project write-up: a two-button USB HID microphone controller with tap-to-toggle and push-to-talk modes." />
     <meta name="author" content="Nathan Tebay" />
-    <link rel="canonical" href="https://tebay.dev/projects/microphonecontroller.html" />
+    <link
+      rel="canonical"
+      href="https://tebay.dev/projects/microphonecontroller.html" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tebay.dev" />
     <meta property="og:title" content="MicrophoneController - Tebay.dev" />
     <meta
       property="og:description"
-      content="A two-button USB HID microphone controller with tap-to-toggle and push-to-talk modes."
-    />
-    <meta property="og:url" content="https://tebay.dev/projects/microphonecontroller.html" />
-    <meta property="og:image" content="https://tebay.dev/assets/images/microphone-controller.jpg" />
+      content="A two-button USB HID microphone controller with tap-to-toggle and push-to-talk modes." />
+    <meta
+      property="og:url"
+      content="https://tebay.dev/projects/microphonecontroller.html" />
+    <meta
+      property="og:image"
+      content="https://tebay.dev/assets/images/microphone-controller.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="MicrophoneController - Tebay.dev" />
     <meta
       name="twitter:description"
-      content="A two-button USB HID microphone controller with tap-to-toggle and push-to-talk modes."
-    />
-    <meta name="twitter:image" content="https://tebay.dev/assets/images/microphone-controller.jpg" />
+      content="A two-button USB HID microphone controller with tap-to-toggle and push-to-talk modes." />
+    <meta
+      name="twitter:image"
+      content="https://tebay.dev/assets/images/microphone-controller.jpg" />
     <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
@@ -90,24 +95,22 @@
             <div class="project-section project-section--overview">
               <h3>Overview</h3>
               <p>
-                In many games and communication apps, you can control multiple
-                microphone channels, such as team and proximity chat. This
-                controller solves that problem while also allowing you to
-                push-to-talk or toggle-to-talk on multiple channels without
-                guessing if a chat channel is currently active. The mode switch
-                on the bottom lets you use the same hardware for either keyboard
-                or gamepad input, depending on the app's support for each HID
-                type.
+                This project began as a way to control multiple microphone
+                channels in games and communication apps, such as team and
+                proximity chat. The controller uses two buttons so you can
+                either push-to-talk or tap-to-toggle without guessing whether a
+                channel is active. The bottom mode switch changes the device
+                between keyboard and gamepad HID output depending on which type
+                the app supports.
               </p>
               <p>
-                I have also found this useful for controlling my
-                WhisperTranscription application, as the dual buttons and
-                tap-or-hold functionality are perfect for distinguishing between
-                transcribing my text and issuing commands to an AI model. I have
-                been happy with this use case, though I am considering changing
-                the hotkeys, possibly making them configurable via the WebUSB
-                protocol. Since this requires an external application, I am
-                looking at hosting it in Lambda alongside this site.
+                Today I mainly use it with my WhisperTranscription application.
+                The dual buttons and tap-or-hold behavior make it easy to
+                distinguish between transcribing text and sending commands to an
+                AI model. I may eventually make the hotkeys configurable over
+                WebUSB, but for now the current setup works well. Since WebUSB
+                depends on an external application, I am considering hosting the
+                software in Lambda alongside this site.
               </p>
             </div>
 
@@ -125,16 +128,28 @@
             <div class="project-section project-section--challenges">
               <h3>Challenges</h3>
               <ul>
-                <li>As a keyboard HID, the device interfered with controller input detection in games.</li>
-                <li>AI-generated hold-or-toggle implementation didn't work as intended — rewrote it manually.</li>
+                <li>
+                  As a keyboard HID, the device interfered with controller input
+                  detection in games.
+                </li>
+                <li>
+                  AI-generated hold-or-toggle implementation didn't work as
+                  intended — rewrote it manually.
+                </li>
               </ul>
             </div>
 
             <div class="project-section project-section--learnings">
               <h3>Learnings</h3>
               <ul>
-                <li>Simpler model wins: a single toggle state is cleaner than separate latch and hold logic.</li>
-                <li>The mode switch changes which USB interface sends input — the device doesn't reinitialize.</li>
+                <li>
+                  Simpler model wins: a single toggle state is cleaner than
+                  separate latch and hold logic.
+                </li>
+                <li>
+                  The mode switch changes which USB interface sends input — the
+                  device doesn't reinitialize.
+                </li>
               </ul>
             </div>
 
