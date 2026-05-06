@@ -400,6 +400,64 @@ applyTheme(savedHex);
   });
 })();
 
+// ── Shared iframe demo modal ──────────────────────────────────────────
+(function () {
+  var modal = document.createElement("div");
+  modal.className = "demo-modal";
+  modal.hidden = true;
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-label", "Project demo");
+  modal.innerHTML =
+    '<div class="demo-modal__backdrop"></div>' +
+    '<div class="demo-modal__box">' +
+      '<button class="demo-modal__close" aria-label="Close">&#x2715;</button>' +
+      '<div class="demo-modal__tablet">' +
+        '<iframe class="demo-modal__iframe" title="Project demo" loading="lazy" allowfullscreen></iframe>' +
+      "</div>" +
+      '<p class="demo-modal__caption"></p>' +
+    "</div>";
+  document.body.appendChild(modal);
+
+  var iframe = modal.querySelector(".demo-modal__iframe");
+  var caption = modal.querySelector(".demo-modal__caption");
+  var closeButton = modal.querySelector(".demo-modal__close");
+  var lastFocused = null;
+
+  function openModal(src, label, opener) {
+    lastFocused = opener || document.activeElement;
+    iframe.src = src;
+    caption.textContent = label || "";
+    modal.hidden = false;
+    closeButton.focus();
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    iframe.src = "";
+    if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
+    lastFocused = null;
+  }
+
+  modal.querySelector(".demo-modal__backdrop").addEventListener("click", closeModal);
+  closeButton.addEventListener("click", closeModal);
+
+  document.addEventListener("keydown", function (e) {
+    if (modal.hidden) return;
+    if (e.key === "Escape") closeModal();
+    if (e.key === "Tab") {
+      e.preventDefault();
+      closeButton.focus();
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    var trigger = e.target.closest("[data-demo-src]");
+    if (!trigger) return;
+    openModal(trigger.dataset.demoSrc, trigger.dataset.demoCaption || "", trigger);
+  });
+})();
+
 // ── Shared video modal ────────────────────────────────────────────────
 (function () {
   var modal = document.createElement("div");

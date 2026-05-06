@@ -2,3 +2,4 @@
 admin/.htpasswd
 admin/cgi-bin/.htpasswd
 .credentials
+.envrc
