@@ -24,6 +24,7 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
   - Fly Fishing Game
   - MicrophoneController
   - WhisperTranscribe
+  - QMK Nexus
   - PersonalSite (this project)
 - **Containerised serving** — Podman/Docker support with dev setup using local MinIO (S3-compatible) and production using AWS S3
 
@@ -53,6 +54,7 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
 │   ├── flyfishinggame.html    # Fly Fishing Game project page
 │   ├── microphonecontroller.html
 │   ├── whispertranscribe.html
+│   ├── qmknexus.html          # QMK Nexus project page
 │   └── personalsite.html      # This project
 │
 ├── admin/
@@ -69,8 +71,12 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
 │   ├── upload.cgi             # Upload images (session-protected)
 │   ├── images.cgi             # List uploaded images (session-protected)
 │   ├── delete-image.cgi       # Delete image (session-protected)
+│   ├── common.sh              # Shared utilities (sourced by CGI scripts)
 │   ├── session.sh             # Session auth enforcement (sourced by CGI scripts)
-│   └── storage.sh             # Storage backend helper
+│   ├── storage.sh             # Storage backend helper
+│   ├── track.cgi              # Page view tracking (public; beaconed from layout.js)
+│   ├── analytics.cgi          # View analytics data (session-protected)
+│   └── health.cgi             # Health check endpoint
 │
 ├── blog/
 │   └── posts/                 # Post files (created at runtime)
@@ -78,7 +84,7 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
 ├── links.html                 # Public links/bookmarks page
 ├── links.json                 # Links data file (categories and link cards)
 │
-├── dev.sh                     # Start dev containers (site + MinIO S3)
+├── install.sh                 # Interactive setup (dev + prod modes)
 ├── Dockerfile                 # Prod image (Lambda, S3 storage, AWS Lambda Web Adapter)
 ├── Dockerfile.dev             # Dev image (local storage or MinIO)
 ├── docker-entrypoint.sh       # Container startup logic
@@ -96,10 +102,10 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
 
 ### Local Development
 
-**Prerequisite:** Podman or Docker installed.
+**Prerequisite:** Podman installed.
 
 ```bash
-./dev.sh
+./install.sh
 ```
 
 This script:
@@ -306,6 +312,7 @@ The admin panel uses the following API endpoints (all session-protected):
 | POST | `/cgi-bin/upload.cgi` | Upload images |
 | GET | `/cgi-bin/images.cgi` | List uploaded images |
 | POST | `/cgi-bin/delete-image.cgi` | Delete image |
+| GET | `/cgi-bin/analytics.cgi` | View page analytics |
 
 ## Navigation
 
@@ -335,6 +342,8 @@ The nav uses `data-page` and `data-basepath` attributes on `<body>` for routing:
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/config.cgi` | Returns `{postsUrl, storage}` |
+| GET | `/cgi-bin/track.cgi` | Page view tracking (beaconed from every page via `navigator.sendBeacon`) |
+| GET | `/cgi-bin/health.cgi` | Health check |
 
 ### Admin Authentication
 
@@ -361,7 +370,7 @@ The nav uses `data-page` and `data-basepath` attributes on `<body>` for routing:
 
 ## Scripts
 
-- **`dev.sh`** — Start containerised dev server with hot-reload (`localhost:8888`)
+- **`install.sh`** — Interactive setup and start dev containers (`localhost:8888`)
 - **`docker-entrypoint.sh`** — Container startup logic; handles S3 sync and cache initialization
 - **`sync-posts.sh`** — Bidirectional sync between S3 and local cache (production only)
 - **`scripts/deploy-lambda.sh`** — Build, push to ECR, and update the Lambda function
@@ -532,7 +541,7 @@ podman logs personalsite-minio
 ### Admin login not working
 
 1. Verify `ADMIN_TOKEN` environment variable is set correctly
-2. In dev, check `dev.sh` sets `ADMIN_TOKEN` (default: SHA-256 of "Password123")
+2. In dev, check `install.sh` sets `ADMIN_TOKEN` (default: SHA-256 of "Password123")
 3. For Lambda, verify `ADMIN_TOKEN` is set via `generate-credentials.sh --apply`
 4. Check CGI logs: `podman logs <container-id>`
 
