@@ -137,7 +137,6 @@
       posts
         .filter(function (p) { return !p.wip; })
         .sort(function (a, b) { return a.date < b.date ? 1 : -1; })
-        .slice(0, 5)
         .forEach(function (post) {
           const li = document.createElement("li");
           li.appendChild(makeLink(post.title, basePath + "blog-post.html?slug=" + post.slug, ""));
