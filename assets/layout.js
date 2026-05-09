@@ -96,28 +96,35 @@
   const navTree = document.createElement("ul");
   navTree.className = "tree";
 
+  // Restore saved nav group state, fall back to sensible defaults
+  var savedNavOpen = "";
+  try { savedNavOpen = localStorage.getItem("tebay_nav_open") || ""; } catch (_) {}
+  var defaultOpen = (currentPage === "blog") ? "blog" : "projects";
+  var openGroup = savedNavOpen || defaultOpen;
+
   // Projects group
   const projectListItem = document.createElement("li");
-  projectListItem.appendChild(
-    createMenuGroup(
-      "Projects",
-      projects.map(function (project) {
-        return {
-          label: project.label,
-          href: basePath + project.path,
-          id: project.id,
-          description: project.description,
-        };
-      }),
-      true,
-    ),
+  const projectsDetails = createMenuGroup(
+    "Projects",
+    projects.map(function (project) {
+      return {
+        label: project.label,
+        href: basePath + project.path,
+        id: project.id,
+        description: project.description,
+      };
+    }),
+    openGroup === "projects",
   );
+  projectsDetails.dataset.navId = "projects";
+  projectListItem.appendChild(projectsDetails);
   navTree.appendChild(projectListItem);
 
   // Blog group (expandable, async-populated with recent posts)
   const blogGroupDetails = document.createElement("details");
   blogGroupDetails.className = "blog-nav-group";
-  if (currentPage === "blog") blogGroupDetails.open = true;
+  blogGroupDetails.dataset.navId = "blog";
+  if (openGroup === "blog") blogGroupDetails.open = true;
   const blogGroupSummary = document.createElement("summary");
   blogGroupSummary.textContent = "Blog";
   blogGroupDetails.appendChild(blogGroupSummary);
@@ -169,12 +176,17 @@
 
   navPanel.appendChild(navTree);
 
-  // Close sibling <details> when one opens (one section open at a time)
+  // One section open at a time; persist open group to localStorage
   navTree.addEventListener("toggle", function (e) {
-    if (!e.target.open) return;
-    navTree.querySelectorAll("details[open]").forEach(function (d) {
-      if (d !== e.target) d.removeAttribute("open");
-    });
+    if (e.target.open) {
+      navTree.querySelectorAll("details[open]").forEach(function (d) {
+        if (d !== e.target) d.removeAttribute("open");
+      });
+    }
+    try {
+      var openEl = navTree.querySelector("details[open]");
+      localStorage.setItem("tebay_nav_open", openEl ? (openEl.dataset.navId || "") : "");
+    } catch (_) {}
   }, true);
 
   // ── Theme picker ──────────────────────────────────────────────────────
