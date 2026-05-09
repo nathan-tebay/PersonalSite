@@ -168,6 +168,13 @@ body {
   color: var(--text-low);
 }
 
+#nav-panel .blog-nav-group ul a {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 #nav-panel .tree>li>a {
   font-size: 0.82rem;
   color: var(--text-mid);

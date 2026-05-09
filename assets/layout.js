@@ -116,6 +116,7 @@
 
   // Blog group (expandable, async-populated with recent posts)
   const blogGroupDetails = document.createElement("details");
+  blogGroupDetails.className = "blog-nav-group";
   if (currentPage === "blog") blogGroupDetails.open = true;
   const blogGroupSummary = document.createElement("summary");
   blogGroupSummary.textContent = "Blog";
@@ -162,6 +163,14 @@
   });
 
   navPanel.appendChild(navTree);
+
+  // Close sibling <details> when one opens (one section open at a time)
+  navTree.addEventListener("toggle", function (e) {
+    if (!e.target.open) return;
+    navTree.querySelectorAll("details[open]").forEach(function (d) {
+      if (d !== e.target) d.removeAttribute("open");
+    });
+  }, true);
 
   // ── Theme picker ──────────────────────────────────────────────────────
   const pickerDivider = document.createElement("div");
