@@ -168,7 +168,8 @@ body {
   color: var(--text-low);
 }
 
-#nav-panel .blog-nav-group ul a {
+#nav-panel .blog-nav-group ul a,
+#nav-panel .blog-nav-group ul .nav-description {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
