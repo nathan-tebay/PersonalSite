@@ -72,17 +72,18 @@
     template.innerHTML = html;
 
     var allowedTags = new Set([
-      "A", "ABBR", "B", "BLOCKQUOTE", "BR", "CODE", "DEL", "EM", "H1", "H2", "H3",
-      "H4", "H5", "H6", "HR", "I", "IMG", "LI", "OL", "P", "PRE", "S", "STRONG",
+      "A", "ABBR", "B", "BLOCKQUOTE", "BR", "CODE", "DEL", "DIV", "EM", "H1", "H2", "H3",
+      "H4", "H5", "H6", "HR", "I", "IMG", "LI", "OL", "P", "PRE", "S", "SPAN", "STRONG",
       "SUB", "SUP", "TABLE", "TBODY", "TD", "TH", "THEAD", "TR", "U", "UL"
     ]);
     var allowedAttrs = {
       A: new Set(["href", "title"]),
-      IMG: new Set(["src", "alt", "title", "width", "height", "loading"]),
+      IMG: new Set(["src", "alt", "title", "width", "height", "loading", "style"]),
       ABBR: new Set(["title"]),
       TH: new Set(["colspan", "rowspan"]),
       TD: new Set(["colspan", "rowspan"])
     };
+    var globalAllowedAttrs = new Set(["class"]);
     var urlAttrs = new Set(["href", "src"]);
     var allowedProtocols = new Set(["http:", "https:", "mailto:", ""]);
 
@@ -105,7 +106,7 @@
         Array.from(child.attributes).forEach(function (attr) {
           var name = attr.name.toLowerCase();
           var allowedForTag = allowedAttrs[child.tagName] || new Set();
-          if (!allowedForTag.has(name) || name.startsWith("on")) {
+          if ((!allowedForTag.has(name) && !globalAllowedAttrs.has(name)) || name.startsWith("on")) {
             child.removeAttribute(attr.name);
             return;
           }
