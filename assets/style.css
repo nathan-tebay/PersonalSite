@@ -336,6 +336,16 @@ summary:focus-visible {
 
 }
 
+#content-panel-story a, #content-panel-story a:visited  {
+  color: var(--text-mid);
+  text-decoration: none;
+  }
+  
+#content-panel-story a:hover {
+  text-decoration: underline;
+  }
+
+
 .intro {
   text-indent: 3ch;
 }
