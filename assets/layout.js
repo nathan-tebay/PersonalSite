@@ -141,6 +141,12 @@
         .forEach(function (post) {
           const li = document.createElement("li");
           li.appendChild(makeLink(post.title, basePath + "blog-post.html?slug=" + post.slug, ""));
+          if (post.desc) {
+            const descEl = document.createElement("p");
+            descEl.className = "nav-description";
+            descEl.textContent = post.desc;
+            li.appendChild(descEl);
+          }
           blogGroupList.appendChild(li);
         });
     })
