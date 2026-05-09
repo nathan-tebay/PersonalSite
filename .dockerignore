@@ -25,6 +25,7 @@ build
 
 # Local data
 blog/posts
+blog-posts/
 analytics
 /tmp
 

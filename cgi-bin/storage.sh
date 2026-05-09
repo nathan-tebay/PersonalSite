@@ -17,7 +17,7 @@ STORAGE="${STORAGE:-s3}"
 LOCAL_DIR="/tmp/www/blog/posts"
 
 # S3 prefix for blog content
-S3_PREFIX="s3://${AWS_BUCKET}/blogs"
+S3_PREFIX="s3://${AWS_BUCKET}/blog/posts"
 
 # AWS CLI endpoint override for local MinIO dev
 _aws_endpoint_arg=""
@@ -40,11 +40,8 @@ storage_put() {
       --region "${AWS_REGION:-us-east-1}" \
       ${_aws_endpoint_arg} 2>&1)
     _rc=$?
-    echo "[storage_put] aws s3 cp s3://${AWS_BUCKET}/blogs/${filename} rc=${_rc} out=${_out}" >&2
+    echo "[storage_put] aws s3 cp s3://${AWS_BUCKET}/blog/posts/${filename} rc=${_rc} out=${_out}" >&2
     [ "$_rc" = "0" ] || return 1
-    # Mirror to local cache so the change is visible immediately
-    mkdir -p "$(dirname "$LOCAL_DIR/$filename")"
-    cp "$localfile" "$LOCAL_DIR/$filename" 2>/dev/null
   fi
 }
 
@@ -55,8 +52,6 @@ storage_get() {
   local filename="$1" localfile="$2"
   if [ "$STORAGE" = "local" ]; then
     cp "$LOCAL_DIR/$filename" "$localfile" 2>/dev/null
-  elif [ -f "$LOCAL_DIR/$filename" ]; then
-    cp "$LOCAL_DIR/$filename" "$localfile"
   else
     aws s3 cp "${S3_PREFIX}/${filename}" "$localfile" \
       --region "${AWS_REGION:-us-east-1}" \
@@ -74,7 +69,6 @@ storage_rm() {
     aws s3 rm "${S3_PREFIX}/${filename}" \
       --region "${AWS_REGION:-us-east-1}" \
       ${_aws_endpoint_arg} >/dev/null 2>&1
-    rm -f "$LOCAL_DIR/$filename"
   fi
 }
 
@@ -89,7 +83,6 @@ storage_rm_dir() {
       --recursive \
       --region "${AWS_REGION:-us-east-1}" \
       ${_aws_endpoint_arg} >/dev/null 2>&1
-    rm -rf "$LOCAL_DIR/$dir"
   fi
 }
 
@@ -104,8 +97,6 @@ storage_mv() {
     aws s3 mv "${S3_PREFIX}/${from}" "${S3_PREFIX}/${to}" \
       --region "${AWS_REGION:-us-east-1}" \
       ${_aws_endpoint_arg} >/dev/null 2>&1
-    mkdir -p "$(dirname "$LOCAL_DIR/$to")"
-    mv "$LOCAL_DIR/$from" "$LOCAL_DIR/$to" 2>/dev/null
   fi
 }
 
@@ -113,7 +104,31 @@ storage_mv() {
 # storage_exists <filename>
 storage_exists() {
   local filename="$1"
-  [ -f "$LOCAL_DIR/$filename" ]
+  if [ "$STORAGE" = "local" ]; then
+    [ -f "$LOCAL_DIR/$filename" ]
+  else
+    aws s3 ls "${S3_PREFIX}/${filename}" \
+      --region "${AWS_REGION:-us-east-1}" \
+      ${_aws_endpoint_arg} >/dev/null 2>&1
+  fi
+}
+
+# Invalidate CloudFront paths after a write. No-op when CF_DIST_ID is unset.
+# cf_invalidate <path> [<path> ...]
+cf_invalidate() {
+  [ -n "${CF_DIST_ID:-}" ] || return 0
+  # Build JSON path list from all arguments
+  _cf_items=""
+  for _p in "$@"; do
+    [ -n "$_cf_items" ] && _cf_items="${_cf_items},"
+    _cf_items="${_cf_items}\"${_p}\""
+  done
+  _cf_qty=$#
+  _cf_ref="inv-$$-$(date +%s)"
+  aws cloudfront create-invalidation \
+    --distribution-id "$CF_DIST_ID" \
+    --invalidation-batch "{\"Paths\":{\"Quantity\":${_cf_qty},\"Items\":[${_cf_items}]},\"CallerReference\":\"${_cf_ref}\"}" \
+    --region "${AWS_REGION:-us-east-1}" >/dev/null 2>&1 || true
 }
 
 # ── File locking (for manifest read-modify-write safety) ──────────────────────
@@ -182,45 +197,43 @@ json_escape() {
 # Remove the entry matching <slug> from a local manifest file (in-place).
 # manifest_remove <file> <slug>
 manifest_remove() {
-  local file="$1" slug="$2" tmp="${1}.tmp"
+  local file="$1" slug="$2" tmp="${1}.tmp" etmp="${1}.entries.tmp"
   local first=1
+  if ! jq -c --arg slug "$slug" '.[] | select(.slug != $slug)' "$file" 2>/dev/null > "$etmp"; then
+    local _sz; _sz=$(wc -c < "$file" 2>/dev/null || echo 0)
+    [ "$_sz" -gt 4 ] && { rm -f "$etmp"; return 1; }
+    > "$etmp"
+  fi
   {
     printf '[\n'
-    while IFS= read -r line; do
-      [ "$line" = "[" ]  && continue
-      [ "$line" = "]" ]  && continue
-      [ -z "$line" ]     && continue
-      local entry
-      entry=$(printf '%s' "$line" | sed 's/^,*//')
-      [ -z "$entry" ]    && continue
-      case "$entry" in *'"slug":"'"$slug"'"'*) continue ;; esac
+    while IFS= read -r entry; do
       [ "$first" = "1" ] && { printf '%s\n' "$entry"; first=0; } \
                          || printf ',%s\n' "$entry"
-    done < "$file"
+    done < "$etmp"
     printf ']\n'
   } > "$tmp" && mv "$tmp" "$file"
+  rm -f "$etmp"
 }
 
 # Add or replace the entry matching <slug> in a local manifest file (in-place).
 # manifest_upsert <file> <slug> <json_entry>
 manifest_upsert() {
-  local file="$1" slug="$2" new_entry="$3" tmp="${1}.tmp"
+  local file="$1" slug="$2" new_entry="$3" tmp="${1}.tmp" etmp="${1}.entries.tmp"
   local first=1
+  if ! jq -c --arg slug "$slug" '.[] | select(.slug != $slug)' "$file" 2>/dev/null > "$etmp"; then
+    local _sz; _sz=$(wc -c < "$file" 2>/dev/null || echo 0)
+    [ "$_sz" -gt 4 ] && { rm -f "$etmp"; return 1; }
+    > "$etmp"
+  fi
   {
     printf '[\n'
-    while IFS= read -r line; do
-      [ "$line" = "[" ]  && continue
-      [ "$line" = "]" ]  && continue
-      [ -z "$line" ]     && continue
-      local entry
-      entry=$(printf '%s' "$line" | sed 's/^,*//')
-      [ -z "$entry" ]    && continue
-      case "$entry" in *'"slug":"'"$slug"'"'*) continue ;; esac
+    while IFS= read -r entry; do
       [ "$first" = "1" ] && { printf '%s\n' "$entry"; first=0; } \
                          || printf ',%s\n' "$entry"
-    done < "$file"
+    done < "$etmp"
     [ "$first" = "1" ] && printf '%s\n' "$new_entry" \
                        || printf ',%s\n' "$new_entry"
     printf ']\n'
   } > "$tmp" && mv "$tmp" "$file"
+  rm -f "$etmp"
 }

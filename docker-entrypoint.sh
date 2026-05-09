@@ -16,29 +16,11 @@ chmod +x \
   /tmp/www/cgi-bin/*.cgi \
   /tmp/www/cgi-bin/*.sh 2>/dev/null || true
 
-if [ "${STORAGE:-s3}" = "s3" ]; then
-  _region="${AWS_REGION:-us-east-1}"
-  _endpoint_arg=""
-  if [ -n "${MINIO_ENDPOINT:-}" ]; then
-    _endpoint_arg="--endpoint-url ${MINIO_ENDPOINT}"
-    # Create bucket if using a local MinIO endpoint (synchronous — needed before httpd)
-    aws s3 mb "s3://${AWS_BUCKET}" --region "$_region" ${_endpoint_arg} 2>/dev/null || true
-  fi
-
-  # Full initial sync — runs synchronously so all content is ready before
-  # the first request. links.json is fetched separately (not under blogs/).
-  /usr/local/bin/sync-posts.sh
-  aws s3 cp "s3://${AWS_BUCKET}/links.json" \
-    /tmp/www/links.json \
-    --region "$_region" ${_endpoint_arg} >/dev/null 2>&1 || true
-
-  # Periodic refresh in the background.
-  (
-    while true; do
-      sleep 600
-      /usr/local/bin/sync-posts.sh
-    done
-  ) &
+if [ "${STORAGE:-s3}" = "s3" ] && [ -n "${MINIO_ENDPOINT:-}" ]; then
+  # Create MinIO bucket on dev startup (no-op if already exists)
+  aws s3 mb "s3://${AWS_BUCKET}" \
+    --region "${AWS_REGION:-us-east-1}" \
+    --endpoint-url "${MINIO_ENDPOINT}" 2>/dev/null || true
 fi
 
 # ── httpd config with MIME types and caching ─────────────────────────────────

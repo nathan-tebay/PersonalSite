@@ -24,6 +24,8 @@
 #                  [--create-role [--trust lambda.amazonaws.com]] \
 #                  [--bucket-policy] \
 #                  [--cf-dist-id EXXXXXXXXXX --cf-video-policy] \
+#                  [--cf-dist-id EXXXXXXXXXX --cf-invalidation-iam] \
+#                  [--cf-dist-id EXXXXXXXXXX --waf-upload-fix] \
 #                  [--save-env] \
 #                  [--dry-run]
 #
@@ -76,6 +78,28 @@
 #                  When used with --bucket-policy, the access-point-only Deny
 #                  is extended with a CloudFront exception so the two policies
 #                  do not conflict.
+#   --cf-blogs-policy
+#                  Apply (or merge into) the bucket policy an Allow statement
+#                  granting the CloudFront distribution OAC read access to
+#                  blog/posts/* and links.json. Also adds /blog/posts/* and
+#                  /links.json cache behaviors to the distribution (requires
+#                  --cf-s3-origin to have been run first). Set CF_DIST_ID as
+#                  a Lambda environment variable so CGI scripts can call
+#                  CloudFront invalidations after writes.
+#   --cf-invalidation-iam
+#                  Add an inline IAM policy named CloudFrontInvalidation to the
+#                  role named in --principal, granting cloudfront:CreateInvalidation
+#                  on the distribution ARN derived from --cf-dist-id and --account-id.
+#                  Only valid when --principal is a role ARN (:role/). Requires
+#                  --cf-dist-id.
+#   --waf-upload-fix
+#                  Look up the WAF WebACL attached to the CloudFront distribution
+#                  (--cf-dist-id), then override five body-inspection rules in
+#                  AWSManagedRulesCommonRuleSet from Block to Count so that large
+#                  file uploads (e.g. image uploads via the admin panel) are not
+#                  rejected. Rules overridden: SizeRestrictions_BODY,
+#                  EC2MetaDataSSRF_BODY, GenericLFI_BODY, GenericRFI_BODY,
+#                  CrossSiteScripting_BODY. Requires --cf-dist-id.
 #   --cf-s3-origin Add (or restore) the S3 bucket origin and a videos/*
 #                  cache behavior to the CloudFront distribution. The origin
 #                  uses the OAC named <bucket>.s3.amazonaws.com. Requires
@@ -104,7 +128,10 @@ OAC_ID="${OAC_ID:-}"
 DRY_RUN=0
 BUCKET_POLICY=0
 CF_VIDEO_POLICY=0
+CF_BLOGS_POLICY=0
 CF_S3_ORIGIN=0
+CF_INVALIDATION_IAM=0
+WAF_UPLOAD_FIX=0
 SAVE_ENV=0
 CREATE_USER=0
 CREATE_ROLE=0
@@ -130,8 +157,11 @@ while [ "$#" -gt 0 ]; do
     --bucket-policy)    BUCKET_POLICY=1;       shift   ;;
     --cf-dist-id)       CF_DIST_ID="$2";      shift 2 ;;
     --cf-video-policy)  CF_VIDEO_POLICY=1;    shift   ;;
-    --cf-s3-origin)     CF_S3_ORIGIN=1;       shift   ;;
-    --oac-id)           OAC_ID="$2";          shift 2 ;;
+    --cf-blogs-policy)  CF_BLOGS_POLICY=1;    shift   ;;
+    --cf-s3-origin)        CF_S3_ORIGIN=1;          shift   ;;
+    --cf-invalidation-iam) CF_INVALIDATION_IAM=1;   shift   ;;
+    --waf-upload-fix)      WAF_UPLOAD_FIX=1;        shift   ;;
+    --oac-id)              OAC_ID="$2";             shift 2 ;;
     --save-env)         SAVE_ENV=1;           shift   ;;
     --dry-run)          DRY_RUN=1;            shift   ;;
     -h|--help)       usage ;;
@@ -183,8 +213,24 @@ if [ "$CF_VIDEO_POLICY" = "1" ] && [ -z "$CF_DIST_ID" ]; then
   echo "Error: --cf-video-policy requires --cf-dist-id"
   exit 1
 fi
+if [ "$CF_BLOGS_POLICY" = "1" ] && [ -z "$CF_DIST_ID" ]; then
+  echo "Error: --cf-blogs-policy requires --cf-dist-id"
+  exit 1
+fi
 if [ "$CF_S3_ORIGIN" = "1" ] && [ -z "$CF_DIST_ID" ]; then
   echo "Error: --cf-s3-origin requires --cf-dist-id"
+  exit 1
+fi
+if [ "$CF_INVALIDATION_IAM" = "1" ] && [ -z "$CF_DIST_ID" ]; then
+  echo "Error: --cf-invalidation-iam requires --cf-dist-id"
+  exit 1
+fi
+if [ "$CF_INVALIDATION_IAM" = "1" ] && [ "$PRINCIPAL_TYPE" != "role" ]; then
+  echo "Error: --cf-invalidation-iam requires a ':role/' ARN in --principal"
+  exit 1
+fi
+if [ "$WAF_UPLOAD_FIX" = "1" ] && [ -z "$CF_DIST_ID" ]; then
+  echo "Error: --waf-upload-fix requires --cf-dist-id"
   exit 1
 fi
 
@@ -322,6 +368,76 @@ build_cloudfront_bucket_policy() {
 EOF
 }
 
+# Bucket policy: Allow CloudFront OAC to read blog/posts/* and links.json directly from S3.
+build_cloudfront_blogs_policy() {
+  cat <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowCloudFrontOACBlogs",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": "s3:GetObject",
+      "Resource": [
+        "arn:aws:s3:::${AWS_BUCKET}/blog/posts/*",
+        "arn:aws:s3:::${AWS_BUCKET}/links.json"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "AWS:SourceArn": "arn:aws:cloudfront::${AWS_ACCOUNT_ID}:distribution/${CF_DIST_ID}"
+        }
+      }
+    }
+  ]
+}
+EOF
+}
+
+# Combined: CloudFront OAC for both videos/* and blog/posts/* + links.json.
+build_cloudfront_combined_policy() {
+  cat <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowCloudFrontOACVideos",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::${AWS_BUCKET}/videos/*",
+      "Condition": {
+        "StringEquals": {
+          "AWS:SourceArn": "arn:aws:cloudfront::${AWS_ACCOUNT_ID}:distribution/${CF_DIST_ID}"
+        }
+      }
+    },
+    {
+      "Sid": "AllowCloudFrontOACBlogs",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": "s3:GetObject",
+      "Resource": [
+        "arn:aws:s3:::${AWS_BUCKET}/blog/posts/*",
+        "arn:aws:s3:::${AWS_BUCKET}/links.json"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "AWS:SourceArn": "arn:aws:cloudfront::${AWS_ACCOUNT_ID}:distribution/${CF_DIST_ID}"
+        }
+      }
+    }
+  ]
+}
+EOF
+}
+
 # Bucket policy: restricts bucket access to go via access points only, with an
 # optional CloudFront exception so videos/* remains accessible via OAC.
 # Apply with caution — this blocks ALL direct bucket access for every principal
@@ -439,6 +555,120 @@ EOF
 EOF
       ;;
   esac
+}
+
+# Apply inline IAM policy granting cloudfront:CreateInvalidation to the role.
+apply_cf_invalidation_iam() {
+  local dist_arn="arn:aws:cloudfront::${AWS_ACCOUNT_ID}:distribution/${CF_DIST_ID}"
+  local policy_doc
+  policy_doc=$(cat <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": "cloudfront:CreateInvalidation",
+    "Resource": "${dist_arn}"
+  }]
+}
+EOF
+  )
+
+  aws iam put-role-policy \
+    --role-name "$PRINCIPAL_NAME" \
+    --policy-name "CloudFrontInvalidation" \
+    --policy-document "$policy_doc" >/dev/null \
+    && ok "Attached inline policy CloudFrontInvalidation to role $PRINCIPAL_NAME" \
+    || err "Failed to attach CloudFrontInvalidation to role $PRINCIPAL_NAME"
+}
+
+# Override body-inspection rules in AWSManagedRulesCommonRuleSet to Count so
+# large file uploads are not blocked by the WAF attached to the distribution.
+apply_waf_upload_fix() {
+  local rules_to_count="SizeRestrictions_BODY EC2MetaDataSSRF_BODY GenericLFI_BODY GenericRFI_BODY CrossSiteScripting_BODY"
+
+  info "Fetching WebACL ARN from distribution $CF_DIST_ID..."
+  local webacl_arn
+  webacl_arn=$(aws cloudfront get-distribution-config \
+    --id "$CF_DIST_ID" \
+    --query 'DistributionConfig.WebACLId' \
+    --output text 2>/dev/null)
+
+  if [ -z "$webacl_arn" ] || [ "$webacl_arn" = "None" ]; then
+    err "No WAF WebACL attached to distribution $CF_DIST_ID"
+    return 1
+  fi
+  info "WebACL ARN : $webacl_arn"
+
+  # Parse name and ID from ARN: arn:aws:wafv2:region:account:global/webacl/NAME/ID
+  local webacl_name webacl_id
+  webacl_name=$(printf '%s' "$webacl_arn" | awk -F'/' '{print $(NF-1)}')
+  webacl_id=$(printf '%s' "$webacl_arn" | awk -F'/' '{print $NF}')
+  info "WebACL name: $webacl_name"
+  info "WebACL ID  : $webacl_id"
+
+  info "Fetching current WebACL rules and lock token..."
+  local waf_json new_config
+  waf_json=$(aws wafv2 get-web-acl \
+    --name "$webacl_name" \
+    --id "$webacl_id" \
+    --scope CLOUDFRONT \
+    --region us-east-1 \
+    --output json)
+
+  new_config=$(python3 <<PYEOF
+import json, sys
+
+waf = json.loads("""${waf_json}""")
+acl = waf['WebACL']
+lock_token = waf['LockToken']
+
+rules_to_count = set("""${rules_to_count}""".split())
+
+rules = acl.get('Rules', [])
+for rule in rules:
+    stmt = rule.get('Statement', {})
+    managed = stmt.get('ManagedRuleGroupStatement', {})
+    if managed.get('Name') == 'AWSManagedRulesCommonRuleSet':
+        overrides = managed.setdefault('RuleActionOverrides', [])
+        existing_names = {o['Name'] for o in overrides}
+        for rule_name in rules_to_count:
+            if rule_name not in existing_names:
+                overrides.append({
+                    'Name': rule_name,
+                    'ActionToUse': {'Count': {}}
+                })
+
+print(json.dumps({
+    'name': acl['Name'],
+    'id': acl['Id'],
+    'lock_token': lock_token,
+    'default_action': acl['DefaultAction'],
+    'visibility_config': acl['VisibilityConfig'],
+    'rules': rules
+}))
+PYEOF
+  )
+
+  local acl_name acl_id lock_token default_action visibility_config rules_json
+  acl_name=$(printf '%s' "$new_config"     | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['name'])")
+  acl_id=$(printf '%s' "$new_config"       | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['id'])")
+  lock_token=$(printf '%s' "$new_config"   | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['lock_token'])")
+  default_action=$(printf '%s' "$new_config" | python3 -c "import json,sys; d=json.load(sys.stdin); print(json.dumps(d['default_action']))")
+  visibility_config=$(printf '%s' "$new_config" | python3 -c "import json,sys; d=json.load(sys.stdin); print(json.dumps(d['visibility_config']))")
+  rules_json=$(printf '%s' "$new_config"   | python3 -c "import json,sys; d=json.load(sys.stdin); print(json.dumps(d['rules']))")
+
+  aws wafv2 update-web-acl \
+    --name "$acl_name" \
+    --id "$acl_id" \
+    --scope CLOUDFRONT \
+    --region us-east-1 \
+    --lock-token "$lock_token" \
+    --default-action "$default_action" \
+    --visibility-config "$visibility_config" \
+    --rules "$rules_json" \
+    --output json >/dev/null \
+    && ok "WAF RuleActionOverrides applied — body-inspection rules now Count" \
+    || err "Failed to update WAF WebACL"
 }
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -697,6 +927,20 @@ else
   attach_iam_policy
 fi
 
+# ── 1b. CloudFront invalidation IAM (optional) ────────────────────────────────
+if [ "$CF_INVALIDATION_IAM" = "1" ]; then
+  section "1b. CloudFront invalidation IAM policy"
+  info "Role       : $PRINCIPAL_NAME"
+  info "Policy     : CloudFrontInvalidation (inline)"
+  info "Distribution: $CF_DIST_ID"
+  if [ "$DRY_RUN" = "1" ]; then
+    info "Would attach inline policy CloudFrontInvalidation to role $PRINCIPAL_NAME"
+    info "  cloudfront:CreateInvalidation on arn:aws:cloudfront::${AWS_ACCOUNT_ID}:distribution/${CF_DIST_ID}"
+  else
+    apply_cf_invalidation_iam
+  fi
+fi
+
 # ── 2. Access point policy ────────────────────────────────────────────────────
 if [ -n "$AWS_ACCESS_POINT" ]; then
   section "2. Access point policy ($AWS_ACCESS_POINT)"
@@ -716,7 +960,12 @@ if [ -n "$AWS_ACCESS_POINT" ]; then
 fi
 
 # ── 3. Bucket policy (optional) ───────────────────────────────────────────────
-if ([ -n "$AWS_ACCESS_POINT" ] && [ "$BUCKET_POLICY" = "1" ]) || [ "$CF_VIDEO_POLICY" = "1" ]; then
+_need_bucket_policy=0
+[ "$BUCKET_POLICY" = "1" ] && [ -n "$AWS_ACCESS_POINT" ] && _need_bucket_policy=1
+[ "$CF_VIDEO_POLICY" = "1" ] && _need_bucket_policy=1
+[ "$CF_BLOGS_POLICY" = "1" ] && _need_bucket_policy=1
+
+if [ "$_need_bucket_policy" = "1" ]; then
   if [ "$BUCKET_POLICY" = "1" ] && [ "$CF_VIDEO_POLICY" = "1" ]; then
     section "3. Bucket policy (access-point-only + CloudFront OAC for videos/*)"
     warn "This will DENY all direct bucket access except via the access point or CloudFront."
@@ -727,11 +976,32 @@ if ([ -n "$AWS_ACCESS_POINT" ] && [ "$BUCKET_POLICY" = "1" ]) || [ "$CF_VIDEO_PO
     warn "This will DENY all direct bucket access for every principal."
     warn "Existing bucket policies will be replaced."
     BP_JSON=$(build_bucket_policy)
-  else
+  elif [ "$CF_VIDEO_POLICY" = "1" ] && [ "$CF_BLOGS_POLICY" = "1" ]; then
+    section "3. Bucket policy (CloudFront OAC for videos/* + blog/posts/* + links.json)"
+    info "Allows CloudFront distribution $CF_DIST_ID to read all three paths via OAC."
+    warn "Existing bucket policies will be replaced."
+    BP_JSON=$(build_cloudfront_combined_policy)
+  elif [ "$CF_VIDEO_POLICY" = "1" ]; then
     section "3. Bucket policy (CloudFront OAC for videos/*)"
     info "Allows CloudFront distribution $CF_DIST_ID to read videos/* via OAC."
     warn "Existing bucket policies will be replaced."
     BP_JSON=$(build_cloudfront_bucket_policy)
+  else
+    # Auto-detect: if the existing bucket policy already covers videos/*, preserve it
+    # so --cf-blogs-policy alone never silently drops video access.
+    _existing_policy=$(aws s3api get-bucket-policy \
+      --bucket "$AWS_BUCKET" --query Policy --output text 2>/dev/null || true)
+    if echo "$_existing_policy" | grep -q '"videos/'; then
+      section "3. Bucket policy (CloudFront OAC for videos/* + blog/posts/* + links.json)"
+      info "Existing policy covers videos/*; preserving it alongside blog content."
+      warn "Existing bucket policies will be replaced."
+      BP_JSON=$(build_cloudfront_combined_policy)
+    else
+      section "3. Bucket policy (CloudFront OAC for blog/posts/* + links.json)"
+      info "Allows CloudFront distribution $CF_DIST_ID to read blog content via OAC."
+      warn "Existing bucket policies will be replaced."
+      BP_JSON=$(build_cloudfront_blogs_policy)
+    fi
   fi
 
   if [ "$DRY_RUN" = "1" ]; then
@@ -755,6 +1025,92 @@ if [ "$CF_S3_ORIGIN" = "1" ]; then
     info "Would add S3 origin and videos/* cache behavior to $CF_DIST_ID"
   else
     apply_cf_s3_origin
+  fi
+fi
+
+# ── 4b. CloudFront behaviors for /blog/posts/* and /links.json (optional) ─────
+if [ "$CF_BLOGS_POLICY" = "1" ]; then
+  section "4b. CloudFront S3 behaviors (blog/posts/* + links.json)"
+  info "Distribution : $CF_DIST_ID"
+  info "Bucket origin: ${AWS_BUCKET}.s3.amazonaws.com"
+  info "Adds /blog/posts/* and /links.json behaviors pointing to the S3 origin."
+  info "Requires the S3 origin + OAC to already exist (run --cf-s3-origin first)."
+  if [ "$DRY_RUN" = "1" ]; then
+    info "Would add /blog/posts/* and /links.json cache behaviors to $CF_DIST_ID"
+  else
+    _oac_id="${OAC_ID}"
+    if [ -z "$_oac_id" ]; then
+      _oac_id=$(aws cloudfront list-origin-access-controls \
+        --query "OriginAccessControlList.Items[?Name=='${AWS_BUCKET}.s3.amazonaws.com'].Id" \
+        --output text 2>/dev/null)
+    fi
+    if [ -z "$_oac_id" ] || [ "$_oac_id" = "None" ]; then
+      err "No OAC found. Run --cf-s3-origin first to create the S3 origin and OAC."
+    else
+      _s3_origin_id="${AWS_BUCKET}.s3.amazonaws.com-oac"
+      _etag=$(aws cloudfront get-distribution-config \
+        --id "$CF_DIST_ID" --query ETag --output text)
+      _new_config=$(python3 <<PYEOF
+import json, subprocess
+dist = json.loads(subprocess.check_output([
+  'aws', 'cloudfront', 'get-distribution-config',
+  '--id', '${CF_DIST_ID}', '--output', 'json'
+]))
+config = dist['DistributionConfig']
+origin_id = '${_s3_origin_id}'
+cache_policy_id = '658327ea-f89d-4fab-a63d-7e88639e58f6'
+
+def make_behavior(pattern):
+  return {
+    'PathPattern': pattern,
+    'TargetOriginId': origin_id,
+    'ViewerProtocolPolicy': 'redirect-to-https',
+    'TrustedSigners': {'Enabled': False, 'Quantity': 0},
+    'TrustedKeyGroups': {'Enabled': False, 'Quantity': 0},
+    'AllowedMethods': {
+      'Quantity': 2, 'Items': ['HEAD', 'GET'],
+      'CachedMethods': {'Quantity': 2, 'Items': ['HEAD', 'GET']}
+    },
+    'SmoothStreaming': False, 'Compress': True,
+    'LambdaFunctionAssociations': {'Quantity': 0},
+    'FunctionAssociations': {'Quantity': 0},
+    'FieldLevelEncryptionId': '',
+    'CachePolicyId': cache_policy_id
+  }
+
+cb = config.setdefault('CacheBehaviors', {'Quantity': 0, 'Items': []})
+cb.setdefault('Items', [])
+existing = [b['PathPattern'] for b in cb['Items']]
+for pattern in ('blog/posts/*', 'links.json'):
+  if pattern not in existing:
+    cb['Items'].append(make_behavior(pattern))
+cb['Quantity'] = len(cb['Items'])
+print(json.dumps(config))
+PYEOF
+      )
+      aws cloudfront update-distribution \
+        --id "$CF_DIST_ID" \
+        --if-match "$_etag" \
+        --distribution-config "$_new_config" \
+        --query 'Distribution.Status' \
+        --output text >/dev/null \
+        && ok "Added blog/posts/* and links.json behaviors — deploying (may take a few minutes)" \
+        || err "Failed to update CloudFront distribution"
+    fi
+  fi
+fi
+
+# ── 4c. WAF upload fix (optional) ─────────────────────────────────────────────
+if [ "$WAF_UPLOAD_FIX" = "1" ]; then
+  section "4c. WAF upload fix (AWSManagedRulesCommonRuleSet body rules → Count)"
+  info "Distribution: $CF_DIST_ID"
+  info "Overrides SizeRestrictions_BODY, EC2MetaDataSSRF_BODY, GenericLFI_BODY,"
+  info "          GenericRFI_BODY, CrossSiteScripting_BODY to Count."
+  if [ "$DRY_RUN" = "1" ]; then
+    info "Would fetch WebACL attached to $CF_DIST_ID and add RuleActionOverrides"
+    info "for the five body-inspection rules in AWSManagedRulesCommonRuleSet."
+  else
+    apply_waf_upload_fix
   fi
 fi
 
@@ -798,4 +1154,7 @@ if [ "$DRY_RUN" = "0" ]; then
   info "  AWS_REGION=${AWS_REGION}"
   info "  AWS_ACCESS_KEY_ID=<key for $PRINCIPAL_NAME>"
   info "  AWS_SECRET_ACCESS_KEY=<secret for $PRINCIPAL_NAME>"
+  if [ "$CF_BLOGS_POLICY" = "1" ] || [ "$CF_VIDEO_POLICY" = "1" ]; then
+    info "  CF_DIST_ID=${CF_DIST_ID}   # enables CloudFront cache invalidation on writes"
+  fi
 fi

@@ -64,4 +64,6 @@ storage_put "manifest.json" "$TMP_DIR/manifest.json" "application/json" || {
   printf '\r\n{"error":"manifest update failed"}\n'; exit 0
 }
 
+cf_invalidate "/blog/posts/manifest.json" "/blog/posts/manifest-all.json" "/blog/posts/$SLUG/*"
+
 printf '\r\n{"ok":true}\n'

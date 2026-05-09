@@ -33,15 +33,11 @@ fetch_month() {
     [ -f "$ANALYTICS_DIR/$fname" ] && cat "$ANALYTICS_DIR/$fname" >> "$TMPFILE"
     return
   fi
-  # S3: check local cache first (written by track.cgi), else fetch
-  if [ -f "$ANALYTICS_DIR/$fname" ]; then
-    cat "$ANALYTICS_DIR/$fname" >> "$TMPFILE"
-  else
-    local tmp="/tmp/analytics-month-$$-${month}"
-    aws s3 cp "s3://${AWS_BUCKET}/analytics/${fname}" "$tmp" \
-      --region "$AWS_REGION" ${_ep} >/dev/null 2>&1 && cat "$tmp" >> "$TMPFILE" || true
-    rm -f "$tmp"
-  fi
+  # S3: always fetch from S3 — Lambda containers don't share /tmp
+  local tmp="/tmp/analytics-month-$$-${month}"
+  aws s3 cp "s3://${AWS_BUCKET}/analytics/${fname}" "$tmp" \
+    --region "$AWS_REGION" ${_ep} >/dev/null 2>&1 && cat "$tmp" >> "$TMPFILE" || true
+  rm -f "$tmp"
 }
 
 fetch_month "$PREV_MONTH"

@@ -1,0 +1,61 @@
+<!-- {"slug":"ai-is-not-the-engineer-it-s-the-junior-developer","title":"AI Is Not the Engineer, It's the Junior Developer","date":"2026-05-08","desc":"","wip":false} -->
+<p class="kicker">AI Development · Engineering practice</p>
+<h1>AI Is Not the Engineer, It's the Junior Developer</h1>
+<p class="subtitle">The engineers who get the most out of AI are the ones who stay in charge of the architecture, the rules, and what happens when things go wrong.</p>
+<p class="byline">Nathan Tebay · May 2026</p>
+
+<p>A lot of people treat AI like it's the engineer, and the human just signs off at the end.</p>
+
+<img src="/blog/posts/ai-is-not-the-engineer-it-s-the-junior-developer/AIIsNottheEngineer.png" alt="AIIsNottheEngineer.png" style="max-width:100%;">
+
+<p>That's not how I use it.</p>
+
+<p>For me, AI is more like a junior developer. I set the boundaries. I'm still the one responsible for the architecture, the rules, how things get checked, and what happens if something goes wrong.</p>
+
+<p>Here's how that looks in my multi-agent coding setup.</p>
+
+<p>The hard rules were explicit:</p>
+<ul>
+<li>AI never writes to disk without approval.</li>
+<li>Unsafe patterns are blocked before review.</li>
+<li>Confidence thresholds determine escalation.</li>
+<li>Revision loops are bounded.</li>
+<li>Security-sensitive work is never delegated.</li>
+</ul>
+
+<p>Those rules didn't come from AI. I set them.</p>
+
+<p>I took the same approach in QMK Nexus.</p>
+
+<p>A lot of my architecture choices went against what AI usually suggests for AWS projects.</p>
+<ul>
+<li>S3 instead of DynamoDB for keyboard indexing</li>
+<li>Per-user SQLite databases stored in S3</li>
+<li>ECS Fargate instead of Lambda for firmware builds</li>
+<li>A custom Python firmware generation pipeline instead of wrapping the QMK CLI</li>
+</ul>
+
+<p>I made those calls because I know what firmware generation actually looks like in practice, what compilers need, and what will be maintainable over time.</p>
+
+<p>AI helped me build it, but the decisions were mine.</p>
+
+<p>The real difference shows up in validation.</p>
+
+<p>AI can write code from a spec, but it can't plug firmware into real hardware, notice that RP2040 builds fail differently than Teensy, track the problem down to board definitions, and fix the pipeline.</p>
+
+<p>That's still my job.</p>
+
+<div class="pullquote">I don't see AI replacing engineering judgment. What it does is give you more leverage, if you know your system well enough to set limits, guide the work, check it, and throw out what doesn't fit.</div>
+
+<p>The value isn't in taking AI code at face value.</p>
+
+<p>The value is in building systems where you can actually trust the generated code to run safely.</p>
+
+<div class="tag-row">
+  <span class="tag tag-blue">multi-agent systems</span>
+  <span class="tag tag-blue">QMK Nexus</span>
+  <span class="tag tag-blue">AWS</span>
+  <span class="tag tag-gray">engineering judgment</span>
+  <span class="tag tag-gray">AI oversight</span>
+  <span class="tag tag-gray">architecture</span>
+</div>

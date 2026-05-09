@@ -114,6 +114,37 @@
   );
   navTree.appendChild(projectListItem);
 
+  // Blog group (expandable, async-populated with recent posts)
+  const blogGroupDetails = document.createElement("details");
+  if (currentPage === "blog") blogGroupDetails.open = true;
+  const blogGroupSummary = document.createElement("summary");
+  blogGroupSummary.textContent = "Blog";
+  blogGroupDetails.appendChild(blogGroupSummary);
+  const blogGroupList = document.createElement("ul");
+  const allPostsLi = document.createElement("li");
+  allPostsLi.appendChild(makeLink("All Posts", basePath + "blog.html", "blog"));
+  blogGroupList.appendChild(allPostsLi);
+  blogGroupDetails.appendChild(blogGroupList);
+  const blogListItem = document.createElement("li");
+  blogListItem.appendChild(blogGroupDetails);
+  navTree.appendChild(blogListItem);
+
+  // Async: fetch manifest and append up to 5 recent posts under Blog group
+  fetch(basePath + "blog/posts/manifest.json")
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (posts) {
+      posts
+        .filter(function (p) { return !p.wip; })
+        .sort(function (a, b) { return a.date < b.date ? 1 : -1; })
+        .slice(0, 5)
+        .forEach(function (post) {
+          const li = document.createElement("li");
+          li.appendChild(makeLink(post.title, basePath + "blog-post.html?slug=" + post.slug, ""));
+          blogGroupList.appendChild(li);
+        });
+    })
+    .catch(function () {});
+
   // Divider
   const dividerElement = document.createElement("div");
   dividerElement.className = "divider";
@@ -122,7 +153,6 @@
   // Top-level links
   [
     { label: "Home",    href: basePath + "index.html",  id: "home" },
-    { label: "Blog",    href: basePath + "blog.html",   id: "blog" },
     { label: "Links",   href: basePath + "links.html",  id: "links" },
     { label: "Contact", href: "mailto:nathan@tebay.dev", id: "" },
   ].forEach(({ label, href, id }) => {
@@ -168,7 +198,7 @@
   // ── Analytics beacon ──────────────────────────────────────────────────────
   if (currentPage !== "admin" && navigator.sendBeacon) {
     try {
-      navigator.sendBeacon("/cgi-bin/track.cgi", new URLSearchParams({
+      navigator.sendBeacon("/cgi-bin/infiniteImprobablity.cgi", new URLSearchParams({
         page: window.location.pathname,
         ref: document.referrer || "",
       }));

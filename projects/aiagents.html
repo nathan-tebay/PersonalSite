@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Agents - Tebay.dev</title>
+    <meta
+      name="description"
+      content="AI Agents project write-up: a modular local agent system for scraping, stock analysis, coding assistance, scheduling, and long-term memory."
+    />
+    <meta name="author" content="Nathan Tebay" />
+    <link rel="canonical" href="https://tebay.dev/projects/aiagents.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tebay.dev" />
+    <meta property="og:title" content="AI Agents - Tebay.dev" />
+    <meta
+      property="og:description"
+      content="A modular local agent system for scraping, stock analysis, coding assistance, scheduling, and long-term memory."
+    />
+    <meta property="og:url" content="https://tebay.dev/projects/aiagents.html" />
+    <meta property="og:image" content="https://tebay.dev/background.jpeg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI Agents - Tebay.dev" />
+    <meta
+      name="twitter:description"
+      content="A modular local agent system for scraping, stock analysis, coding assistance, scheduling, and long-term memory."
+    />
+    <meta name="twitter:image" content="https://tebay.dev/background.jpeg" />
+    <link rel="icon" type="image/png" href="../favicon.png" />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body data-page="aiagents" data-basepath="../">
+    <div class="page-layout">
+      <div id="layout-nav"></div>
+
+      <div class="main-col">
+        <div class="side-panel">
+          <div class="project-header">
+            <div>
+              <h1>AI Agents</h1>
+              <p class="tagline">
+                Modular local AI agent system for scraping, market analysis,
+                coding assistance, scheduling, review, and long-term memory
+              </p>
+            </div>
+            <div class="header-actions">
+              <a
+                href="https://github.com/nathan-tebay/ai-agents"
+                class="github-link"
+                target="_blank"
+                rel="noopener"
+              >
+                View on GitHub
+              </a>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="project-body">
+            <div class="project-section project-section--overview">
+              <h3>Overview</h3>
+              <p>
+                AI Agents is a Python-based orchestration project for running a
+                small team of focused local agents. Claude Code acts as the
+                planner and reviewer while a configured LM Studio model handles
+                worker tasks through an OpenAI-compatible API. The goal is to
+                keep high-level architecture and approvals with Claude while
+                offloading bounded scraping, market analysis, and small coding
+                jobs to local models.
+              </p>
+              <p>
+                The system centers on an <code>OrchestratorAgent</code> that
+                dispatches work to specialized agents, a <code>TaskRouter</code>
+                that decides when coding tasks are safe to delegate, and a
+                <code>CodeReviewer</code> gate that prevents generated code from
+                being written without review. Shared memory gives every agent a
+                common place to store facts, task history, context, and semantic
+                recall across sessions.
+              </p>
+            </div>
+
+            <div class="project-section project-section--stack">
+              <h3>Stack</h3>
+              <div class="tag-list">
+                <span class="tag">Python</span>
+                <span class="tag">AsyncIO</span>
+                <span class="tag">Pydantic</span>
+                <span class="tag">LM Studio</span>
+                <span class="tag">OpenAI-compatible API</span>
+                <span class="tag">SQLite</span>
+                <span class="tag">ChromaDB</span>
+                <span class="tag">APScheduler</span>
+                <span class="tag">Playwright</span>
+                <span class="tag">BeautifulSoup</span>
+                <span class="tag">yfinance</span>
+                <span class="tag">pytest</span>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Key Systems</h3>
+              <ul>
+                <li>
+                  <strong>Orchestration</strong> - starts shared services,
+                  schedules recurring jobs, dispatches tasks, tracks retries,
+                  and keeps agent execution consistent.
+                </li>
+                <li>
+                  <strong>Coding delegation</strong> - routes small and medium
+                  coding tasks through <code>CodingAgent</code>, applies safety
+                  checks, and requires review before any write-to-disk step.
+                </li>
+                <li>
+                  <strong>Scraping workflow</strong> - uses Playwright or
+                  BeautifulSoup to collect page content, then summarizes and
+                  structures results with the configured worker model.
+                </li>
+                <li>
+                  <strong>Market workflow</strong> - pulls ticker data and news
+                  signals, then produces scheduled analysis reports for tracked
+                  symbols.
+                </li>
+                <li>
+                  <strong>Shared memory</strong> - combines structured SQLite
+                  records with ChromaDB semantic search so agents can recall
+                  task outcomes, preferences, and prior context.
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section project-section--challenges">
+              <h3>Challenges</h3>
+              <ul>
+                <li>
+                  Drawing a hard boundary between work a local model can safely
+                  produce and work Claude should handle directly, especially for
+                  security-sensitive or broad multi-file changes.
+                </li>
+                <li>
+                  Making delegated code generation useful without ever treating
+                  it as automatically trusted output.
+                </li>
+                <li>
+                  Keeping the memory layer centralized so agents share context
+                  without reaching into database internals.
+                </li>
+                <li>
+                  Designing schedules, retries, and logging so long-running
+                  worker tasks can fail clearly instead of silently disappearing.
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section project-section--learnings">
+              <h3>Learnings</h3>
+              <ul>
+                <li>
+                  A local model is most useful when the task boundary is narrow,
+                  the expected output format is typed, and a reviewer gate is
+                  mandatory.
+                </li>
+                <li>
+                  Agent memory needs both durable structured records and fuzzy
+                  semantic search; one without the other misses important
+                  operational context.
+                </li>
+                <li>
+                  Coding agents need policy in configuration, not scattered
+                  conditionals, so delegation rules can evolve as the system is
+                  tested.
+                </li>
+                <li>
+                  The simplest orchestration system is often easier to trust:
+                  explicit agents, explicit routes, explicit review, and plain
+                  logs beat hidden framework magic.
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Current Scope</h3>
+              <ul>
+                <li>On-demand scraping and coding tasks.</li>
+                <li>Scheduled stock analysis and orchestrator health checks.</li>
+                <li>SQLite development storage with optional PostgreSQL path.</li>
+                <li>ChromaDB semantic memory for recall across sessions.</li>
+                <li>Systemd service files and helper scripts for local startup.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/project-data.js"></script>
+    <script src="../assets/layout.js"></script>
+    <script src="../assets/script.js" defer></script>
+  </body>
+</html>

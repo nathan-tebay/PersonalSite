@@ -1,8 +1,8 @@
 #!/bin/sh
 . /var/www/html/cgi-bin/session.sh
 # CGI: upload an image for a blog post.
-# POST fields: slug, filename, image_b64 or data (base64-encoded image)
-# Content-Type: application/x-www-form-urlencoded
+# Query params: slug, filename
+# Body: raw binary image data
 
 . /var/www/html/cgi-bin/common.sh
 . /var/www/html/cgi-bin/storage.sh
@@ -25,16 +25,13 @@ rate_limit_check "upload_${REMOTE_ADDR}" 15 60 || emit_error "429 Too Many Reque
 _verify_csrf || _fail_csrf
 # ───────────────────────────────────────────────────────────────────────
 
-POST_DATA=""
-[ -n "$CONTENT_LENGTH" ] && POST_DATA=$(head -c "$CONTENT_LENGTH")
+# Read slug and filename from query string (no POST body parsing needed)
+SLUG=$(printf '%s' "${QUERY_STRING}" | tr '&' '\n' | grep '^slug=' | head -1 | cut -d= -f2- | tr -cd 'a-z0-9-')
+_raw_filename=$(printf '%s' "${QUERY_STRING}" | tr '&' '\n' | grep '^filename=' | head -1 | cut -d= -f2-)
+FILENAME=$(urldecode "$_raw_filename" | tr -cd 'a-zA-Z0-9._-')
 
-SLUG=$(get_field "$POST_DATA" slug | tr -cd 'a-z0-9-')
-FILENAME=$(get_field "$POST_DATA" filename | tr -cd 'a-zA-Z0-9._-')
-IMAGEDATA=$(get_field "$POST_DATA" data)
-[ -n "$IMAGEDATA" ] || IMAGEDATA=$(get_field "$POST_DATA" image_b64)
-
-if [ -z "$SLUG" ] || [ -z "$FILENAME" ] || [ -z "$IMAGEDATA" ]; then
-  printf '\r\n{"error":"slug, filename, and image data are required"}\n'; exit 0
+if [ -z "$SLUG" ] || [ -z "$FILENAME" ]; then
+  printf '\r\n{"error":"slug and filename are required"}\n'; exit 0
 fi
 
 # ── Validate file extension (whitelist) ────────────────────────────────
@@ -45,18 +42,22 @@ case "$_ext" in
 esac
 # ───────────────────────────────────────────────────────────────────────
 
-# ── Decode base64 and check size (max 5MB) ────────────────────────────
-printf '%s' "$IMAGEDATA" | base64 -d > "$TMP_DIR/image" 2>/dev/null || {
-  printf '\r\n{"error":"invalid base64 data"}\n'; exit 0
-}
+# ── Read raw binary body directly to file — no shell variable ─────────
+if [ -n "$CONTENT_LENGTH" ] && [ "$CONTENT_LENGTH" -gt 0 ] 2>/dev/null; then
+  head -c "$CONTENT_LENGTH" > "$TMP_DIR/image"
+else
+  cat > "$TMP_DIR/image"
+fi
 
 _filesize=$(wc -c < "$TMP_DIR/image" 2>/dev/null || echo 0)
 if [ "$_filesize" -gt 5242880 ]; then
   printf '\r\n{"error":"file too large (max 5MB)"}\n'; exit 0
 fi
+if [ "$_filesize" -eq 0 ]; then
+  printf '\r\n{"error":"empty file"}\n'; exit 0
+fi
 # ──────────────────────────────────────────────────────────────────────
 
-# Determine content type from extension
 case "$_ext" in
   jpg|jpeg) contenttype="image/jpeg" ;;
   png)      contenttype="image/png" ;;

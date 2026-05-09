@@ -11,6 +11,7 @@
   </script>
     <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
+    <link rel="stylesheet" href="../assets/blog-post.css" />
     <style>
       :root {
         --danger:   #f87171;
@@ -772,6 +773,37 @@
         font-size: 0.8rem;
         color: var(--text-low);
       }
+
+      /* ── Component insert toolbar ─────────────────────────────────────── */
+      #component-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        padding: 0.4rem 0;
+        border-bottom: 1px solid var(--divider);
+        margin-bottom: 0.4rem;
+      }
+
+      .comp-btn {
+        background: none;
+        color: var(--text-mid);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-family: system-ui, sans-serif;
+        font-size: 0.7rem;
+        padding: 0.15rem 0.5rem;
+        transition: color 0.12s, border-color 0.12s;
+      }
+
+      .comp-btn:hover { color: var(--text-high); border-color: rgba(255, 255, 255, 0.3); }
+
+      .comp-sep {
+        font-size: 0.65rem;
+        color: var(--text-low);
+        align-self: center;
+        margin-left: 0.25rem;
+      }
     </style>
   </head>
   <body data-page="admin" data-basepath="../">
@@ -801,6 +833,8 @@
               <div class="list-header">
                 <span>Posts</span>
                 <button id="new-btn">+ New</button>
+                <button id="import-btn">Import</button>
+                <input type="file" id="import-file-input" accept=".html" hidden>
               </div>
               <div id="post-list-items"></div>
             </div>
@@ -843,9 +877,21 @@
               </div>
               <div class="form-group">
                 <div class="tabs">
-                  <button class="tab-btn active" id="tab-text">Text</button>
-                  <button class="tab-btn" id="tab-html">HTML</button>
+                  <button class="tab-btn active" id="tab-html">HTML</button>
                   <button class="tab-btn" id="tab-preview">Preview</button>
+                </div>
+                <div id="component-toolbar" style="display:none">
+                  <button class="comp-btn" data-component="kicker">Kicker</button>
+                  <button class="comp-btn" data-component="subtitle">Subtitle</button>
+                  <button class="comp-btn" data-component="byline">Byline</button>
+                  <button class="comp-btn" data-component="pullquote">Pullquote</button>
+                  <button class="comp-btn" data-component="lesson-card">Lesson Card</button>
+                  <button class="comp-btn" data-component="timeline">Timeline</button>
+                  <span class="comp-sep">Tags:</span>
+                  <button class="comp-btn" data-component="tag-red">Red</button>
+                  <button class="comp-btn" data-component="tag-amber">Amber</button>
+                  <button class="comp-btn" data-component="tag-gray">Gray</button>
+                  <button class="comp-btn" data-component="tag-blue">Blue</button>
                 </div>
                 <textarea id="field-content" placeholder="Write your post…" data-gramm="true" data-gramm_editor="true" spellcheck="true"></textarea>
                 <div id="preview-pane"></div>
@@ -959,11 +1005,8 @@
         /** @type {boolean|null} null when no post is loaded */
         let currentPublished = null;
 
-        /** @type {"text"|"html"} */
-        let currentMode = "text";
-
-        /** Plain text with <image: filename> placeholders */
-        let textContent = "";
+        /** @type {"html"|"preview"} */
+        let currentMode = "html";
 
         /** Actual HTML with <img> tags */
         let htmlContent = "";
@@ -986,9 +1029,9 @@
         const imgGrid      = document.getElementById("img-grid");
         const imgDropZone  = document.getElementById("img-drop-zone");
         const imgFileInput = document.getElementById("img-file-input");
-        const tabText      = document.getElementById("tab-text");
-        const tabHtml      = document.getElementById("tab-html");
-        const tabPreview   = document.getElementById("tab-preview");
+        const tabHtml           = document.getElementById("tab-html");
+        const tabPreview        = document.getElementById("tab-preview");
+        const componentToolbar  = document.getElementById("component-toolbar");
 
         // ── API ───────────────────────────────────────────────────────────
         async function apiPost(path, body) {
@@ -1041,14 +1084,20 @@
           if (!slug) { setStatus("Save the post first before uploading images.", true); return; }
           for (var i = 0; i < files.length; i++) {
             var file = files[i];
-            var b64 = await new Promise(function (resolve) {
-              var reader = new FileReader();
-              reader.onload = function (e) { resolve(e.target.result.split(",")[1]); };
-              reader.readAsDataURL(file);
+            var params = new URLSearchParams({ slug: slug, filename: file.name });
+            var resp = await fetch("../cgi-bin/upload.cgi?" + params.toString(), {
+              method: "POST",
+              headers: {
+                "X-CSRF-Token": getCsrfToken(),
+                "Content-Type": file.type || "application/octet-stream",
+              },
+              body: file,
             });
-            await apiPost("../cgi-bin/upload.cgi", new URLSearchParams({
-              slug: slug, filename: file.name, image_b64: b64,
-            }));
+            if (!resp.ok) {
+              var errJson = await resp.json().catch(function () { return {}; });
+              setStatus("Upload failed: " + (errJson.error || resp.status), true);
+              return;
+            }
           }
           await loadImages(slug);
         }
@@ -1097,103 +1146,48 @@
           });
         }
 
-        // ── Conversion ────────────────────────────────────────────────────
-        // Images are referenced by server URL: /blog/posts/<slug>/<filename>
-        function textToHtml(text) {
-          let processed = text.replace(/<image:\s*([^>]+?)>/g, function (_, name) {
-            name = name.trim();
-            const src = currentSlug ? imageUrl(currentSlug, name) : "";
-            return '<img src="' + src + '" alt="' + escapeHtml(name) + '" style="max-width:100%;">';
-          });
-          return processed.split(/\n\n+/).map(function (para) {
-            return '<p>' + para.replace(/\n/g, '<br>\n') + '</p>';
-          }).join('\n');
-        }
-
-        function htmlToText(html) {
-          let text = html;
-          // Stash <img> tags as null-byte placeholders to protect them from the tag stripper
-          const stash = [];
-          text = text.replace(/<img\s[^>]*>/gi, function (match) {
-            const srcM = match.match(/src="([^"]*)"/i);
-            const altM = match.match(/alt="([^"]*)"/i);
-            const src  = srcM ? srcM[1] : "";
-            const alt  = altM ? altM[1] : "";
-            // Extract filename from URL path or fall back to alt text
-            const name = src ? src.split("/").pop() : (alt || "image");
-            const ph   = "\x00" + stash.length + "\x00";
-            stash.push("<image: " + name + ">");
-            return ph;
-          });
-          // Block elements → newlines
-          text = text.replace(/<br\s*\/?>/gi, "\n");
-          text = text.replace(/<\/(?:p|div|li|h[1-6])>/gi, "\n\n");
-          // Strip remaining tags
-          text = text.replace(/<[^>]+>/g, "");
-          // Decode entities
-          text = text.replace(/&amp;/g, "&").replace(/&lt;/g, "<")
-                     .replace(/&gt;/g, ">").replace(/&quot;/g, '"')
-                     .replace(/&#39;/g, "'").replace(/&nbsp;/g, " ");
-          // Restore stashed image placeholders
-          stash.forEach(function (val, i) { text = text.split("\x00" + i + "\x00").join(val); });
-          return text.replace(/\n{3,}/g, "\n\n").trim();
-        }
-
         // ── Session storage ───────────────────────────────────────────────
         function saveSession() {
           if (!currentSlug) return;
-          sessionStorage.setItem("tebay_t_" + currentSlug, textContent);
           sessionStorage.setItem("tebay_h_" + currentSlug, htmlContent);
         }
 
-        // ── Sync textarea → current-mode variable ─────────────────────────
+        // ── Sync textarea → htmlContent ───────────────────────────────────
         function syncFromTextarea() {
-          if (currentMode === "text") textContent = contentInput.value;
-          else if (currentMode === "html") htmlContent = contentInput.value;
+          htmlContent = contentInput.value;
         }
 
         // ── Tab switching ─────────────────────────────────────────────────
         function switchTab(mode) {
           syncFromTextarea();
-          if (mode === "text") {
-            if (currentMode === "html") textContent = htmlToText(htmlContent);
-            currentMode = "text";
-            contentInput.value        = textContent;
-            contentInput.style.display = "";
-            previewPane.style.display  = "none";
-            tabText.classList.add("active");
-            tabHtml.classList.remove("active");
-            tabPreview.classList.remove("active");
-          } else if (mode === "html") {
-            if (currentMode === "text") htmlContent = textToHtml(textContent);
+          if (mode === "html") {
             currentMode = "html";
             contentInput.value        = htmlContent;
             contentInput.style.display = "";
             previewPane.style.display  = "none";
-            tabText.classList.remove("active");
             tabHtml.classList.add("active");
             tabPreview.classList.remove("active");
+            componentToolbar.style.display = "";
           } else {
-            if (currentMode === "text") htmlContent = textToHtml(textContent);
-            else htmlContent = contentInput.value;
+            currentMode = "preview";
+            htmlContent = contentInput.value;
             contentInput.style.display = "none";
             previewPane.style.display  = "block";
             previewPane.innerHTML      = htmlContent;
-            tabText.classList.remove("active");
             tabHtml.classList.remove("active");
             tabPreview.classList.add("active");
+            componentToolbar.style.display = "none";
           }
           saveSession();
         }
 
-        tabText.addEventListener("click",    function () { switchTab("text"); });
         tabHtml.addEventListener("click",    function () { switchTab("html"); });
         tabPreview.addEventListener("click", function () { switchTab("preview"); });
 
         // ── Get final HTML for saving ─────────────────────────────────────
         function getHtmlContent() {
           syncFromTextarea();
-          return currentMode === "text" ? textToHtml(textContent) : htmlContent;
+          return htmlContent;
         }
 
         // ── Publish button state ──────────────────────────────────────────
@@ -1276,21 +1270,11 @@
             currentSlug      = slug;
             currentPublished = published;
 
-            // Load images from server before restoring content (so textToHtml has currentImages)
             await loadImages(slug);
 
-            // Restore from session if available, else derive text from html
-            const st = sessionStorage.getItem("tebay_t_" + slug);
             const sh = sessionStorage.getItem("tebay_h_" + slug);
-            if (st !== null || sh !== null) {
-              textContent = st || "";
-              htmlContent = sh || content || "";
-            } else {
-              htmlContent = content || "";
-              textContent = htmlToText(htmlContent);
-            }
-
-            contentInput.value = currentMode === "html" ? htmlContent : textContent;
+            htmlContent = sh || content || "";
+            contentInput.value = htmlContent;
             contentInput.style.display = "";
             previewPane.style.display  = "none";
 
@@ -1306,9 +1290,8 @@
         function clearEditor() {
           currentSlug      = null;
           currentPublished = null;
-          currentMode      = "text";
+          currentMode      = "html";
           currentImages    = [];
-          textContent      = "";
           htmlContent      = "";
           titleInput.value   = "";
           slugInput.value    = "";
@@ -1319,9 +1302,9 @@
           contentInput.value = "";
           contentInput.style.display = "";
           previewPane.style.display  = "none";
-          tabText.classList.add("active");
-          tabHtml.classList.remove("active");
+          tabHtml.classList.add("active");
           tabPreview.classList.remove("active");
+          componentToolbar.style.display = "";
           deleteBtn.style.display = "none";
           syncPublishBtn();
           setStatus("");
@@ -1374,12 +1357,7 @@
           const filename = e.dataTransfer.getData("application/x-blog-image");
           if (!filename) return;
           e.preventDefault();
-          let insert;
-          if (currentMode === "text") {
-            insert = "<image: " + filename + ">";
-          } else {
-            insert = '<img src="' + imageUrl(currentSlug, filename) + '" alt="' + escapeHtml(filename) + '" style="max-width:100%;">';
-          }
+          const insert = '<img src="' + imageUrl(currentSlug, filename) + '" alt="' + escapeHtml(filename) + '" style="max-width:100%;">';
           const s = contentInput.selectionStart;
           const end = contentInput.selectionEnd;
           contentInput.value = contentInput.value.substring(0, s) + insert + contentInput.value.substring(end);
@@ -1417,6 +1395,7 @@
           if (json.ok) {
             currentSlug      = slug;
             currentPublished = json.published;
+            sessionStorage.removeItem("tebay_h_" + slug);
             deleteBtn.style.display = "";
             syncPublishBtn();
             setStatus("Saved.");
@@ -1479,6 +1458,88 @@
 
         document.getElementById("new-btn").addEventListener("click", clearEditor);
         document.getElementById("clear-btn").addEventListener("click", clearEditor);
+
+        // ── HTML document import ──────────────────────────────────────────
+        var importFileInput = document.getElementById("import-file-input");
+
+        document.getElementById("import-btn").addEventListener("click", function () {
+          importFileInput.click();
+        });
+
+        importFileInput.addEventListener("change", function () {
+          var file = importFileInput.files[0];
+          if (!file) return;
+          var reader = new FileReader();
+          reader.onload = function (e) { importHtmlDocument(e.target.result, file.name); };
+          reader.readAsText(file);
+          importFileInput.value = "";
+        });
+
+        function importHtmlDocument(html, filename) {
+          var doc = new DOMParser().parseFromString(html, "text/html");
+
+          var rawTitle = doc.querySelector("title") ? doc.querySelector("title").textContent : "";
+          var title = rawTitle.replace(/\s*\|.*$/, "").trim();
+          var descMeta = doc.querySelector('meta[name="description"]');
+          var desc  = descMeta ? (descMeta.getAttribute("content") || "") : "";
+          var slug  = title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "");
+
+          var date = "";
+          var bylineEl = doc.querySelector(".byline");
+          if (bylineEl) {
+            var bylineMatch = bylineEl.textContent.match(/([A-Za-z]+)\s+(\d{4})/);
+            if (bylineMatch) {
+              var months = { January:1, February:2, March:3, April:4, May:5, June:6,
+                             July:7, August:8, September:9, October:10, November:11, December:12 };
+              var mo = months[bylineMatch[1]];
+              if (mo) date = bylineMatch[2] + "-" + String(mo).padStart(2, "0") + "-01";
+            }
+          }
+
+          var contentRoot = doc.querySelector(".wrap") || doc.body;
+          contentRoot.querySelectorAll("style, script").forEach(function (el) { el.remove(); });
+          var content = contentRoot.innerHTML.trim();
+
+          clearEditor();
+          titleInput.value   = title;
+          slugInput.value    = slug;
+          descInput.value    = desc;
+          if (date) dateInput.value = date;
+          htmlContent        = content;
+          contentInput.value = content;
+          setStatus("Imported from " + filename + " — review and save.");
+        }
+
+        // ── Component snippets ────────────────────────────────────────────
+        var componentSnippets = {
+          "kicker":      '<p class="kicker">Category &middot; Subcategory</p>',
+          "subtitle":    '<p class="subtitle">Lead sentence or subtitle text.</p>',
+          "byline":      '<p class="byline">Nathan Tebay &middot; Month Year</p>',
+          "pullquote":   '<div class="pullquote">Pull quote text goes here.</div>',
+          "lesson-card": '<div class="lesson-card">\n  <div class="lc-head">Heading</div>\n  <div class="lc-body">Body text.</div>\n</div>',
+          "timeline":    '<div class="timeline">\n  <div class="tl-item">\n    <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>\n    <div class="tl-content">\n      <div class="tl-label">Label</div>\n      <div class="tl-text"><strong>Event</strong> Description.</div>\n    </div>\n  </div>\n</div>',
+          "tag-red":     '<span class="tag tag-red">label</span>',
+          "tag-amber":   '<span class="tag tag-amber">label</span>',
+          "tag-gray":    '<span class="tag tag-gray">label</span>',
+          "tag-blue":    '<span class="tag tag-blue">label</span>',
+        };
+
+        componentToolbar.addEventListener("click", function (e) {
+          var btn = e.target.closest(".comp-btn");
+          if (!btn) return;
+          var snippet = componentSnippets[btn.dataset.component];
+          if (!snippet) return;
+          var s   = contentInput.selectionStart;
+          var end = contentInput.selectionEnd;
+          var nl  = (s > 0 && contentInput.value[s - 1] !== "\n") ? "\n" : "";
+          contentInput.value = contentInput.value.substring(0, s) + nl + snippet + "\n" + contentInput.value.substring(end);
+          contentInput.selectionStart = contentInput.selectionEnd = s + nl.length + snippet.length + 1;
+          contentInput.focus();
+          htmlContent = contentInput.value;
+        });
 
         document.getElementById("logout-btn").addEventListener("click", function () {
           window.location.href = "/cgi-bin/logout.cgi";

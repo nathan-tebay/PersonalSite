@@ -31,5 +31,6 @@ if [ -z "$SLUG" ] || [ -z "$FILENAME" ]; then
 fi
 
 storage_rm "$SLUG/$FILENAME"
+cf_invalidate "/blog/posts/$SLUG/$FILENAME"
 
 printf '\r\n{"ok":true}\n'

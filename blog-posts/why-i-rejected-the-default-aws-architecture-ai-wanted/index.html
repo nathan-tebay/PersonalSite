@@ -1,0 +1,58 @@
+<!-- {"slug":"why-i-rejected-the-default-aws-architecture-ai-wanted","title":"Why I Rejected the \"Default\" AWS Architecture AI Wanted","date":"2026-05-08","desc":"Part 2 of findings from asking AI on how I use it. ","wip":false} -->
+<p class="kicker">AI Development · Cloud architecture</p>
+<h1>Why I Rejected the "Default" AWS Architecture AI Wanted</h1>
+<p class="subtitle">AI always reaches for the same AWS blueprint. On QMK Nexus, that blueprint was wrong — and knowing why required domain knowledge no prompt can replicate.</p>
+<p class="byline">Nathan Tebay · May 2026</p>
+
+<img src="/blog/posts/why-i-rejected-the-default-aws-architecture-ai-wanted/rejectarchitecture.png" alt="rejectarchitecture.png" style="max-width:100%;">
+
+<p>One thing I've learned building with AI is that it always leans toward the standard architecture.</p>
+
+<p>If you ask an AI model to build an AWS application, you will almost always get some variation of:</p>
+<ul>
+<li>API Gateway</li>
+<li>Lambda</li>
+<li>DynamoDB</li>
+<li>S3 for assets</li>
+<li>Standard framework boilerplate</li>
+</ul>
+
+<p>That setup works for many projects.</p>
+
+<p>It didn't work for QMK Nexus.</p>
+
+<p>QMK Nexus generates QMK firmware for custom keyboards. That means dealing with big firmware definitions, compiler toolchains, MCU quirks, and long-running builds.</p>
+
+<p>The default AI-generated architecture fell apart fast under those constraints.</p>
+
+<p>For example, AI consistently pushed toward DynamoDB for keyboard indexing. I rejected that for several reasons:</p>
+<ul>
+<li>400KB item size limits become problematic with firmware metadata</li>
+<li>Full-text style search is awkward</li>
+<li>The data behaves more like files than relational entities</li>
+</ul>
+
+<p>S3 with in-memory indexing was simpler and better suited to the workload.</p>
+
+<p>The same thing happened with firmware builds.</p>
+
+<p>AI kept suggesting Lambda because that's the standard AWS serverless answer. But avr-gcc and arm-gcc builds are CPU-heavy and sometimes take a while. Lambda limits quickly become operational constraints.</p>
+
+<p>So I moved the build system to ECS Fargate instead.</p>
+
+<p>I also avoided depending on the QMK CLI. Instead of wrapping the existing toolchain, qmk-nexus generates firmware configs directly in Python.</p>
+
+<p>That's a lot harder to build, but it's also much easier to control.</p>
+
+<p>This is where AI-assisted engineering actually gets interesting.</p>
+
+<div class="pullquote">The leverage isn't in taking AI's first suggestion. It's in knowing the problem domain well enough to spot when the default answer is wrong.</div>
+
+<div class="tag-row">
+  <span class="tag tag-blue">AWS</span>
+  <span class="tag tag-blue">QMK Nexus</span>
+  <span class="tag tag-blue">ECS Fargate</span>
+  <span class="tag tag-blue">S3</span>
+  <span class="tag tag-gray">architecture</span>
+  <span class="tag tag-gray">AI-assisted development</span>
+</div>

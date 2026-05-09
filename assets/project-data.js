@@ -38,6 +38,12 @@ window.TEBAY_PROJECTS = [
     path: "projects/dbfirstgrid.html",
   }, 
   {
+    id: "aiagents",
+    label: "AI Agents",
+    description: "Local multi-agent orchestration and memory system.",
+    path: "projects/aiagents.html",
+  },
+  {
     id: "personalsite",
     label: "PersonalSite",
     description: "Source and deployment tooling for this site.",

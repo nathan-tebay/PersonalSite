@@ -125,9 +125,13 @@
                 <span class="tag">React Konva</span>
                 <span class="tag">Zustand</span>
                 <span class="tag">FastAPI</span>
+                <span class="tag">Pydantic v2</span>
                 <span class="tag">SQLite</span>
+                <span class="tag">AWS Lambda</span>
                 <span class="tag">AWS S3</span>
-                <span class="tag">DynamoDB</span>
+                <span class="tag">CloudFront</span>
+                <span class="tag">ECS Fargate</span>
+                <span class="tag">Mangum</span>
                 <span class="tag">Podman</span>
                 <span class="tag">QMK</span>
               </div>
@@ -210,13 +214,13 @@
                 </li>
                 <li>
                   <strong>Build pipeline</strong> - FastAPI route prepares a
-                  build directory, delegates to Podman or a build proxy, tracks
-                  status, and serves compiled artifacts.
+                  build directory, delegates to an ECS Fargate build service
+                  (or local Podman in dev), polls status, and serves compiled
+                  artifacts.
                 </li>
                 <li>
-                  <strong>Persistence</strong> - local SQLite in development,
-                  S3-backed user database storage in production, and DynamoDB
-                  for build state.
+                  <strong>Persistence</strong> - per-user SQLite database on
+                  S3; no shared database. Local SQLite file in development.
                 </li>
                 <li>
                   <strong>QMK index</strong> - generated keyboard metadata and
@@ -229,13 +233,15 @@
             <div class="project-section">
               <h3>Current Scope</h3>
               <ul>
-                <li>Authenticated web app with Google OAuth flow.</li>
-                <li>AVR builds supported; ARM targets are gated as planned work.</li>
-                <li>Generated firmware path plus QMK-native source import path.</li>
-                <li>
-                  Backend validation before build to catch missing matrix
-                  assignments and unsupported target combinations.
-                </li>
+                <li>Authenticated web app with Google OAuth 2.0; per-user storage with up to 20 saved keyboards.</li>
+                <li>AVR and ARM builds: atmega32u4/u2, at90usb1286, atmega328p, STM32F072/F103/F303, mk20dx256, RP2040.</li>
+                <li>Generated firmware path and QMK-native source import path for upstream keyboards.</li>
+                <li>Visual layout editor — drag, resize, rotate keys; ISO enter; multi-select with transform.</li>
+                <li>Matrix wiring canvas with Union-Find row/col derivation; encoder, OLED, and trackball support.</li>
+                <li>Full QMK keycode library; unlimited layers; OLED configurator with preset and custom C blocks.</li>
+                <li>15 feature modules: RGB Matrix, RGB Light, Backlight, Split, Encoder, OLED, Pointing Device, Tap Dance, Combo, Mouse Keys, NKRO, Boot Magic, Console, Extra Keys, Audio.</li>
+                <li>Import from 1000+ keyboards in the QMK index; custom source file overrides.</li>
+                <li>Live build log with 2s polling and one-click firmware download.</li>
               </ul>
             </div>
           </div>

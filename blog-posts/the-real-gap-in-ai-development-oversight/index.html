@@ -1,0 +1,73 @@
+<!-- {"slug":"the-real-gap-in-ai-development-oversight","title":"The Real Gap in AI Development: Oversight","date":"2026-05-08","desc":"Part 3 of findings from asking AI on how I use it. ","wip":false} -->
+<p class="kicker">AI Development · Engineering practice</p>
+<h1>The Real Gap in AI Development: Oversight</h1>
+<p class="subtitle">Writing better prompts is the easy part. The harder problem is safely integrating probabilistic AI systems into deterministic engineering workflows.</p>
+<p class="byline">Nathan Tebay · May 2026</p>
+
+<img src="/blog/posts/the-real-gap-in-ai-development-oversight/oversight.png" alt="oversight.png" style="max-width:100%;">
+
+<p>Most of what I hear about AI these days is just people trying to write better prompts.</p>
+
+<p>What actually matters to me is oversight.</p>
+
+<h3>The real risks aren't about compilation</h3>
+
+<p>The real risks with AI-generated code have nothing to do with whether it compiles.</p>
+
+<ul>
+<li>Unsafe operations</li>
+<li>Hidden assumptions</li>
+<li>Over-delegation</li>
+<li>Lack of validation</li>
+<li>Unclear escalation paths</li>
+<li>Loss of architectural control</li>
+</ul>
+
+<h3>The question has changed</h3>
+
+<p>The hard part isn't what it used to be. "How do I get AI to generate more code?" Now the question is different.</p>
+
+<div class="pullquote">"How do I safely integrate probabilistic systems into deterministic workflows?"</div>
+
+<p>With traditional software, the same input gives you the same output every time. AI doesn't work like that. Oversight and validation aren't optional. They have to be there from the start.</p>
+
+<h3>Ground rules for oversight</h3>
+
+<p>On my projects, I set some ground rules:</p>
+
+<ul>
+<li>AI-generated code could never write directly to disk.</li>
+<li>Static analysis blocked unsafe patterns before review.</li>
+<li>Confidence thresholds determined when work goes back to human review.</li>
+<li>Security-sensitive tasks are never delegated.</li>
+<li>Revision loops were capped to prevent unbounded correction cycles.</li>
+</ul>
+
+<p>I put those checks in place because AI isn't predictable. AI can do a lot, but it's inconsistent in ways traditional software isn't.</p>
+
+<p>The problem isn't usually syntax. It's that AI can produce code that looks fine but quietly breaks your assumptions, your security, or your architecture.</p>
+
+<h3>Build systems that don't require trust</h3>
+
+<p>That turns the whole engineering problem on its head.</p>
+
+<p>The answer isn't to trust the model more. The answer is to build systems that don't require you to trust the model. Validation, escalation, and containment need to be built in from the start.</p>
+
+<p>Thinking this way changed how I handle incremental delivery too. On several projects, I broke work into phases with clear review points before moving forward — not because AI can't generate big batches of code, but because it's easier to check small, isolated changes.</p>
+
+<h3>Where experience still matters</h3>
+
+<p>This is where experienced engineers still have a real edge when working with AI.</p>
+
+<p>The difficult part is no longer generating code. The hard part now is designing systems where you can actually evaluate generated code safely and predictably.</p>
+
+<p>AI made it cheaper to crank out code. It didn't make it any easier to know if that code should exist at all.</p>
+
+<div class="tag-row">
+  <span class="tag tag-blue">AI oversight</span>
+  <span class="tag tag-blue">multi-agent systems</span>
+  <span class="tag tag-red">security</span>
+  <span class="tag tag-amber">validation</span>
+  <span class="tag tag-gray">engineering practice</span>
+  <span class="tag tag-gray">architecture</span>
+</div>

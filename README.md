@@ -74,7 +74,7 @@ A hand-rolled static portfolio website with vanilla HTML, CSS, and JavaScript—
 │   ├── common.sh              # Shared utilities (sourced by CGI scripts)
 │   ├── session.sh             # Session auth enforcement (sourced by CGI scripts)
 │   ├── storage.sh             # Storage backend helper
-│   ├── track.cgi              # Page view tracking (public; beaconed from layout.js)
+│   ├── infiniteImprobablity.cgi  # Page view tracking (public; beaconed from layout.js)
 │   ├── analytics.cgi          # View analytics data (session-protected)
 │   └── health.cgi             # Health check endpoint
 │
@@ -342,8 +342,14 @@ The nav uses `data-page` and `data-basepath` attributes on `<body>` for routing:
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/config.cgi` | Returns `{postsUrl, storage}` |
-| GET | `/cgi-bin/track.cgi` | Page view tracking (beaconed from every page via `navigator.sendBeacon`) |
+| POST | `/cgi-bin/infiniteImprobablity.cgi` | Page view tracking (beaconed from every page via `navigator.sendBeacon`) |
 | GET | `/cgi-bin/health.cgi` | Health check |
+
+> **Why `infiniteImprobablity.cgi`?** Ad blockers (uBlock Origin, EasyPrivacy, Firefox ETP) pattern-match
+> tracking endpoint URLs. Any path containing words like `track`, `beacon`, `analytics`, `collect`, or
+> `pixel` gets silently blocked before the request leaves the browser — the beacon never fires and the
+> visit is never recorded. The deliberately obscure name avoids every common filter list pattern.
+> Reference: [Hitchhiker's Guide to the Galaxy — Infinite Improbability Drive](https://en.wikipedia.org/wiki/Technology_in_The_Hitchhiker%27s_Guide_to_the_Galaxy#Infinite_Improbability_Drive).
 
 ### Admin Authentication
 

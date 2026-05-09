@@ -44,10 +44,25 @@ manifest_entry() {
 
 write_manifest_all_state() {
   local published="$1" wip="$2"
-  jq --arg slug "$SLUG" --argjson published "$published" --argjson wip "$wip" \
-    'map(if .slug == $slug then .published = $published | .wip = $wip else . end)' \
-    "$TMP_DIR/manifest-all.json" > "$TMP_DIR/manifest-all-next.json" \
+  local _entries_tmp="$TMP_DIR/manifest-all-entries.tmp"
+  local _first=1
+  if ! jq -c --arg slug "$SLUG" --argjson published "$published" --argjson wip "$wip" \
+    '.[] | if .slug == $slug then .published = $published | .wip = $wip else . end' \
+    "$TMP_DIR/manifest-all.json" 2>/dev/null > "$_entries_tmp"; then
+    local _sz; _sz=$(wc -c < "$TMP_DIR/manifest-all.json" 2>/dev/null || echo 0)
+    [ "$_sz" -gt 4 ] && { rm -f "$_entries_tmp"; return 1; }
+    > "$_entries_tmp"
+  fi
+  {
+    printf '[\n'
+    while IFS= read -r _entry; do
+      [ "$_first" = "1" ] && { printf '%s\n' "$_entry"; _first=0; } \
+                          || printf ',%s\n' "$_entry"
+    done < "$_entries_tmp"
+    printf ']\n'
+  } > "$TMP_DIR/manifest-all-next.json" \
     && mv "$TMP_DIR/manifest-all-next.json" "$TMP_DIR/manifest-all.json"
+  rm -f "$_entries_tmp"
 }
 
 # Determine current state
@@ -87,6 +102,7 @@ if [ "$IS_PUBLISHED" = "true" ]; then
   storage_put "manifest.json" "$TMP_DIR/manifest.json" "application/json" || {
     printf '\r\n{"error":"manifest update failed"}\n'; exit 0
   }
+  cf_invalidate "/blog/posts/manifest.json" "/blog/posts/manifest-all.json" "/blog/posts/$SLUG/*"
   printf '\r\n{"ok":true,"published":false}\n'
 else
   _entry=$(manifest_entry)
@@ -113,5 +129,6 @@ else
   storage_put "manifest.json" "$TMP_DIR/manifest.json" "application/json" || {
     printf '\r\n{"error":"manifest update failed"}\n'; exit 0
   }
+  cf_invalidate "/blog/posts/manifest.json" "/blog/posts/manifest-all.json" "/blog/posts/$SLUG/*"
   printf '\r\n{"ok":true,"published":true}\n'
 fi

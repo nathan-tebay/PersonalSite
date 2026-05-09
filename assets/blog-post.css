@@ -1,0 +1,159 @@
+/* Blog post component styles — scoped to .blog-post-content */
+.blog-post-content {
+  --bp-tag-red-bg:     #501313;
+  --bp-tag-red-text:   #F09595;
+  --bp-tag-amber-bg:   #412402;
+  --bp-tag-amber-text: #FAC775;
+  --bp-tag-gray-bg:    #2C2C2A;
+  --bp-tag-gray-text:  #B4B2A9;
+  --bp-tag-blue-bg:    #042C53;
+  --bp-tag-blue-text:  #85B7EB;
+}
+
+.blog-post-content .kicker {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-low);
+  margin-bottom: 0.75rem;
+}
+
+.blog-post-content .subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 17px;
+  color: var(--text-mid);
+  line-height: 1.5;
+  margin-bottom: 1.75rem;
+}
+
+.blog-post-content .byline {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  color: var(--text-low);
+  border-top: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider);
+  padding: 0.75rem 0;
+  margin-bottom: 2.5rem;
+}
+
+.blog-post-content .pullquote {
+  border-left: 3px solid var(--divider);
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  margin: 2rem 0;
+  color: var(--text-mid);
+  font-size: 19px;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+/* ── Timeline ──────────────────────────────────────────────────── */
+.blog-post-content .timeline {
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.blog-post-content .tl-item {
+  display: flex;
+  gap: 16px;
+}
+
+.blog-post-content .tl-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.blog-post-content .tl-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-low);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.blog-post-content .tl-dot.red   { background: #E24B4A; }
+.blog-post-content .tl-dot.amber { background: #EF9F27; }
+
+.blog-post-content .tl-line {
+  width: 1px;
+  background: var(--divider);
+  flex: 1;
+  min-height: 20px;
+  margin-top: 4px;
+}
+
+.blog-post-content .tl-content {
+  padding-bottom: 1.5rem;
+}
+
+.blog-post-content .tl-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-low);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+}
+
+.blog-post-content .tl-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.6;
+}
+
+.blog-post-content .tl-text strong {
+  font-weight: 600;
+  color: var(--text-high);
+}
+
+/* ── Tags ──────────────────────────────────────────────────────── */
+.blog-post-content .tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2rem 0;
+}
+
+.blog-post-content .tag {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-weight: 500;
+}
+
+.blog-post-content .tag-red   { background: var(--bp-tag-red-bg);   color: var(--bp-tag-red-text); }
+.blog-post-content .tag-amber { background: var(--bp-tag-amber-bg); color: var(--bp-tag-amber-text); }
+.blog-post-content .tag-gray  { background: var(--bp-tag-gray-bg);  color: var(--bp-tag-gray-text); }
+.blog-post-content .tag-blue  { background: var(--bp-tag-blue-bg);  color: var(--bp-tag-blue-text); }
+
+/* ── Lesson cards ──────────────────────────────────────────────── */
+.blog-post-content .lesson-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin: 0.75rem 0;
+}
+
+.blog-post-content .lesson-card .lc-head {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-high);
+  margin-bottom: 5px;
+}
+
+.blog-post-content .lesson-card .lc-body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.6;
+}

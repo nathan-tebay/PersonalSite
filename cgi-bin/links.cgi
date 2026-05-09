@@ -2,25 +2,25 @@
 . /var/www/html/cgi-bin/session.sh
 # CGI: load or save links.json.
 # GET:  returns {"categories":[...],"links":[...]}
-# POST: body is full JSON — saves to local cache and S3.
+# POST: body is full JSON — saves to S3.
 
 . /var/www/html/cgi-bin/common.sh
 . /var/www/html/cgi-bin/storage.sh
-
-LOCAL_FILE="/tmp/www/links.json"
 
 emit_json_header
 
 if [ "$REQUEST_METHOD" = "GET" ]; then
   printf '\r\n'
-  if [ -f "$LOCAL_FILE" ]; then
-    cat "$LOCAL_FILE"
-  elif [ "$STORAGE" = "s3" ] && [ -n "${AWS_BUCKET:-}" ]; then
-    aws s3 cp "s3://${AWS_BUCKET}/links.json" "$LOCAL_FILE" \
+  if [ "$STORAGE" = "s3" ] && [ -n "${AWS_BUCKET:-}" ]; then
+    _tmp_links="/tmp/links-$$.json"
+    aws s3 cp "s3://${AWS_BUCKET}/links.json" "$_tmp_links" \
       --region "${AWS_REGION:-us-east-1}" \
       ${_aws_endpoint_arg} >/dev/null 2>&1 \
-      && cat "$LOCAL_FILE" \
+      && cat "$_tmp_links" \
       || printf '{"categories":[],"links":[]}\n'
+    rm -f "$_tmp_links"
+  elif [ -f "/tmp/www/links.json" ]; then
+    cat "/tmp/www/links.json"
   else
     printf '{"categories":[],"links":[]}\n'
   fi
@@ -46,19 +46,24 @@ if [ -z "$POST_DATA" ]; then
   printf '\r\n{"error":"no data"}\n'; exit 0
 fi
 
-printf '%s\n' "$POST_DATA" > "$LOCAL_FILE"
+_tmp_links="/tmp/links-$$.json"
+printf '%s\n' "$POST_DATA" > "$_tmp_links"
 
 if [ "$STORAGE" = "s3" ] && [ -n "${AWS_BUCKET:-}" ]; then
-  _out=$(aws s3 cp "$LOCAL_FILE" "s3://${AWS_BUCKET}/links.json" \
+  _out=$(aws s3 cp "$_tmp_links" "s3://${AWS_BUCKET}/links.json" \
     --content-type "application/json" \
     --region "${AWS_REGION:-us-east-1}" \
     ${_aws_endpoint_arg} 2>&1)
   _rc=$?
   echo "[links.cgi] aws s3 cp links.json rc=${_rc} out=${_out}" >&2
+  rm -f "$_tmp_links"
   if [ "$_rc" != "0" ]; then
     printf '\r\n{"ok":false,"error":"s3 upload failed"}\n'
     exit 0
   fi
+  cf_invalidate "/links.json"
+else
+  mv "$_tmp_links" "/tmp/www/links.json"
 fi
 
 printf '\r\n{"ok":true}\n'
