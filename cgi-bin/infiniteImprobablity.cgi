@@ -28,12 +28,7 @@ REF=$(get_field "$POST_DATA" ref | cut -c1-200)
 # ── IP (honour proxy header from Lambda/CloudFront) ────────────────────────
 IP="${HTTP_X_FORWARDED_FOR:-${REMOTE_ADDR:-}}"
 IP=$(printf '%s' "$IP" | cut -d',' -f1 | tr -d ' ')
-
-# Truncate last octet of IPv4 for privacy; mask last 80 bits of IPv6
-case "$IP" in
-  ::*) IP=$(printf '%s' "$IP" | sed 's/:.*$/::1/') ;;
-  *) IP=$(printf '%s' "$IP" | sed 's/\.[0-9]*$/.x/') ;;
-esac
+GEO_IP="$IP"  # keep full IP for geo lookup; truncate only for storage
 
 # ── Timestamp / JSONL filename ────────────────────────────────────────────
 TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
@@ -43,16 +38,16 @@ FILENAME="${MONTH}.jsonl"
 # ── Geo lookup with caching (skip private/local IPs) ──────────────────────
 COUNTRY="" CC="" REGION="" CITY=""
 _priv=0
-case "$IP" in
+case "$GEO_IP" in
   127.*|10.*|192.168.*|::1|"") _priv=1 ;;
   172.*)
-    _oct2=$(printf '%s' "$IP" | cut -d'.' -f2)
+    _oct2=$(printf '%s' "$GEO_IP" | cut -d'.' -f2)
     [ "$_oct2" -ge 16 ] && [ "$_oct2" -le 31 ] && _priv=1 ;;
 esac
 
-if [ "$_priv" = "0" ] && [ -n "$IP" ]; then
-  # Check geo cache first (valid for 1 hour)
-  _GEO_CACHE="/tmp/geo_cache_${IP//[^a-z0-9._]/_}"
+if [ "$_priv" = "0" ] && [ -n "$GEO_IP" ]; then
+  # Check geo cache first (valid for 1 hour, keyed on full IP)
+  _GEO_CACHE="/tmp/geo_cache_${GEO_IP//[^a-z0-9._]/_}"
   _GEO_AGE=0
   _NOW=$(date +%s)
   if [ -f "$_GEO_CACHE" ]; then
@@ -68,7 +63,7 @@ if [ "$_priv" = "0" ] && [ -n "$IP" ]; then
     CITY=$(sed -n '5p' "$_GEO_CACHE")
   else
     # Fresh geo lookup
-    GEO=$(wget -q -O - --timeout=3 "http://ip-api.com/json/${IP}?fields=country,countryCode,regionName,city" 2>/dev/null || true)
+    GEO=$(wget -q -O - --timeout=3 "http://ip-api.com/json/${GEO_IP}?fields=country,countryCode,regionName,city" 2>/dev/null || true)
     if [ -n "$GEO" ]; then
       COUNTRY=$(printf '%s' "$GEO" | grep -o '"country":"[^"]*"' | cut -d'"' -f4)
       CC=$(printf '%s' "$GEO" | grep -o '"countryCode":"[^"]*"' | cut -d'"' -f4)
@@ -79,6 +74,12 @@ if [ "$_priv" = "0" ] && [ -n "$IP" ]; then
     fi
   fi
 fi
+
+# ── Truncate IP for storage (last IPv4 octet → .x; last 80 bits of IPv6) ──
+case "$IP" in
+  *:*) IP=$(printf '%s' "$IP" | sed 's/:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*$/::/') ;;
+  *)   IP=$(printf '%s' "$IP" | sed 's/\.[0-9]*$/.x/') ;;
+esac
 
 # ── JSON-escape helper ────────────────────────────────────────────────────
 je() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/ /g; s/[\x01-\x1f]//g'; }
