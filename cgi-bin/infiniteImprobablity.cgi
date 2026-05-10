@@ -82,7 +82,7 @@ case "$IP" in
 esac
 
 # ── JSON-escape helper ────────────────────────────────────────────────────
-je() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/ /g; s/[\x01-\x1f]//g'; }
+je() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/ /g; s/[[:cntrl:]]//g'; }
 
 ENTRY=$(printf '{"ts":"%s","ip":"%s","page":"%s","ref":"%s","ua":"%s","country":"%s","cc":"%s","region":"%s","city":"%s"}' \
   "$TS" "$(je "$IP")" "$(je "$PAGE")" "$(je "$REF")" "$(je "${HTTP_USER_AGENT:-}")" \
