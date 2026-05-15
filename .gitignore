@@ -3,3 +3,5 @@ admin/.htpasswd
 admin/cgi-bin/.htpasswd
 .credentials
 .envrc
+blog-posts/*/draft.html
+

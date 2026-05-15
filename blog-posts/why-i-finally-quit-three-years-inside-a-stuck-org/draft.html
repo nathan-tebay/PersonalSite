@@ -1,89 +1,127 @@
-<!-- {"slug":"why-i-finally-quit-three-years-inside-a-stuck-org","title":"Why I finally quit: three years inside a stuck org","date":"2026-05-09","desc":"I didn't leave over a bad boss or a bad review. I left because I ran out of hope that the organization would ever value what I valued.","wip":false} -->
+<!-- {"slug":"why-i-finally-quit-three-years-inside-a-stuck-org","title":"Why I finally quit: three years inside a stuck org","date":"2026-05-09","desc":"I didn't leave because of a bad boss or a bad review. I left because I stopped believing the company cared about the same things I did.","wip":false} -->
 <p class="kicker">Engineering culture · Personal experience</p>
-<h1>Why I finally quit: three years inside a decision-paralyzed org</h1>
-<p class="subtitle">I didn't leave over a bad boss or a bad review. I left because I ran out of hope that the organization would ever value what I valued.</p>
+<p class="subtitle">I didn't leave because of a bad boss or a bad review. I left because I stopped believing the company cared about the same things I did.</p>
 <p class="byline">Nathan Tebay · May 2026</p>
 
-<p>Nobody wakes up one morning and decides to quit. Departure builds slowly, through small frustrations, ignored requests, and clear signs the organization doesn't value what matters to you.</p>
+<p>Quitting doesn't happen overnight. It builds up over time, with small frustrations, ignored requests, and clear signs the company doesn't care about what matters to you.</p>
 
-<p>This is mine. I spent several years as a senior software engineer at a fintech company I'm not going to name. It's not hard to figure out from my history, and that's not really the point. The point is the pattern. I want to write about it honestly, including what I got wrong, because I think a lot of engineers will recognize pieces of this in their own situations.</p>
+<p>Here's my story. I spent a few years as a senior software engineer at a fintech company. You can probably guess which one, but that's not important. What matters is the pattern. I'm writing this to be honest about what happened, including my own mistakes, because I think other engineers will see parts of their own experience here.</p>
+
+<img src="/blog/posts/why-i-finally-quit-three-years-inside-a-stuck-org/quitting.webp" alt="quitting.webp" style="max-width:100%;">
 
 <h3>The Kubernetes trap</h3>
 
-<p>After two years running three Kubernetes clusters in production, I was the only person in the organization who could support them. I didn't plan it that way. It just happened because nobody stepped in.</p>
+<p>After two years of running Kubernetes clusters in production, I was the only one who could support them. I didn't plan it that way. It just happened because nobody stepped in.</p>
 
-<p>I wrote docs. I ran cross-training sessions. I spent months in meetings with IT trying to get them to take formal ownership. They were always too busy putting out fires. My management agreed the situation was bad. Nothing changed.</p>
+<p>I wrote docs. I ran cross-training. I spent months meeting with IT, trying to hand things off. They were always too busy putting out fires. Management agreed it was a problem, but nothing changed.</p>
 
-<div class="pullquote">The more reliable I was, the more the institution leaned on me, and the less pressure there was to fix the underlying problems my reliability was masking.</div>
+<div class="pullquote">The more I kept things running, the more the company leaned on me. My reliability just hid the real problems.</div>
 
-<p>The moment that crystallized it for me came in March. My parents had organized a once-in-a-lifetime family cruise, the kind of trip that takes years to plan and costs real money. I was asked to bring my laptop to support a production install during it. I said no. What made that ask so tone-deaf wasn't that work was inconvenient. It was that the company had two years to figure out how to back me up when something like this happened. They hadn't. The single point of failure was still me, and somehow that was my problem to manage around my family's vacation.</p>
+<p>The breaking point came in March. My parents planned a big family cruise, something we'd saved for and looked forward to. The company asked me to bring my laptop so I could support a production install during the trip. I said no. The problem wasn't the timing. The problem was they'd had two years to make sure I wasn't the only one who could do this work. They didn't. I was still the single point of failure, and it was somehow my job to work around that on my own time.</p>
 
-<p>Then came Christmas. While asking about my holiday plans, at my desk, in front of coworkers, my director said: "Are you taking your laptop?" then immediately walked it back with a laugh. "Just kidding. Nathan doesn't like taking his laptop." It landed as a joke at my expense. What it actually was: a public signal that my director had entirely missed the point of why the earlier ask was wrong. It wasn't that I dislike carrying hardware. It was that after two years, the org still had no answer for what happens when I'm unavailable, and their response to that failure was to make me the punchline.</p>
+<p>At Christmas, my director asked me in front of everyone if I was taking my laptop on vacation, then laughed and said he was joking. It was supposed to be funny, but it just showed he missed the point. The issue wasn't about carrying a laptop. It was that after two years, nobody had figured out what to do when I wasn't around. Instead of fixing it, they made it a joke.</p>
 
 <div class="timeline">
-  <div class="tl-item">
+ <div class="tl-item">
     <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
     <div class="tl-content">
       <div class="tl-label">Year 1</div>
-      <div class="tl-text"><strong>Writing Python, still having fun.</strong> New role, interesting problems, building things that matter. This is what software engineering is supposed to feel like.</div>
+      <div class="tl-text"><strong>Writing Python, still having fun. </strong> New role, interesting problems, building things that matter. This is what software engineering is supposed to feel like.</div>
     </div>
   </div>
   <div class="tl-item">
     <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
     <div class="tl-content">
-      <div class="tl-label">Year 1&ndash;2</div>
+      <div class="tl-label">Year 2&ndash;3</div>
       <div class="tl-text"><strong>Kubernetes ownership gap emerges.</strong> Documentation written, cross-training attempted, IT meetings ongoing. No handoff achieved.</div>
     </div>
   </div>
   <div class="tl-item">
     <div class="tl-left"><div class="tl-dot amber"></div><div class="tl-line"></div></div>
     <div class="tl-content">
-      <div class="tl-label">Year 2</div>
+      <div class="tl-label">Year 3</div>
       <div class="tl-text"><strong>Laptop request submitted</strong> for hardware capable of running Docker Desktop. Sits unanswered for over a year.</div>
     </div>
   </div>
   <div class="tl-item">
     <div class="tl-left"><div class="tl-dot amber"></div><div class="tl-line"></div></div>
     <div class="tl-content">
-      <div class="tl-label">Year 2&ndash;3</div>
-      <div class="tl-text"><strong>AI tooling deliberation begins.</strong> Seven months of director-level debate. Owner finally intervenes. Result: a ChatGPT Enterprise chatbot with no API, no Copilot, no code completion.</div>
+      <div class="tl-label">Year 3&ndash;4</div>
+      <div class="tl-text"><strong>AI tooling deliberation begins.</strong> Seven months of director-level debate. The owner finally intervenes. Result: a ChatGPT Enterprise chatbot with no API, no Copilot, no code completion.</div>
     </div>
   </div>
   <div class="tl-item">
     <div class="tl-left"><div class="tl-dot red"></div><div class="tl-line"></div></div>
     <div class="tl-content">
-      <div class="tl-label">Year 3</div>
-      <div class="tl-text"><strong>Dev environment initiative stalls.</strong> Full leadership buy-in secured, then six months of no movement. Next step would have been escalating to the owner again.</div>
+      <div class="tl-label">Year 4</div>
+      <div class="tl-text"><strong>Dev environment initiative stalls.</strong> Full leadership buy-in secured, then six months of no movement. The next step would have been escalating to the owner again.</div>
     </div>
   </div>
   <div class="tl-item">
     <div class="tl-left"><div class="tl-dot red"></div></div>
     <div class="tl-content">
       <div class="tl-label">Exit</div>
-      <div class="tl-text"><strong>Hope runs out.</strong> A leadership restructure produces my director's own diagnosis: &ldquo;decision paralysis.&rdquo; I stop waiting for change that isn't coming.</div>
+      <div class="tl-text"><strong>Hope runs out.</strong> A leadership restructuring produces my director's own diagnosis: &ldquo;decision paralysis.&rdquo; I stop waiting for change that isn't coming.</div>
     </div>
   </div>
 </div>
 
 <h3>The Wireshark moment</h3>
 
-<p>I could explain away some of the problems. Maybe the laptop request was about budget. Maybe Kubernetes was a staffing issue. But the Wireshark incident made the systemic nature of it undeniable.</p>
+<p>I could explain away some of the problems. Maybe the laptop request was about budget. Maybe Kubernetes was a staffing issue. But the Wireshark thing made it clear this was bigger than that.</p>
 
-<p>A QA engineer on my team requested Wireshark, a standard, inexpensive network analysis tool that was already approved for use by other teams in the same company. What followed was three months of meetings with security, legal, and directors before access was granted. The cost of the approval process almost certainly exceeded the cost of the software.</p>
+<p>A QA engineer on my team asked for Wireshark, a basic network tool that other teams already use. It took three months of meetings with security, legal, and directors to get it approved. The process costs more than the tool.</p>
 
-<div class="pullquote">In a permission culture, the cost of saying yes is always visible and attributable. The cost of saying no is diffuse and invisible: the talent lost, the morale eroded, the velocity sacrificed.</div>
+<div class="pullquote">It's easy to see the cost of saying yes. The cost of saying no is harder to spot. You lose people, morale drops, and work slows down.</div>
 
-<p>Watching a teammate spend three months fighting for a tool others already had was demoralizing in a specific way. It wasn't just a waste of time. It showed me the company didn't value our time, and that this wasn't something I could fix. It was baked into the culture.</p>
+<p>Watching a teammate spend three months fighting for a tool others already had was demoralizing. It wasn't just a waste of time. It showed me the company didn't value our time, and that this wasn't something I could fix. It was baked into the culture.</p>
 
 <h3>Seven months for a chatbot</h3>
 
-<p>The AI tooling story is the one I keep coming back to. Directors spent seven months arguing about which AI tools we could use. This was while AI was moving faster than anything I'd seen in my career. Every week we waited, we fell further behind.</p>
+<p>The AI tooling mess sticks with me. Directors spent seven months arguing about which AI tools we could use. This was while AI was moving faster than anything I'd seen in my career. Every week we waited, we fell further behind.</p>
 
-<p>In the end, the owner just told IT to do it and stop worrying about security concerns. We got a ChatGPT Enterprise subscription. No API access. No Copilot. No code completion tools. The technology that had the most potential to change how I worked, handed to me in the most neutered form possible.</p>
+<p>In the end, the owner just told IT to do it and ignore security concerns. We got a ChatGPT Enterprise subscription. No API, no Copilot, no code completion. The tool that could have changed how I worked was handed to us in the weakest form possible.</p>
 
-<p>Seven months. An owner override. An MVP chatbot.</p>
+<p>Seven months. The owner had to step in. All we got was an MVP chatbot.</p>
 
-<p>That was the result. The worst part wasn't even the outcome. It was seeing the same pattern forming again. I had full leadership buy-in on a less restrictive dev environment. Six months later, nothing had changed. The next step was going to be escalating security concerns to the owner. Again.</p>
+<p>That was the result. The worst part wasn't even the outcome. It was seeing the same thing happen again. I had leadership support for a better, more open development environment. Six months later, nothing had changed. It was about to get escalated to the owner again.</p>
+
+<h3>What I got wrong</h3>
+
+<p>I need to be honest about my part in this. Blaming the company for everything wouldn't be fair or accurate.</p>
+
+<p>I didn't say no soon enough. I kept taking on problems that should have been escalated or just left alone. Kubernetes is the best example. I took on all the responsibility instead of making the company deal with the risk. My reliability just covered up the real issues. By the time I pushed for real change, it was too late.</p>
+
+<p>If I could do it over, I'd set clear limits earlier. I'd call out the risks sooner. I'd ask better questions before taking on something important: Who else is responsible? What happens if things get stuck? Is leadership actually going to fix this, or just put it off?</p>
+
+<p>I assumed those things would sort themselves out. They don't.</p>
+
+<h3>What I'd tell the next engineer in this situation</h3>
+
+<div class="lesson-card">
+  <div class="lc-head">If you're reliable, the company might use that as an excuse not to fix things.</div>
+  <div class="lc-body">If you keep taking on single points of failure, you take away the pressure for the company to fix them. Sometimes the best thing you can do is refuse to be the fix for a broken system.</div>
+</div>
+<div class="lesson-card">
+  <div class="lc-head">If decisions are always slow, that's not just a rough patch. It's a sign of how things work.</div>
+  <div class="lc-body">One slow approval is a process issue. Three in a row, across different projects and teams, means it's the culture. Pay attention to the pattern.</div>
+</div>
+<div class="lesson-card">
+  <div class="lc-head">Getting buy-in isn't the same as making progress.</div>
+  <div class="lc-body">I got leadership to agree on a new dev environment, then watched nothing happen for six months. Getting everyone in a room to say yes is easy. What matters is what happens after.</div>
+</div>
+<div class="lesson-card">
+  <div class="lc-head">Hope isn't a plan, for you or for the company.</div>
+  <div class="lc-body">I stayed through a leadership change because I hoped things would get better. They didn't. At some point, staying is its own decision, and you have to make it on purpose.</div>
+</div>
+
+<h3>Leaving as a signal</h3>
+
+<p>I'm not bitter about it. I learned an enormous amount, technically, organizationally, and about myself. I know what I'd do differently, and I'm bringing a more deliberate version of myself to whatever comes next.</p>
+
+<p>When a senior engineer who built and ran key systems leaves after trying to fix things, that's not neutral. It shows the gap between what a company says it values and what it actually does.</p>
+
+<p>In my case, that gap was about three years wide.</p>
 
 <div class="tag-row">
   <span class="tag tag-red">single point of failure</span>
@@ -93,40 +131,3 @@
   <span class="tag tag-gray">leadership restructure</span>
   <span class="tag tag-blue">retained capability loss</span>
 </div>
-
-<h3>What I got wrong</h3>
-
-<p>I need to be honest about my part in this. Blaming the company for everything wouldn't be fair or accurate.</p>
-
-<p>I didn't say no enough, and I didn't say it early enough. I kept absorbing problems that should have been escalated or declined outright. The Kubernetes ownership gap is the clearest example. I took on single-threaded responsibility rather than forcing the organization to confront the risks of not distributing it. My reliability became a subsidy for the dysfunction. By the time I was pushing hard for structural change, the org's habits were too entrenched to shift.</p>
-
-<p>If I could go back, I'd set harder limits earlier. I'd call out the risks sooner. I'd ask better questions before taking ownership of something critical: who else is accountable for this, what's the escalation path when things get stuck, is leadership actually aligned on fixing this or just agreeing to defer it?</p>
-
-<p>I assumed those things would sort themselves out. They don't.</p>
-
-<h3>What I'd tell the next engineer in this situation</h3>
-
-<div class="lesson-card">
-  <div class="lc-head">Your reliability can become the org's excuse not to fix things.</div>
-  <div class="lc-body">If you keep absorbing single points of failure, you remove the pressure that would force the organization to address them. Sometimes the most useful thing you can do is refuse to be the solution to a structural problem.</div>
-</div>
-<div class="lesson-card">
-  <div class="lc-head">A pattern of slow decisions is data, not a rough patch.</div>
-  <div class="lc-body">One slow approval is a process problem. Three in a row across different initiatives and different teams is culture. Trust what the pattern is telling you.</div>
-</div>
-<div class="lesson-card">
-  <div class="lc-head">Buy-in is not the same as momentum.</div>
-  <div class="lc-body">I got full leadership agreement on a dev environment initiative and watched it go nowhere for six months. Getting everyone in a room to say yes is not the hard part. Watch what happens in the weeks after the meeting.</div>
-</div>
-<div class="lesson-card">
-  <div class="lc-head">Hope is not a retention strategy, for you or for them.</div>
-  <div class="lc-body">I stayed through a leadership restructure because I hoped the new structure would unlock change. It didn't. There's a point where staying becomes its own kind of decision, and you should make it consciously.</div>
-</div>
-
-<h3>The exit as measurement</h3>
-
-<p>I'm not bitter about it. I learned an enormous amount, technically, organizationally, and about myself. I know what I'd do differently, and I'm bringing a more deliberate version of myself to whatever comes next.</p>
-
-<p>But the departure of a senior engineer with deep institutional knowledge, someone who built and owned critical infrastructure and actively tried to fix the problems before leaving, is not a neutral event for an organization. It's a measurement. It tells you something precise about the gap between what you say you value and what you actually do.</p>
-
-<p>In my case, that gap was about three years wide.</p>

@@ -975,6 +975,7 @@
                       <th>First Seen (UTC)</th>
                       <th>Last Seen (UTC)</th>
                       <th style="text-align:right">Visits</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody id="unique-visitors-tbody"></tbody>
@@ -1938,8 +1939,40 @@
               td.title = String(col.val);
               tr.appendChild(td);
             });
+            var tdDel = document.createElement("td");
+            var delBtn = document.createElement("button");
+            delBtn.className = "secondary";
+            delBtn.style.cssText = "font-size:0.7rem;padding:0.15rem 0.5rem;";
+            delBtn.textContent = "✕";
+            delBtn.title = "Delete all visits from this IP";
+            delBtn.addEventListener("click", function () { purgeVisitorIP(entry.ip, tr); });
+            tdDel.appendChild(delBtn);
+            tr.appendChild(tdDel);
             uvTbody.appendChild(tr);
           });
+        }
+
+        async function purgeVisitorIP(ip, rowEl) {
+          if (!confirm("Delete all recorded visits from " + ip + "?")) return;
+          var csrfToken = document.cookie.split(";").map(function (c) { return c.trim(); })
+            .find(function (c) { return c.startsWith("csrf_token="); });
+          csrfToken = csrfToken ? csrfToken.split("=")[1] : "";
+          try {
+            var r = await fetch("../cgi-bin/purge-visits.cgi", {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded", "X-CSRF-Token": csrfToken },
+              body: "ip=" + encodeURIComponent(ip),
+            });
+            var data = await r.json();
+            if (data.ok) {
+              rowEl.remove();
+              analyticsStatusEl.textContent = "Removed " + (data.removed || 0) + " record(s) for " + ip;
+            } else {
+              analyticsStatusEl.textContent = "Error: " + (data.error || "unknown");
+            }
+          } catch (e) {
+            analyticsStatusEl.textContent = "Request failed";
+          }
         }
 
         document.getElementById("analytics-refresh-btn").addEventListener("click", function () {

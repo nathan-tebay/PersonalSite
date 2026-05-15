@@ -1,8 +1,8 @@
 [
-{"slug":"ai-is-not-the-engineer-it-s-the-junior-developer","title":"AI Is Not the Engineer, It’s the Junior Developer","date":"2026-05-08","desc":"","wip":false}
-,{"slug":"why-i-rejected-the-default-aws-architecture-ai-wanted","title":"Why I Rejected the “Default” AWS Architecture AI Wanted","date":"2026-05-08","desc":"Part 2 of findings from asking AI on how I use it. ","wip":false}
-,{"slug":"the-real-gap-in-ai-development-oversight","title":"The Real Gap in AI Development: Oversight","date":"2026-05-08","desc":"Part 3 of findings from asking AI on how I use it. ","wip":false}
-,{"slug":"the-senior-engineer-paradox-recent-interviews","title":"The Senior Engineer Paradox - Recent Interviews","date":"2026-04-22","desc":"","wip":false}
+{"slug":"the-real-gap-in-ai-development-oversight","title":"The Real Gap in AI Development: Oversight","date":"2026-05-08","desc":"Part 3 of findings from asking AI on how I use it. ","wip":false}
 ,{"slug":"the-senior-developer-paradox","title":"The Senior Engineer Paradox","date":"2026-04-03","desc":"I see posts about Senior Engineers interviewing like the are Junior, with various explanations. Going to give it my 2 cents. ","wip":false}
+,{"slug":"why-i-rejected-the-default-aws-architecture-ai-wanted","title":"Why I Rejected the \"Default\" AWS Architecture AI Wanted","date":"2026-05-08","desc":"Part 2 of findings from asking AI on how I use it. ","wip":false}
+,{"slug":"the-senior-engineer-paradox-recent-interviews","title":"The Senior Engineer Paradox - Recent Interviews","date":"2026-04-22","desc":"Reflecting on my three recent interview. ","wip":false}
+,{"slug":"ai-is-not-the-engineer-it-s-the-junior-developer","title":"AI Is Not the Engineer, It's the Junior Developer","date":"2026-05-08","desc":"The start of my series on AI and how I use it","wip":false}
 ,{"slug":"the-dual-key-database","title":"The Dual Key Database","date":"2026-03-12","desc":"Story about the pitfalls of a database design I worked in, where the main tables had dual keys base on type identifier..","wip":false}
 ]

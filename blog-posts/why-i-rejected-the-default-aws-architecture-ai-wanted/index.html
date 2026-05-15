@@ -1,6 +1,5 @@
 <!-- {"slug":"why-i-rejected-the-default-aws-architecture-ai-wanted","title":"Why I Rejected the \"Default\" AWS Architecture AI Wanted","date":"2026-05-08","desc":"Part 2 of findings from asking AI on how I use it. ","wip":false} -->
 <p class="kicker">AI Development · Cloud architecture</p>
-<h1>Why I Rejected the "Default" AWS Architecture AI Wanted</h1>
 <p class="subtitle">AI always reaches for the same AWS blueprint. On QMK Nexus, that blueprint was wrong — and knowing why required domain knowledge no prompt can replicate.</p>
 <p class="byline">Nathan Tebay · May 2026</p>
 
@@ -38,6 +37,7 @@
 
 <p>AI kept suggesting Lambda because that's the standard AWS serverless answer. But avr-gcc and arm-gcc builds are CPU-heavy and sometimes take a while. Lambda limits quickly become operational constraints.</p>
 
+<div class="pullquote">The leverage isn't in taking AI's first suggestion. It's in knowing the problem domain well enough to spot when the default answer is wrong.</div>
 <p>So I moved the build system to ECS Fargate instead.</p>
 
 <p>I also avoided depending on the QMK CLI. Instead of wrapping the existing toolchain, qmk-nexus generates firmware configs directly in Python.</p>
@@ -46,7 +46,6 @@
 
 <p>This is where AI-assisted engineering actually gets interesting.</p>
 
-<div class="pullquote">The leverage isn't in taking AI's first suggestion. It's in knowing the problem domain well enough to spot when the default answer is wrong.</div>
 
 <div class="tag-row">
   <span class="tag tag-blue">AWS</span>

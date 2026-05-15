@@ -15,6 +15,10 @@ fi
 emit_json_header
 printf '\r\n'
 
+# ── Skip recording for admin sessions ─────────────────────────────────────
+_sess=$(printf '%s' "${HTTP_COOKIE:-}" | tr ';' '\n' | sed 's/^ *//' | grep '^admin_session=' | head -1 | cut -d= -f2-)
+[ -n "${ADMIN_TOKEN:-}" ] && [ -n "$_sess" ] && [ "$_sess" = "$ADMIN_TOKEN" ] && { printf '{"ok":true}\n'; exit 0; }
+
 STORAGE="${STORAGE:-s3}"
 ANALYTICS_DIR="/tmp/analytics"
 AWS_REGION="${AWS_REGION:-us-east-1}"

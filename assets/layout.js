@@ -222,7 +222,8 @@
   if (navPlaceholder) navPlaceholder.replaceWith(navPanel);
 
   // ── Analytics beacon ──────────────────────────────────────────────────────
-  if (currentPage !== "admin" && navigator.sendBeacon) {
+  const _isAdmin = document.cookie.split(';').some(function (c) { return c.trim() === 'admin_ui=1'; });
+  if (currentPage !== "admin" && !_isAdmin && navigator.sendBeacon) {
     try {
       navigator.sendBeacon("/cgi-bin/infiniteImprobablity.cgi", new URLSearchParams({
         page: window.location.pathname,
