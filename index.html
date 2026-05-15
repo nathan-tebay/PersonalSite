@@ -3,29 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tebay.dev</title>
+    <title>Nathan Tebay - Workflow Tools, Firmware UX, and Automation</title>
     <meta
       name="description"
-      content="Nathan Tebay's portfolio and project archive for software engineering, hardware systems, automation tools, AI-assisted workflows, and infrastructure."
+      content="Nathan Tebay builds tools that reduce complexity in messy technical workflows, including QMK Nexus, automation systems, AI-assisted workflows, and infrastructure."
     />
     <meta name="author" content="Nathan Tebay" />
     <link rel="canonical" href="https://tebay.dev/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Tebay.dev" />
-    <meta property="og:title" content="Nathan Tebay - Software Engineer" />
+    <meta property="og:title" content="Nathan Tebay - Workflow Tools, Firmware UX, and Automation" />
     <meta
       property="og:description"
-      content="Project write-ups, systems notes, and a portfolio of software, hardware, automation, AI, and infrastructure work by Nathan Tebay."
+      content="Portfolio of practical tools that turn messy technical workflows into usable software, led by QMK Nexus."
     />
     <meta property="og:url" content="https://tebay.dev/" />
     <meta property="og:image" content="https://tebay.dev/background.jpeg" />
     <meta property="og:image:width" content="960" />
     <meta property="og:image:height" content="960" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Nathan Tebay - Software Engineer" />
+    <meta name="twitter:title" content="Nathan Tebay - Workflow Tools, Firmware UX, and Automation" />
     <meta
       name="twitter:description"
-      content="Project write-ups, systems notes, and a portfolio of software, hardware, automation, AI, and infrastructure work by Nathan Tebay."
+      content="Portfolio of practical tools that turn messy technical workflows into usable software, led by QMK Nexus."
     />
     <meta name="twitter:image" content="https://tebay.dev/background.jpeg" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -38,6 +38,13 @@
         "url": "https://tebay.dev/",
         "email": "mailto:nathan@tebay.dev",
         "jobTitle": "Software Engineer",
+        "knowsAbout": [
+          "developer tools",
+          "embedded firmware",
+          "workflow automation",
+          "AI-assisted software",
+          "infrastructure"
+        ],
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Bozeman",
@@ -70,25 +77,24 @@
               <div>
                 <h1>Nathan Tebay</h1>
                 <p class="subtitle">
-                  Software Engineer &middot; Tech Enthusiast &middot; Maker
-                  &middot; Tinkerer
+                  Software Engineer &middot; Tool Builder &middot; Embedded UX
+                  &middot; Automation
                 </p>
               </div>
               <div class="divider"></div>
               <div>
                 <span class="section-label">About</span>
                 <p>
-                  I'm a software engineer based in Bozeman, Montana, driven more
-                  by curiosity than ambition. The mountains here shape how I
-                  think. I'd rather go deep on something that matters than wide
-                  on things that don't. Here I document my journey, the things
-                  I've built, the problems I found interesting, and the ideas
-                  I'm still working through.
+                  I build tools that reduce complexity in messy technical
+                  workflows. My work tends to sit where users, hardware,
+                  automation, and infrastructure all have to agree with each
+                  other.
                 </p>
               </div>
               <div class="divider"></div>
               <div>
                 <span class="section-label">Links</span>
+                <a href="projects/qmknexus.html">QMK Nexus case study</a>
                 <a
                   href="https://github.com/nathan-tebay"
                   target="_blank"
@@ -114,12 +120,101 @@
         <!-- Content panels -->
         <div id="content-panel" class="side-panel intro">
           <p>
-            I build practical, sometimes just fun, software and hardware systems:
-            automation tools, embedded devices, AI-assisted workflows, developer
-            utilities, and infrastructure that solves real operational problems.
-            This site exists because many useful projects disappear unless
-            someone documents why they mattered and how they came to be.
+            I build tools that reduce complexity in messy technical workflows:
+            embedded firmware interfaces, automation systems, AI-assisted
+            developer utilities, and infrastructure that lets those systems run
+            somewhere real. The common thread is turning work that normally
+            requires tribal knowledge, careful file editing, or repeated manual
+            steps into software people can reason about.
           </p>
+          <p>
+            For teams, that means I am most useful where product experience,
+            platform engineering, automation, and low-level technical detail all
+            overlap.
+          </p>
+          <p>
+            Short version: I build systems that make complex workflows
+            understandable, usable, and safer.
+          </p>
+
+          <div class="home-actions">
+            <a class="github-link" href="projects/qmknexus.html"
+              >Start with QMK Nexus</a
+            >
+            <a class="github-link" href="mailto:nathan@tebay.dev">Contact Nathan</a>
+          </div>
+        </div>
+
+        <div id="content-panel-featured" class="side-panel home-feature">
+          <span class="section-label">Primary project</span>
+          <div class="home-feature__grid">
+            <div>
+              <h2>QMK Nexus</h2>
+              <p class="home-feature__lead">
+                A visual frontend for QMK firmware that unifies layout design,
+                matrix mapping, keycode setup, hardware feature configuration,
+                and firmware builds.
+              </p>
+              <p>
+                QMK is powerful, but the real workflow crosses JSON, C headers,
+                keymaps, rules files, MCU support, and build tooling. QMK Nexus
+                turns that scattered process into one guided web app.
+              </p>
+            </div>
+            <div class="home-feature__proof">
+              <span>Visual keyboard editor</span>
+              <span>Matrix wiring + row/col derivation</span>
+              <span>Full keycode and layer setup</span>
+              <span>15 hardware feature modules</span>
+              <span>QMK source generation and build logs</span>
+            </div>
+          </div>
+          <div class="home-actions">
+            <a class="github-link" href="projects/qmknexus.html">Read the case study</a>
+            <a
+              class="github-link"
+              href="https://qmknexus.tebay.dev"
+              target="_blank"
+              rel="noopener"
+              >Open the app</a
+            >
+          </div>
+        </div>
+
+        <div id="content-panel-related" class="side-panel home-related">
+          <span class="section-label">Project paths</span>
+          <div class="project-path-grid">
+            <section class="project-path-card">
+              <h2>Workflow and developer tools</h2>
+              <p>
+                Tools that turn scattered setup, schema, or orchestration work
+                into structured interfaces.
+              </p>
+              <a href="projects/qmknexus.html">QMK Nexus</a>
+              <a href="projects/dbfirstgrid.html">DBFirstDataGrid</a>
+              <a href="projects/aiagents.html">AI Agents</a>
+            </section>
+            <section class="project-path-card">
+              <h2>Hardware and operational systems</h2>
+              <p>
+                Software that has to respect timing, sensors, firmware, and
+                real-world constraints.
+              </p>
+              <a href="projects/autorejection.html">AutoRejection</a>
+              <a href="projects/microphonecontroller.html">MicrophoneController</a>
+              <a href="projects/qmknexus.html">QMK Nexus hardware support</a>
+            </section>
+            <section class="project-path-card">
+              <h2>Product, infrastructure, and simulation</h2>
+              <p>
+                Systems that show deployment discipline, UI iteration, and
+                end-to-end ownership.
+              </p>
+              <a href="projects/personalsite.html">PersonalSite</a>
+              <a href="projects/flyfishinggame.html">Fly Fishing Game</a>
+              <a href="blog.html">Technical writing</a>
+            </section>
+          </div>
         </div>
         <div id="content-panel-story" class="side-panel intro">
           <p>

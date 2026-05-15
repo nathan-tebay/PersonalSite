@@ -3,7 +3,7 @@ window.TEBAY_PROJECTS = [
   {
     id: "qmknexus",
     label: "QMK Nexus",
-    description: "Keyboard firmware builder for QMK.",
+    description: "Visual QMK firmware workflow: layout, matrix, keymap, features, builds.",
     path: "projects/qmknexus.html",
   },
   {

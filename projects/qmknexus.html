@@ -3,27 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QMK Nexus - Tebay.dev</title>
+    <title>QMK Nexus - Visual QMK Firmware Builder by Nathan Tebay</title>
     <meta
       name="description"
-      content="QMK Nexus project write-up: a browser-based custom keyboard firmware builder for QMK layouts, keymaps, peripherals, and local builds."
+      content="QMK Nexus case study: a visual QMK firmware frontend that unifies keyboard layout design, matrix mapping, keycode setup, hardware feature configuration, and builds."
     />
     <meta name="author" content="Nathan Tebay" />
     <link rel="canonical" href="https://tebay.dev/projects/qmknexus.html" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tebay.dev" />
-    <meta property="og:title" content="QMK Nexus - Tebay.dev" />
+    <meta property="og:title" content="QMK Nexus - Visual QMK Firmware Builder" />
     <meta
       property="og:description"
-      content="A browser-based custom keyboard firmware builder for QMK layouts, keymaps, peripherals, and local builds."
+      content="A visual frontend for QMK firmware that turns scattered layout, matrix, keymap, feature, and build work into one guided workflow."
     />
     <meta property="og:url" content="https://tebay.dev/projects/qmknexus.html" />
     <meta property="og:image" content="https://tebay.dev/assets/images/qmknexus-layout-screen.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="QMK Nexus - Tebay.dev" />
+    <meta name="twitter:title" content="QMK Nexus - Visual QMK Firmware Builder" />
     <meta
       name="twitter:description"
-      content="A browser-based custom keyboard firmware builder for QMK layouts, keymaps, peripherals, and local builds."
+      content="A visual frontend for QMK firmware that turns scattered layout, matrix, keymap, feature, and build work into one guided workflow."
     />
     <meta name="twitter:image" content="https://tebay.dev/assets/images/qmknexus-layout-screen.png" />
     <link rel="icon" type="image/png" href="../favicon.png" />
@@ -39,8 +39,9 @@
             <div>
               <h1>QMK Nexus</h1>
               <p class="tagline">
-                Browser-based custom keyboard firmware builder for QMK layouts,
-                keymaps, peripherals, and local firmware builds
+                Visual frontend for QMK firmware that unifies layout design,
+                matrix mapping, keycode setup, hardware feature configuration,
+                and firmware builds.
               </p>
             </div>
             <div class="header-actions">
@@ -64,6 +65,43 @@
           </div>
 
           <div class="divider"></div>
+
+          <div class="project-hero-copy">
+            <p>
+              QMK Nexus exists because keyboard firmware work is not one task.
+              It is a chain of layout decisions, matrix wiring, C source files,
+              hardware feature flags, keycode layers, and compiler feedback.
+              The project turns that fragmented workflow into a guided app that
+              keeps the user close to the keyboard they are designing while
+              still producing real QMK-compatible firmware.
+            </p>
+            <div class="project-outcome-grid">
+              <div>
+                <strong>Problem</strong>
+                <span
+                  >QMK is powerful, but the workflow assumes users can keep
+                  layout, matrix, C files, features, and builds synchronized by
+                  hand.</span
+                >
+              </div>
+              <div>
+                <strong>Solution</strong>
+                <span
+                  >A browser app that models the keyboard visually, validates
+                  build readiness, generates source, and runs isolated firmware
+                  builds.</span
+                >
+              </div>
+              <div>
+                <strong>Signal</strong>
+                <span
+                  >One project shows frontend UX, type-safe data modeling,
+                  firmware generation, cloud deployment, and containerized build
+                  orchestration.</span
+                >
+              </div>
+            </div>
+          </div>
 
           <div class="renders-row renders-row--2 renders-row--screens">
             <div class="render-card render-card--span2">
@@ -100,13 +138,13 @@
 
           <div class="project-body">
             <div class="project-section project-section--overview">
-              <h3>Overview</h3>
+              <h3>What it does</h3>
               <p>
                 QMK Nexus is a full-stack web app for building custom keyboard
                 firmware without hand-editing QMK source files. The frontend
-                guides users through the key design stages: physical layout,
-                matrix wiring, peripheral setup, keymap editing, metadata,
-                feature toggles, and firmware build.
+                guides users through physical layout, matrix wiring, peripheral
+                setup, keymap editing, metadata, feature toggles, and firmware
+                build.
               </p>
               <p>
                 The backend stores user keyboards, checks build readiness,
@@ -114,6 +152,82 @@
                 builds inside an isolated Podman builder. It also includes a
                 QMK keyboard index so existing boards can be loaded or adapted.
               </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Why it matters</h3>
+              <p>
+                This is the kind of product work I like: take a workflow with
+                real technical depth, respect the underlying system, then make
+                the happy path understandable without hiding the important
+                constraints. The same pattern applies to internal tools,
+                hardware operations, data-heavy business apps, and developer
+                platforms.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Technical notes</h3>
+              <div class="note-grid">
+                <div>
+                  <strong>Why I built it</strong>
+                  <span>
+                    QMK is flexible, but the workflow spreads decisions across
+                    layout JSON, matrix wiring, C files, feature flags, and
+                    compiler output.
+                  </span>
+                </div>
+                <div>
+                  <strong>Matrix modeling</strong>
+                  <span>
+                    The visual editor has to preserve the difference between
+                    key geometry, electrical wiring, and generated firmware
+                    macros.
+                  </span>
+                </div>
+                <div>
+                  <strong>Hardware features</strong>
+                  <span>
+                    OLED, encoders, pointing devices, split boards, RGB, combos,
+                    and tap dance all need explicit UI state and backend
+                    validation.
+                  </span>
+                </div>
+                <div>
+                  <strong>What I learned</strong>
+                  <span>
+                    Generated firmware needs tests, durable build state, and
+                    honest constraints so users are not surprised by the build
+                    button.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Workflow covered</h3>
+              <ol class="workflow-list">
+                <li>
+                  <strong>Design layout</strong> — place, size, rotate, and
+                  group keys on a canvas.
+                </li>
+                <li>
+                  <strong>Map matrix</strong> — wire rows and columns,
+                  including peripheral placement.
+                </li>
+                <li>
+                  <strong>Configure firmware</strong> — choose MCU, bootloader,
+                  features, pins, OLED, encoder, trackball, and RGB behavior.
+                </li>
+                <li>
+                  <strong>Assign keycodes</strong> — edit layers, encoders,
+                  combos, tap dance, mouse keys, and QMK keycodes.
+                </li>
+                <li>
+                  <strong>Build and inspect</strong> — generate QMK source, run
+                  an isolated build, view logs, and download firmware.
+                </li>
+              </ol>
             </div>
 
             <div class="project-section project-section--stack">
@@ -138,7 +252,7 @@
             </div>
 
             <div class="project-section project-section--challenges">
-              <h3>Challenges</h3>
+              <h3>Hard parts</h3>
               <ul>
                 <li>
                   Translating a visual keyboard layout into valid QMK matrix
@@ -168,7 +282,7 @@
             </div>
 
             <div class="project-section project-section--learnings">
-              <h3>Learnings</h3>
+              <h3>Engineering takeaways</h3>
               <ul>
                 <li>
                   Firmware generators need snapshot tests. Small formatting or
@@ -243,6 +357,64 @@
                 <li>Import from 1000+ keyboards in the QMK index; custom source file overrides.</li>
                 <li>Live build log with 2s polling and one-click firmware download.</li>
               </ul>
+            </div>
+
+            <div class="project-section">
+              <h3>Related work</h3>
+              <div class="related-project-grid">
+                <a class="related-project-card" href="dbfirstgrid.html">
+                  <strong>DBFirstDataGrid</strong>
+                  <span
+                    >Turns database metadata into UI instead of repeating
+                    boilerplate by hand.</span
+                  >
+                </a>
+                <a class="related-project-card" href="aiagents.html">
+                  <strong>AI Agents</strong>
+                  <span
+                    >Local orchestration and durable memory for multi-step
+                    technical work.</span
+                  >
+                </a>
+                <a class="related-project-card" href="autorejection.html">
+                  <strong>AutoRejection</strong>
+                  <span
+                    >Industrial hardware/software workflow with sensors, timing,
+                    and operational constraints.</span
+                  >
+                </a>
+                <a class="related-project-card" href="personalsite.html">
+                  <strong>PersonalSite</strong>
+                  <span
+                    >The site architecture, deployment path, and portfolio
+                    system behind this case study.</span
+                  >
+                </a>
+              </div>
+            </div>
+
+            <div class="project-section project-cta-panel">
+              <h3>What to do next</h3>
+              <p>
+                If you are here from QMK Nexus, this is the portfolio trail:
+                QMK Nexus shows how I turn a tangled technical process into a
+                usable product; the related projects show the same pattern
+                across automation, AI-assisted tooling, data-heavy UI, and
+                infrastructure.
+              </p>
+              <div class="home-actions">
+                <a class="github-link" href="../index.html"
+                  >Back to portfolio</a
+                >
+                <a class="github-link" href="mailto:nathan@tebay.dev">Contact Nathan</a>
+                <a
+                  class="github-link"
+                  href="https://github.com/nathan-tebay/qmk-nexus"
+                  target="_blank"
+                  rel="noopener"
+                  >Review the code</a
+                >
+              </div>
             </div>
           </div>
         </div>
