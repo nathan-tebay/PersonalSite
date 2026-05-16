@@ -95,6 +95,43 @@ body {
   position: sticky;
   top: 1.5rem;
   align-self: flex-start;
+  transition:
+    width 0.18s ease,
+    padding 0.18s ease,
+    background-color 0.2s ease,
+    outline-color 0.2s ease,
+    color 0.2s ease;
+}
+
+#nav-collapse-toggle {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--divider);
+  border-radius: 0.45rem;
+  color: var(--text-mid);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 1rem;
+  font-weight: 700;
+  height: 2rem;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+  width: 2rem;
+}
+
+#nav-collapse-toggle:hover {
+  background: var(--hover-bg);
+  border-color: var(--text-link);
+  color: var(--text-high);
+}
+
+#nav-collapse-toggle:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 #nav-panel .tree {
@@ -183,6 +220,25 @@ body {
 
 #nav-panel .tree > li > a:hover {
   color: var(--text-high);
+}
+
+@media (min-width: 601px) {
+  body.nav-collapsed #nav-panel {
+    padding: 0.75rem;
+    width: 3.75rem;
+  }
+
+  body.nav-collapsed #nav-collapse-toggle {
+    margin-bottom: 0;
+  }
+
+  body.nav-collapsed #nav-panel .section-label,
+  body.nav-collapsed #nav-panel .tree,
+  body.nav-collapsed #nav-panel .divider,
+  body.nav-collapsed #picker-wrap,
+  body.nav-collapsed #nav-login-btn {
+    display: none;
+  }
 }
 
 /* ── Main column ─────────────────────────────────────────────────────── */
@@ -1439,6 +1495,10 @@ summary:focus-visible {
       transform 0.25s ease,
       background-color 0.2s ease,
       outline-color 0.2s ease;
+  }
+
+  #nav-collapse-toggle {
+    display: none;
   }
 
   #nav-panel.nav-open {

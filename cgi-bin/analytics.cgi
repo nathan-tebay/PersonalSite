@@ -24,6 +24,7 @@ else
 fi
 
 TMPFILE="/tmp/analytics-all-$$"
+FILTERED_FILE="/tmp/analytics-filtered-$$"
 touch "$TMPFILE"
 
 # ── Fetch a month's JSONL into TMPFILE ────────────────────────────────────
@@ -43,9 +44,21 @@ fetch_month() {
 fetch_month "$PREV_MONTH"
 fetch_month "$CURRENT_MONTH"
 
-# ── Return last 2000 visits as JSON array ─────────────────────────────────
+# ── Ignore likely bot rows, including historical records already stored ─────
+awk '
+  function likely_bot(line, ua, lower) {
+    ua = line
+    sub(/^.*"ua":"/, "", ua)
+    sub(/","country":.*$/, "", ua)
+    lower = tolower(ua)
+    return lower == "" || lower ~ /(bot|crawl|spider|slurp|bingpreview|facebookexternalhit|embedly|quora link preview|pinterest|preview|validator|lighthouse|pagespeed|uptimerobot|statuscake|pingdom|monitoring|curl|wget|python-requests|go-http-client|httpclient|java\/|libwww|php\/|axios|node-fetch|okhttp|headlesschrome|phantomjs|playwright|puppeteer|semrush|ahrefs|mj12bot|dotbot|petalbot|bytespider|gptbot|chatgpt-user|claudebot|anthropic-ai|perplexitybot)/
+  }
+  /^\{/ && !likely_bot($0) { print }
+' "$TMPFILE" > "$FILTERED_FILE"
+
+# ── Return last 2000 non-bot visits as JSON array ───────────────────────────
 printf '{"visits":['
-tail -n 2000 "$TMPFILE" | awk 'BEGIN{n=0}/^\{/{if(n>0)printf ",";printf "%s",$0;n++}'
+tail -n 2000 "$FILTERED_FILE" | awk 'BEGIN{n=0}/^\{/{if(n>0)printf ",";printf "%s",$0;n++}'
 printf ']}'
 
-rm -f "$TMPFILE"
+rm -f "$TMPFILE" "$FILTERED_FILE"

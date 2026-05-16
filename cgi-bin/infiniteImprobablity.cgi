@@ -4,6 +4,24 @@
 
 . /var/www/html/cgi-bin/common.sh
 
+# ── Bot filtering: ignore crawlers, previews, monitors, and script clients ─
+is_likely_bot_user_agent() {
+  _ua=$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')
+  [ -z "$_ua" ] && return 0
+  case "$_ua" in
+    *bot*|*crawl*|*spider*|*slurp*|*bingpreview*|*facebookexternalhit*|*embedly*|*quora\ link\ preview*|*pinterest*|*preview*|*validator*|*lighthouse*|*pagespeed*|*uptimerobot*|*statuscake*|*pingdom*|*monitoring*|*curl*|*wget*|*python-requests*|*go-http-client*|*httpclient*|*java/*|*libwww*|*php/*|*axios*|*node-fetch*|*okhttp*|*headlesschrome*|*phantomjs*|*playwright*|*puppeteer*|*semrush*|*ahrefs*|*mj12bot*|*dotbot*|*petalbot*|*bytespider*|*gptbot*|*chatgpt-user*|*claudebot*|*anthropic-ai*|*perplexitybot*)
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+if is_likely_bot_user_agent "${HTTP_USER_AGENT:-}"; then
+  emit_json_header
+  printf '\r\n{"ok":true}\n'
+  exit 0
+fi
+
 # ── Rate limiting: max 30 beacons per 60s per IP ───────────────────────
 if ! rate_limit_check "track_${REMOTE_ADDR}" 30 60; then
   emit_json_header
@@ -28,6 +46,7 @@ POST_DATA=""
 
 PAGE=$(get_field "$POST_DATA" page | cut -c1-200)
 REF=$(get_field "$POST_DATA" ref | cut -c1-200)
+SLUG=$(get_field "$POST_DATA" slug | cut -c1-120)
 
 # ── IP (honour proxy header from Lambda/CloudFront) ────────────────────────
 IP="${HTTP_X_FORWARDED_FOR:-${REMOTE_ADDR:-}}"
@@ -88,8 +107,8 @@ esac
 # ── JSON-escape helper ────────────────────────────────────────────────────
 je() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/ /g; s/[[:cntrl:]]//g'; }
 
-ENTRY=$(printf '{"ts":"%s","ip":"%s","page":"%s","ref":"%s","ua":"%s","country":"%s","cc":"%s","region":"%s","city":"%s"}' \
-  "$TS" "$(je "$IP")" "$(je "$PAGE")" "$(je "$REF")" "$(je "${HTTP_USER_AGENT:-}")" \
+ENTRY=$(printf '{"ts":"%s","ip":"%s","page":"%s","slug":"%s","ref":"%s","ua":"%s","country":"%s","cc":"%s","region":"%s","city":"%s"}' \
+  "$TS" "$(je "$IP")" "$(je "$PAGE")" "$(je "$SLUG")" "$(je "$REF")" "$(je "${HTTP_USER_AGENT:-}")" \
   "$(je "$COUNTRY")" "$(je "$CC")" "$(je "$REGION")" "$(je "$CITY")")
 
 # ── Persist ────────────────────────────────────────────────────────────────

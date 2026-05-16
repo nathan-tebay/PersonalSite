@@ -653,7 +653,7 @@
 
       #analytics-tables {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
         gap: 0.65rem;
       }
 
@@ -962,6 +962,10 @@
               <div class="analytics-panel">
                 <h3>Top Countries</h3>
                 <div id="analytics-countries"></div>
+              </div>
+              <div class="analytics-panel">
+                <h3>Top Blog Posts</h3>
+                <div id="analytics-blog-posts"></div>
               </div>
             </div>
             <div id="unique-visitors-panel">
@@ -1878,6 +1882,7 @@
           var weekCount = 0;
           var pageCounts = {};
           var countryCounts = {};
+          var blogSlugCounts = {};
 
           visits.forEach(function (v) {
             if (v.ip) uniqueIPs[v.ip] = true;
@@ -1887,6 +1892,7 @@
             var page = v.page || "/";
             pageCounts[page] = (pageCounts[page] || 0) + 1;
             if (v.country) countryCounts[v.country] = (countryCounts[v.country] || 0) + 1;
+            if (v.slug) blogSlugCounts[v.slug] = (blogSlugCounts[v.slug] || 0) + 1;
           });
 
           document.getElementById("stat-total").textContent  = visits.length.toLocaleString();
@@ -1896,6 +1902,7 @@
 
           renderBarList("analytics-pages", pageCounts, 10);
           renderBarList("analytics-countries", countryCounts, 10);
+          renderBarList("analytics-blog-posts", blogSlugCounts, 10);
 
           var visitorMap = {};
           visits.forEach(function (v) {

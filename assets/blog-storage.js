@@ -7,27 +7,27 @@
  * Schema: Array<{ slug, title, date, desc, content, published }>
  */
 (function () {
-  const LS_KEY = "tebay_blog_posts";
+  const LS_KEY = 'tebay_blog_posts'
 
   /** @returns {Array<{slug:string,title:string,date:string,desc:string,content:string,published:boolean}>} */
-  function loadAll() {
-    try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch (_) { return []; }
+  function loadAll () {
+    try { return JSON.parse(window.localStorage.getItem(LS_KEY)) || [] } catch (_) { return [] }
   }
 
   /** @param {Array} posts */
-  function persist(posts) {
-    localStorage.setItem(LS_KEY, JSON.stringify(posts));
+  function persist (posts) {
+    window.localStorage.setItem(LS_KEY, JSON.stringify(posts))
   }
 
   window.BlogStorage = {
     /** Return all posts including drafts (admin use). */
-    getAllPosts() {
-      return loadAll();
+    getAllPosts () {
+      return loadAll()
     },
 
     /** Return published posts only (public use). */
-    getPublishedPosts() {
-      return loadAll().filter(function (p) { return p.published; });
+    getPublishedPosts () {
+      return loadAll().filter(function (p) { return p.published })
     },
 
     /**
@@ -35,8 +35,8 @@
      * @param {string} slug
      * @returns {{slug,title,date,desc,content,published}|null}
      */
-    getPost(slug) {
-      return loadAll().find(function (p) { return p.slug === slug; }) || null;
+    getPost (slug) {
+      return loadAll().find(function (p) { return p.slug === slug }) || null
     },
 
     /**
@@ -45,23 +45,23 @@
      * @param {{slug,title,date,desc,content,published?,wip?}} post
      * @returns {{slug,title,date,desc,content,published,wip}}
      */
-    savePost(post) {
-      const posts = loadAll();
-      const index = posts.findIndex(function (p) { return p.slug === post.slug; });
-      const existing = index >= 0 ? posts[index] : null;
+    savePost (post) {
+      const posts = loadAll()
+      const index = posts.findIndex(function (p) { return p.slug === post.slug })
+      const existing = index >= 0 ? posts[index] : null
       const entry = {
-        slug:      post.slug,
-        title:     post.title,
-        date:      post.date,
-        desc:      post.desc,
-        content:   post.content,
+        slug: post.slug,
+        title: post.title,
+        date: post.date,
+        desc: post.desc,
+        content: post.content,
         published: post.published !== undefined ? post.published : (existing ? existing.published : false),
-        wip:       post.wip      !== undefined ? post.wip      : (existing ? existing.wip      : false),
-      };
-      if (index >= 0) posts[index] = entry;
-      else posts.push(entry);
-      persist(posts);
-      return entry;
+        wip: post.wip !== undefined ? post.wip : (existing ? existing.wip : false)
+      }
+      if (index >= 0) posts[index] = entry
+      else posts.push(entry)
+      persist(posts)
+      return entry
     },
 
     /**
@@ -69,30 +69,30 @@
      * @param {string} slug
      * @returns {{slug,title,date,desc,content,published,wip}|null}
      */
-    togglePublished(slug) {
-      const posts = loadAll();
-      const post = posts.find(function (p) { return p.slug === slug; });
-      if (!post) return null;
-      post.published = !post.published;
-      if (post.published) post.wip = false;
-      persist(posts);
-      return post;
+    togglePublished (slug) {
+      const posts = loadAll()
+      const post = posts.find(function (p) { return p.slug === slug })
+      if (!post) return null
+      post.published = !post.published
+      if (post.published) post.wip = false
+      persist(posts)
+      return post
     },
 
     /**
      * Return published posts plus any unpublished WIP placeholders (public use).
      * @returns {Array}
      */
-    getPublishedAndWipPosts() {
-      return loadAll().filter(function (p) { return p.published || p.wip; });
+    getPublishedAndWipPosts () {
+      return loadAll().filter(function (p) { return p.published || p.wip })
     },
 
     /**
      * Delete a post by slug.
      * @param {string} slug
      */
-    deletePost(slug) {
-      persist(loadAll().filter(function (p) { return p.slug !== slug; }));
-    },
-  };
-})();
+    deletePost (slug) {
+      persist(loadAll().filter(function (p) { return p.slug !== slug }))
+    }
+  }
+})()
