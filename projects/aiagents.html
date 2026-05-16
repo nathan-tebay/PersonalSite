@@ -3,27 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Agents - Tebay.dev</title>
+    <title>AI Agents - Local Agent Orchestration by Nathan Tebay</title>
     <meta
       name="description"
-      content="AI Agents project write-up: a modular local agent system for scraping, stock analysis, coding assistance, scheduling, and long-term memory."
+      content="AI Agents case study: a local multi-agent orchestration system with typed task routing, reviewer gates, scheduled jobs, scraping, market analysis, and durable shared memory."
     />
     <meta name="author" content="Nathan Tebay" />
     <link rel="canonical" href="https://tebay.dev/projects/aiagents.html" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tebay.dev" />
-    <meta property="og:title" content="AI Agents - Tebay.dev" />
+    <meta property="og:title" content="AI Agents - Local Agent Orchestration" />
     <meta
       property="og:description"
-      content="A modular local agent system for scraping, stock analysis, coding assistance, scheduling, and long-term memory."
+      content="AI Agents case study: a local multi-agent orchestration system with typed task routing, reviewer gates, scheduled jobs, scraping, market analysis, and durable shared memory."
     />
-    <meta property="og:url" content="https://tebay.dev/projects/aiagents.html" />
+    <meta
+      property="og:url"
+      content="https://tebay.dev/projects/aiagents.html"
+    />
     <meta property="og:image" content="https://tebay.dev/background.jpeg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AI Agents - Tebay.dev" />
+    <meta
+      name="twitter:title"
+      content="AI Agents - Local Agent Orchestration"
+    />
     <meta
       name="twitter:description"
-      content="A modular local agent system for scraping, stock analysis, coding assistance, scheduling, and long-term memory."
+      content="AI Agents case study: a local multi-agent orchestration system with typed task routing, reviewer gates, scheduled jobs, scraping, market analysis, and durable shared memory."
     />
     <meta name="twitter:image" content="https://tebay.dev/background.jpeg" />
     <link rel="icon" type="image/png" href="../favicon.png" />
@@ -39,8 +45,13 @@
             <div>
               <h1>AI Agents</h1>
               <p class="tagline">
-                Modular local AI agent system for scraping, market analysis,
-                coding assistance, scheduling, review, and long-term memory
+                Local multi-agent orchestration with durable memory and review
+                gates.
+              </p>
+              <p class="hero-summary">
+                AI Agents turns scraping, stock analysis, scheduling, and small
+                coding tasks into bounded local-agent workflows that can be
+                routed, reviewed, logged, and remembered across sessions.
               </p>
             </div>
             <div class="header-actions">
@@ -50,143 +61,289 @@
                 target="_blank"
                 rel="noopener"
               >
-                View on GitHub
+                View GitHub
               </a>
             </div>
           </div>
 
           <div class="divider"></div>
 
+          <div class="project-hero-copy project-section">
+            <h3>What it solves</h3>
+            <p>
+              Local LLMs are useful for bounded work, but they need a system
+              around them: task boundaries, typed inputs and outputs, review
+              rules, retries, logging, and shared memory.
+            </p>
+            <p>
+              AI Agents keeps Claude Code in the planner/reviewer role while a
+              configured LM Studio model handles worker tasks through an
+              OpenAI-compatible API. The point is not agent novelty; it is
+              controlled delegation that stays inspectable.
+            </p>
+          </div>
+
           <div class="project-body">
-            <div class="project-section project-section--overview">
-              <h3>Overview</h3>
-              <p>
-                AI Agents is a Python-based orchestration project for running a
-                small team of focused local agents. Claude Code acts as the
-                planner and reviewer while a configured LM Studio model handles
-                worker tasks through an OpenAI-compatible API. The goal is to
-                keep high-level architecture and approvals with Claude while
-                offloading bounded scraping, market analysis, and small coding
-                jobs to local models.
-              </p>
-              <p>
-                The system centers on an <code>OrchestratorAgent</code> that
-                dispatches work to specialized agents, a <code>TaskRouter</code>
-                that decides when coding tasks are safe to delegate, and a
-                <code>CodeReviewer</code> gate that prevents generated code from
-                being written without review. Shared memory gives every agent a
-                common place to store facts, task history, context, and semantic
-                recall across sessions.
-              </p>
-            </div>
-
-            <div class="project-section project-section--stack">
-              <h3>Stack</h3>
-              <div class="tag-list">
-                <span class="tag">Python</span>
-                <span class="tag">AsyncIO</span>
-                <span class="tag">Pydantic</span>
-                <span class="tag">LM Studio</span>
-                <span class="tag">OpenAI-compatible API</span>
-                <span class="tag">SQLite</span>
-                <span class="tag">ChromaDB</span>
-                <span class="tag">APScheduler</span>
-                <span class="tag">Playwright</span>
-                <span class="tag">BeautifulSoup</span>
-                <span class="tag">yfinance</span>
-                <span class="tag">pytest</span>
-              </div>
-            </div>
-
-            <div class="project-section">
-              <h3>Key Systems</h3>
+            <div class="project-section project-section--audience">
+              <h3>Who this is for</h3>
               <ul>
+                <li>Developers testing local LLM task delegation</li>
+                <li>People who want scheduled scraping or market reports</li>
                 <li>
-                  <strong>Orchestration</strong> - starts shared services,
-                  schedules recurring jobs, dispatches tasks, tracks retries,
-                  and keeps agent execution consistent.
+                  Builders comparing structured memory and semantic recall
                 </li>
                 <li>
-                  <strong>Coding delegation</strong> - routes small and medium
-                  coding tasks through <code>CodingAgent</code>, applies safety
-                  checks, and requires review before any write-to-disk step.
-                </li>
-                <li>
-                  <strong>Scraping workflow</strong> - uses Playwright or
-                  BeautifulSoup to collect page content, then summarizes and
-                  structures results with the configured worker model.
-                </li>
-                <li>
-                  <strong>Market workflow</strong> - pulls ticker data and news
-                  signals, then produces scheduled analysis reports for tracked
-                  symbols.
-                </li>
-                <li>
-                  <strong>Shared memory</strong> - combines structured SQLite
-                  records with ChromaDB semantic search so agents can recall
-                  task outcomes, preferences, and prior context.
+                  Teams thinking about safe coding-agent review boundaries
                 </li>
               </ul>
             </div>
 
+            <div class="project-section project-section--overview">
+              <h3>What it does</h3>
+              <p>
+                AI Agents is a Python-based orchestration project for running a
+                small team of focused local agents. An
+                <code>OrchestratorAgent</code> starts shared services, schedules
+                recurring work, dispatches tasks, handles retries, and records
+                task outcomes.
+              </p>
+              <p>
+                A <code>TaskRouter</code> decides when coding work is safe to
+                delegate, and a <code>CodeReviewer</code> gate prevents
+                generated code from being written without review. Shared memory
+                combines SQLite records with ChromaDB semantic search so agents
+                can recall facts, preferences, task history, and previous
+                context.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Workflow covered</h3>
+              <ol class="workflow-list">
+                <li>
+                  <strong>Plan and route</strong> - classify the task, decide
+                  which agent should handle it, and keep unsafe work local.
+                </li>
+                <li>
+                  <strong>Execute and review</strong> - run scraping, market,
+                  scheduled, or coding work through typed agents with logs,
+                  retries, and reviewer gates.
+                </li>
+                <li>
+                  <strong>Remember and improve</strong> - store structured task
+                  outcomes and searchable context so later sessions can reuse
+                  what the system learned.
+                </li>
+              </ol>
+            </div>
+
+            <div class="project-section project-section--stack">
+              <h3>Technical highlights / stack</h3>
+              <div class="stack-groups">
+                <div>
+                  <strong>Language/runtime</strong>
+                  <div class="tag-list">
+                    <span class="tag">Python</span>
+                    <span class="tag">AsyncIO</span>
+                    <span class="tag">Pydantic</span>
+                    <span class="tag">pytest</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Model interface</strong>
+                  <div class="tag-list">
+                    <span class="tag">LM Studio</span>
+                    <span class="tag">OpenAI-compatible API</span>
+                    <span class="tag">Claude Code</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Memory</strong>
+                  <div class="tag-list">
+                    <span class="tag">SQLite</span>
+                    <span class="tag">ChromaDB</span>
+                    <span class="tag">Semantic search</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Workers</strong>
+                  <div class="tag-list">
+                    <span class="tag">APScheduler</span>
+                    <span class="tag">Playwright</span>
+                    <span class="tag">BeautifulSoup</span>
+                    <span class="tag">yfinance</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Why it matters</h3>
+              <p>
+                The useful part of agent systems is not pretending the model is
+                autonomous. It is making delegation explicit enough that humans
+                can trust the boundary, inspect the work, and improve the system
+                after failures.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Technical notes</h3>
+              <div class="note-grid">
+                <div>
+                  <strong>Typed routing</strong>
+                  <span>
+                    Task policies live in routing code and configuration so
+                    delegation rules can evolve without scattered conditionals.
+                  </span>
+                </div>
+                <div>
+                  <strong>Reviewer gate</strong>
+                  <span>
+                    Coding output is treated as proposed work until a reviewer
+                    approves the write path.
+                  </span>
+                </div>
+                <div>
+                  <strong>Shared memory</strong>
+                  <span>
+                    SQLite keeps durable structured records while ChromaDB adds
+                    fuzzy recall for context that is hard to query exactly.
+                  </span>
+                </div>
+                <div>
+                  <strong>Scheduled jobs</strong>
+                  <span>
+                    APScheduler jobs make recurring stock reports and health
+                    checks visible instead of hiding them in ad-hoc scripts.
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div class="project-section project-section--challenges">
-              <h3>Challenges</h3>
+              <h3>Hard parts</h3>
               <ul>
                 <li>
                   Drawing a hard boundary between work a local model can safely
-                  produce and work Claude should handle directly, especially for
-                  security-sensitive or broad multi-file changes.
+                  produce and work Claude should handle directly.
                 </li>
                 <li>
-                  Making delegated code generation useful without ever treating
-                  it as automatically trusted output.
+                  Making delegated code generation useful without treating it as
+                  automatically trusted output.
                 </li>
                 <li>
-                  Keeping the memory layer centralized so agents share context
-                  without reaching into database internals.
+                  Keeping memory centralized so agents share context without
+                  reaching into database internals.
                 </li>
                 <li>
-                  Designing schedules, retries, and logging so long-running
-                  worker tasks can fail clearly instead of silently disappearing.
+                  Designing schedules, retries, and logs so long-running work
+                  fails clearly instead of disappearing.
                 </li>
               </ul>
             </div>
 
             <div class="project-section project-section--learnings">
-              <h3>Learnings</h3>
+              <h3>Engineering takeaways</h3>
               <ul>
                 <li>
-                  A local model is most useful when the task boundary is narrow,
-                  the expected output format is typed, and a reviewer gate is
-                  mandatory.
+                  Local models work best when the task boundary is narrow and
+                  the expected output format is typed.
                 </li>
                 <li>
-                  Agent memory needs both durable structured records and fuzzy
-                  semantic search; one without the other misses important
-                  operational context.
+                  Agent memory needs both structured records and semantic
+                  search; one without the other misses important context.
                 </li>
                 <li>
-                  Coding agents need policy in configuration, not scattered
-                  conditionals, so delegation rules can evolve as the system is
-                  tested.
+                  Coding-agent safety belongs in policy and review gates, not in
+                  trust that a prompt will behave.
                 </li>
                 <li>
-                  The simplest orchestration system is often easier to trust:
-                  explicit agents, explicit routes, explicit review, and plain
-                  logs beat hidden framework magic.
+                  Explicit agents, routes, review, and logs are easier to trust
+                  than hidden framework magic.
                 </li>
               </ul>
             </div>
 
+            <div class="project-section project-section--scope">
+              <h3>Current scope</h3>
+              <div class="scope-grid">
+                <div>
+                  <h4>Works now</h4>
+                  <ul>
+                    <li>On-demand scraping tasks</li>
+                    <li>Bounded coding delegation</li>
+                    <li>Scheduled stock analysis</li>
+                    <li>Orchestrator health checks</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Core systems</h4>
+                  <ul>
+                    <li>OrchestratorAgent</li>
+                    <li>TaskRouter</li>
+                    <li>CodeReviewer</li>
+                    <li>Shared memory service</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Still improving</h4>
+                  <ul>
+                    <li>Delegation policy tuning</li>
+                    <li>PostgreSQL production path</li>
+                    <li>More durable job dashboards</li>
+                    <li>Better task outcome summaries</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
             <div class="project-section">
-              <h3>Current Scope</h3>
-              <ul>
-                <li>On-demand scraping and coding tasks.</li>
-                <li>Scheduled stock analysis and orchestrator health checks.</li>
-                <li>SQLite development storage with optional PostgreSQL path.</li>
-                <li>ChromaDB semantic memory for recall across sessions.</li>
-                <li>Systemd service files and helper scripts for local startup.</li>
-              </ul>
+              <h3>Related work</h3>
+              <div class="related-project-grid">
+                <a class="related-project-card" href="qmknexus.html">
+                  <strong>QMK Nexus</strong>
+                  <span>Complex firmware workflow made visual and guided.</span>
+                </a>
+                <a class="related-project-card" href="whispertranscribe.html">
+                  <strong>WhisperTranscribe</strong>
+                  <span
+                    >Voice commands routed into strict executable formats.</span
+                  >
+                </a>
+                <a class="related-project-card" href="personalsite.html">
+                  <strong>PersonalSite</strong>
+                  <span
+                    >Deployment, validation, and content system for this
+                    site.</span
+                  >
+                </a>
+                <a class="related-project-card" href="dbfirstgrid.html">
+                  <strong>DBFirstDataGrid</strong>
+                  <span
+                    >Another metadata-first system that reduces repeated UI
+                    work.</span
+                  >
+                </a>
+              </div>
+            </div>
+
+            <div class="project-section project-cta-panel">
+              <h3>What to do next</h3>
+              <p>
+                Review the source if you are interested in local model
+                orchestration, typed task boundaries, memory layers, and human
+                review gates around generated work.
+              </p>
+              <div class="home-actions">
+                <a
+                  class="github-link"
+                  href="https://github.com/nathan-tebay/ai-agents"
+                  target="_blank"
+                  rel="noopener"
+                  >View GitHub</a
+                >
+              </div>
             </div>
           </div>
         </div>

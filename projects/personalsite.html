@@ -3,27 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PersonalSite — Tebay.dev</title>
+    <title>PersonalSite - Framework-Free Portfolio CMS by Nathan Tebay</title>
     <meta
       name="description"
-      content="PersonalSite project write-up: a hand-rolled portfolio, project archive, CMS, and Lambda-hosted deployment target."
+      content="PersonalSite case study: the framework-free tebay.dev portfolio, blog, links, admin panel, shell CGI CMS, S3-backed storage, Lambda container deployment, and smoke-tested release path."
     />
     <meta name="author" content="Nathan Tebay" />
     <link rel="canonical" href="https://tebay.dev/projects/personalsite.html" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tebay.dev" />
-    <meta property="og:title" content="PersonalSite - Tebay.dev" />
+    <meta
+      property="og:title"
+      content="PersonalSite - Framework-Free Portfolio CMS"
+    />
     <meta
       property="og:description"
-      content="A hand-rolled portfolio, project archive, CMS, and Lambda-hosted deployment target."
+      content="PersonalSite case study: the framework-free tebay.dev portfolio, blog, links, admin panel, shell CGI CMS, S3-backed storage, Lambda container deployment, and smoke-tested release path."
     />
-    <meta property="og:url" content="https://tebay.dev/projects/personalsite.html" />
+    <meta
+      property="og:url"
+      content="https://tebay.dev/projects/personalsite.html"
+    />
     <meta property="og:image" content="https://tebay.dev/background.jpeg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="PersonalSite - Tebay.dev" />
+    <meta
+      name="twitter:title"
+      content="PersonalSite - Framework-Free Portfolio CMS"
+    />
     <meta
       name="twitter:description"
-      content="A hand-rolled portfolio, project archive, CMS, and Lambda-hosted deployment target."
+      content="PersonalSite case study: the framework-free tebay.dev portfolio, blog, links, admin panel, shell CGI CMS, S3-backed storage, Lambda container deployment, and smoke-tested release path."
     />
     <meta name="twitter:image" content="https://tebay.dev/background.jpeg" />
     <link rel="icon" type="image/png" href="../favicon.png" />
@@ -39,280 +48,325 @@
             <div>
               <h1>PersonalSite</h1>
               <p class="tagline">
-                This site — a hand-rolled portfolio, project archive, CMS, and
-                Lambda-hosted deployment target built without a frontend framework
+                This site: portfolio, blog, links, admin tools, and deployment
+                pipeline without a frontend framework.
+              </p>
+              <p class="hero-summary">
+                PersonalSite is the operating surface for tebay.dev: static
+                project pages, dynamic blog and links content, shell CGI admin
+                workflows, S3-backed storage, analytics, and Lambda container
+                deployment.
               </p>
             </div>
             <div class="header-actions">
+              <a href="../index.html" class="github-link">Open Site</a>
               <a
                 href="https://github.com/nathan-tebay/PersonalSite"
                 class="github-link"
                 target="_blank"
-                rel="noopener">
-                View on GitHub
+                rel="noopener"
+              >
+                View GitHub
               </a>
             </div>
           </div>
 
           <div class="divider"></div>
 
+          <div class="project-hero-copy project-section">
+            <h3>What it solves</h3>
+            <p>
+              I wanted a portfolio and CMS that stayed small, understandable,
+              self-hosted, and deployable without a frontend build chain or
+              heavyweight application server.
+            </p>
+            <p>
+              The result is a plain HTML/CSS/JS site with shared layout scripts,
+              CGI admin endpoints, S3-backed content, local MinIO development,
+              CloudFront delivery, and repeatable Lambda container deployment.
+            </p>
+          </div>
+
           <div class="project-body">
+            <div class="project-section project-section--audience">
+              <h3>Who this is for</h3>
+              <ul>
+                <li>
+                  People reviewing how this portfolio is built and operated
+                </li>
+                <li>Developers interested in framework-free web systems</li>
+                <li>
+                  Builders comparing static pages with small dynamic admin tools
+                </li>
+                <li>
+                  Anyone evaluating my deployment, verification, and AI-assisted
+                  process
+                </li>
+              </ul>
+            </div>
+
             <div class="project-section project-section--overview">
-              <h3>Overview</h3>
+              <h3>What it does</h3>
               <p>
                 PersonalSite started as a constraint-driven portfolio rebuild:
                 no frontend framework, no Node runtime, no build step, and no
-                heavyweight CMS. It has since become the operating surface for
-                <code>tebay.dev</code>: project documentation, a blog, a curated
-                links page, an admin panel, deployment scripts, smoke checks,
-                and a small analytics pipeline.
-              </p>
-              <p>
-                The public side is still plain HTML, CSS, and vanilla
-                JavaScript. Shared navigation is injected by
-                <code>assets/layout.js</code>, project metadata lives in
-                <code>assets/project-data.js</code>, and page-specific scripts
-                render blog posts, links, and theme state without a bundler. The
-                admin side is implemented as POSIX shell CGI scripts behind
-                cookie-based session auth.
+                heavy CMS. It now powers project documentation, a blog, curated
+                links, an admin panel, deployment scripts, smoke checks, and a
+                small analytics pipeline.
               </p>
               <p>
                 Production runs as an AWS Lambda container behind CloudFront.
                 BusyBox <code>httpd</code> serves from <code>/tmp/www</code>,
-                the AWS Lambda Web Adapter bridges Lambda events to HTTP on
-                port 8080, and S3 stores blog posts, images, links, and
-                analytics data. On cold start the container syncs S3 content
-                into a local cache so normal page reads stay fast and simple.
+                the Lambda Web Adapter bridges Lambda events to HTTP, and S3
+                stores blog posts, images, links, and analytics data. On cold
+                start, the container syncs S3 content into a local cache before
+                serving requests.
               </p>
             </div>
 
             <div class="project-section">
-              <h3>Current Status</h3>
-              <ul>
+              <h3>Workflow covered</h3>
+              <ol class="workflow-list">
                 <li>
-                  Live at <code>tebay.dev</code> with project pages, responsive
-                  navigation, persistent theme swatches, blog rendering, links
-                  rendering, and an admin panel.
+                  <strong>Publish content</strong> - write project pages, manage
+                  posts and links, upload images, and update manifests through
+                  the admin UI.
                 </li>
                 <li>
-                  Blog and links content are managed through CGI endpoints and
-                  mirrored between S3 and the Lambda-local cache for immediate
-                  reads after writes.
+                  <strong>Serve and persist</strong> - render public pages from
+                  static assets while CGI endpoints mirror content between local
+                  cache and S3.
                 </li>
                 <li>
-                  Admin workflows include login/logout, draft save, publish,
-                  delete, image upload/list/delete, link management, and
-                  analytics review.
+                  <strong>Deploy and verify</strong> - build a linux/amd64 image
+                  with Podman, push to ECR, update Lambda, and run validation
+                  plus smoke checks.
                 </li>
-                <li>
-                  Deployment is scripted: <code>deploy-lambda.sh</code> builds a
-                  linux/amd64 container with Podman, pushes to ECR, updates the
-                  Lambda function, waits for completion, and reports the
-                  resolved image digest.
-                </li>
-                <li>
-                  Validation is split between static site checks
-                  (<code>validate-site.py</code>) and production smoke checks
-                  (<code>smoke-check.sh https://tebay.dev</code>).
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section">
-              <h3>Design Constraints</h3>
-              <ul>
-                <li>
-                  Use no frontend frameworks, libraries, or build tools — just
-                  plain HTML, CSS, and JavaScript.
-                </li>
-                <li>
-                  Keep the runtime small and transparent: BusyBox
-                  <code>httpd</code>, shell CGI, AWS CLI, and the Lambda Web
-                  Adapter.
-                </li>
-                <li>
-                  Support local development with Podman and MinIO while keeping
-                  production storage on AWS S3.
-                </li>
-                <li>
-                  Make publishing possible from the site itself without adding a
-                  database server, Node application, or external CMS.
-                </li>
-                <li>
-                  Keep deployment repeatable enough that production fixes can be
-                  built, pushed, and verified from one script.
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section">
-              <h3>AI-Assisted Build</h3>
-              <p>
-                I used Claude Code heavily while designing, implementing, and
-                documenting the site. That was useful for quickly iterating on
-                CGI scripts, Dockerfiles, AWS setup, admin UI, and validation
-                tooling, but it also exposed places where AI needs tight
-                supervision:
-              </p>
-              <ul>
-                <li>
-                  It was effective at generating small, testable shell and
-                  frontend changes when the constraints were explicit.
-                </li>
-                <li>
-                  It tended to confuse BusyBox <code>httpd</code>, Apache-style
-                  CGI assumptions, Lambda filesystem limits, and auth/session
-                  edge cases unless corrected with real runtime feedback.
-                </li>
-                <li>
-                  It was most valuable as a fast implementation partner, not as
-                  an autopilot. The important work was constraining the design,
-                  reading the generated code, and verifying behavior in the real
-                  deployment environment.
-                </li>
-              </ul>
+              </ol>
             </div>
 
             <div class="project-section project-section--stack">
-              <h3>Stack</h3>
-              <div class="tag-list">
-                <span class="tag">HTML5</span>
-                <span class="tag">CSS3</span>
-                <span class="tag">Vanilla JS</span>
-                <span class="tag">Shell CGI</span>
-                <span class="tag">BusyBox httpd</span>
-                <span class="tag">AWS Lambda</span>
-                <span class="tag">Lambda Web Adapter</span>
-                <span class="tag">AWS S3</span>
-                <span class="tag">CloudFront</span>
-                <span class="tag">ECR</span>
-                <span class="tag">Podman</span>
-                <span class="tag">MinIO</span>
+              <h3>Technical highlights / stack</h3>
+              <div class="stack-groups">
+                <div>
+                  <strong>Frontend</strong>
+                  <div class="tag-list">
+                    <span class="tag">HTML5</span>
+                    <span class="tag">CSS3</span>
+                    <span class="tag">Vanilla JS</span>
+                    <span class="tag">No build step</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Backend</strong>
+                  <div class="tag-list">
+                    <span class="tag">Shell CGI</span>
+                    <span class="tag">BusyBox httpd</span>
+                    <span class="tag">Cookie sessions</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Storage</strong>
+                  <div class="tag-list">
+                    <span class="tag">AWS S3</span>
+                    <span class="tag">MinIO</span>
+                    <span class="tag">Local cache</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Deployment</strong>
+                  <div class="tag-list">
+                    <span class="tag">AWS Lambda</span>
+                    <span class="tag">Lambda Web Adapter</span>
+                    <span class="tag">CloudFront</span>
+                    <span class="tag">ECR</span>
+                    <span class="tag">Podman</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Why it matters</h3>
+              <p>
+                This project shows how I prefer to build: choose constraints,
+                keep the runtime visible, automate the risky parts, and verify
+                behavior in the same environment that serves users.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Technical notes</h3>
+              <div class="note-grid">
+                <div>
+                  <strong>Read-only Lambda</strong>
+                  <span>
+                    Startup copies the image web root to <code>/tmp/www</code>
+                    so CGI writes can update manifests and generated files.
+                  </span>
+                </div>
+                <div>
+                  <strong>S3 cache</strong>
+                  <span>
+                    A synchronous S3 sync runs before serving, then background
+                    refresh keeps local reads fast and simple.
+                  </span>
+                </div>
+                <div>
+                  <strong>Admin surface</strong>
+                  <span>
+                    Login, draft save, publish, delete, upload, links, and
+                    analytics all go through small CGI scripts.
+                  </span>
+                </div>
+                <div>
+                  <strong>Release checks</strong>
+                  <span>
+                    Static validation catches broken HTML and links, while live
+                    smoke checks cover CloudFront, Lambda, adapter, and routes.
+                  </span>
+                </div>
               </div>
             </div>
 
             <div class="project-section project-section--challenges">
-              <h3>Challenges</h3>
+              <h3>Hard parts</h3>
               <ul>
                 <li>
-                  Lambda's read-only filesystem means the image web root cannot
-                  be modified in place. Startup copies the site to
-                  <code>/tmp/www</code>, then <code>httpd</code> serves from
-                  there so posts, manifests, links, and generated CGI files can
-                  be updated.
+                  Lambda's read-only filesystem required a writable
+                  <code>/tmp/www</code> runtime copy.
                 </li>
                 <li>
-                  Lambda containers need the AWS Lambda Web Adapter. A Dockerfile
-                  refactor accidentally removed the adapter copy and
-                  <code>PORT=8080</code>, which produced production
-                  <code>502</code> responses until the adapter layer and
-                  readiness timeout were restored.
+                  Lambda containers required the Web Adapter, correct port
+                  setup, and cold-start timing.
                 </li>
                 <li>
-                  Third-party S3 clients and Lambda temporary credentials were
-                  brittle in this environment. The production image uses AWS CLI
-                  despite the size cost because it reliably follows the standard
-                  credential chain.
+                  AWS CLI was more reliable than smaller S3 clients with Lambda
+                  temporary credentials.
                 </li>
                 <li>
-                  The first request after a cold start depends on content
-                  availability. The entrypoint performs a synchronous S3 sync
-                  before starting <code>httpd</code>, then refreshes the cache in
-                  the background every 10 minutes.
+                  Shell-based JSON and manifest handling needed locks, cleanup,
+                  and validation.
                 </li>
                 <li>
-                  Shell-based JSON handling is fragile. Manifest updates use
-                  small line-oriented helpers, advisory locks in <code>/tmp</code>,
-                  and explicit cleanup of leading commas before re-inserting
-                  entries.
-                </li>
-                <li>
-                  Lambda CPU is proportional to memory. Too little memory looked
-                  like AWS CLI/network slowness rather than an obvious resource
-                  issue.
+                  Cold-start failures can look like generic website failures
+                  without smoke checks.
                 </li>
               </ul>
             </div>
 
             <div class="project-section project-section--learnings">
-              <h3>Learnings</h3>
+              <h3>Engineering takeaways</h3>
               <ul>
                 <li>
-                  Lambda plus CGI is viable for a low-traffic personal site:
-                  each request is isolated, the runtime is understandable, and
-                  persistence can be pushed to S3.
+                  Lambda plus CGI is viable for a low-traffic site when
+                  persistence is pushed to S3.
                 </li>
                 <li>
-                  Cold-start behavior matters more than steady-state behavior.
-                  The site needs placeholder manifests, synchronous startup
-                  sync, and smoke checks because a broken cold start looks like
-                  a broken website.
+                  Cold-start behavior deserves first-class validation, not only
+                  steady-state checks.
                 </li>
                 <li>
-                  A local MinIO-backed dev environment is worth the setup. It
-                  lets the same storage code path run locally without touching
-                  production S3.
+                  MinIO-backed local development is worth it because storage
+                  code stays realistic.
                 </li>
                 <li>
-                  Static validation catches broken links and markup, but the
-                  deployment surface also needs live route checks because
-                  CloudFront, Lambda, ECR, and the adapter can fail independently
-                  of the HTML.
-                </li>
-                <li>
-                  Keeping the frontend framework-free made the project easier to
-                  reason about. Most complexity lives where it belongs: storage,
-                  auth, deployment, and Lambda startup behavior.
+                  AI assistance is useful when constraints are explicit and
+                  runtime feedback is trusted.
                 </li>
               </ul>
             </div>
 
-            <div class="project-section project-section--features">
-              <h3>Key Features</h3>
-              <ul>
-                <li>
-                  Shared layout script injects responsive navigation and keeps
-                  project pages consistent without a build step.
-                </li>
-                <li>
-                  Multi-theme color picker derives readable text/link colors
-                  from selected swatches and persists the choice in
-                  <code>localStorage</code>.
-                </li>
-                <li>
-                  Blog CMS supports drafts, publishing, WIP placeholders,
-                  per-post images, public manifests, and admin-only manifests.
-                </li>
-                <li>
-                  Links CMS manages categorized bookmark cards through the same
-                  admin surface.
-                </li>
-                <li>
-                  Cookie-based admin session auth with shared session utilities,
-                  refresh timestamps, and rate limiting helpers.
-                </li>
-                <li>
-                  Lightweight analytics beacon logs privacy-truncated IP,
-                  page/referrer/user-agent, optional geo data, and admin-only
-                  JSON reporting.
-                </li>
-                <li>
-                  Production deployment script handles ECR login, no-cache
-                  linux/amd64 image build, push, Lambda update, waiter, and
-                  deployed digest reporting.
-                </li>
-                <li>
-                  Static validation and live smoke checks cover the homepage,
-                  project pages, blog manifests, links, and admin route.
-                </li>
-              </ul>
+            <div class="project-section project-section--scope">
+              <h3>Current scope</h3>
+              <div class="scope-grid">
+                <div>
+                  <h4>Public site</h4>
+                  <ul>
+                    <li>Project pages</li>
+                    <li>Blog rendering</li>
+                    <li>Links page</li>
+                    <li>Theme swatches</li>
+                    <li>Responsive navigation</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Admin</h4>
+                  <ul>
+                    <li>Login/logout</li>
+                    <li>Draft and publish flow</li>
+                    <li>Image upload/list/delete</li>
+                    <li>Link management</li>
+                    <li>Analytics review</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Operations</h4>
+                  <ul>
+                    <li>Podman image build</li>
+                    <li>ECR push</li>
+                    <li>Lambda update</li>
+                    <li>Static validation</li>
+                    <li>Production smoke checks</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Related work</h3>
+              <div class="related-project-grid">
+                <a class="related-project-card" href="qmknexus.html">
+                  <strong>QMK Nexus</strong>
+                  <span>Featured case study using this page system.</span>
+                </a>
+                <a class="related-project-card" href="aiagents.html">
+                  <strong>AI Agents</strong>
+                  <span
+                    >AI-assisted engineering boundaries reflected in my
+                    workflow.</span
+                  >
+                </a>
+                <a class="related-project-card" href="dbfirstgrid.html">
+                  <strong>DBFirstDataGrid</strong>
+                  <span
+                    >Another small web system focused on useful metadata.</span
+                  >
+                </a>
+                <a class="related-project-card" href="whispertranscribe.html">
+                  <strong>WhisperTranscribe</strong>
+                  <span
+                    >Local tooling documented and linked from this site.</span
+                  >
+                </a>
+              </div>
+            </div>
+
+            <div class="project-section project-cta-panel">
+              <h3>What to do next</h3>
+              <p>
+                Read the source if you want to inspect the no-build frontend,
+                shell CGI admin workflows, S3 cache behavior, Lambda deployment,
+                and validation scripts behind tebay.dev.
+              </p>
+              <div class="home-actions">
+                <a class="github-link" href="../index.html">Open Site</a>
+                <a
+                  class="github-link"
+                  href="https://github.com/nathan-tebay/PersonalSite"
+                  target="_blank"
+                  rel="noopener"
+                  >View GitHub</a
+                >
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
     <script src="../assets/project-data.js"></script>
     <script src="../assets/layout.js"></script>
-    <script src="../assets/script.js"></script>
+    <script src="../assets/script.js" defer></script>
   </body>
 </html>

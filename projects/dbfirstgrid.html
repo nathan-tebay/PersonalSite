@@ -3,29 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DBFirstDataGrid — Tebay.dev</title>
+    <title>DBFirstDataGrid - Database-Driven Data Grid by Nathan Tebay</title>
     <meta
       name="description"
-      content="DBFirstDataGrid project write-up: a full-stack equipment management dashboard with a database-driven data grid."
+      content="DBFirstDataGrid case study: a React and Express equipment dashboard where database metadata drives tables, forms, dropdowns, recursive subgrids, and CRUD APIs."
     />
     <meta name="author" content="Nathan Tebay" />
     <link rel="canonical" href="https://tebay.dev/projects/dbfirstgrid.html" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tebay.dev" />
-    <meta property="og:title" content="DBFirstDataGrid - Tebay.dev" />
+    <meta
+      property="og:title"
+      content="DBFirstDataGrid - Database-Driven Data Grid"
+    />
     <meta
       property="og:description"
-      content="A full-stack equipment management dashboard with a database-driven data grid."
+      content="DBFirstDataGrid case study: a React and Express equipment dashboard where database metadata drives tables, forms, dropdowns, recursive subgrids, and CRUD APIs."
     />
-    <meta property="og:url" content="https://tebay.dev/projects/dbfirstgrid.html" />
-    <meta property="og:image" content="https://tebay.dev/assets/images/dbfirstgridscreenshot.png" />
+    <meta
+      property="og:url"
+      content="https://tebay.dev/projects/dbfirstgrid.html"
+    />
+    <meta
+      property="og:image"
+      content="https://tebay.dev/assets/images/dbfirstgridscreenshot.png"
+    />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="DBFirstDataGrid - Tebay.dev" />
+    <meta
+      name="twitter:title"
+      content="DBFirstDataGrid - Database-Driven Data Grid"
+    />
     <meta
       name="twitter:description"
-      content="A full-stack equipment management dashboard with a database-driven data grid."
+      content="DBFirstDataGrid case study: a React and Express equipment dashboard where database metadata drives tables, forms, dropdowns, recursive subgrids, and CRUD APIs."
     />
-    <meta name="twitter:image" content="https://tebay.dev/assets/images/dbfirstgridscreenshot.png" />
+    <meta
+      name="twitter:image"
+      content="https://tebay.dev/assets/images/dbfirstgridscreenshot.png"
+    />
     <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
@@ -39,8 +54,13 @@
             <div>
               <h1>DBFirstDataGrid</h1>
               <p class="tagline">
-                Full-stack equipment management dashboard with a database-driven
-                data grid
+                Database metadata turned into tables, forms, filters, and nested
+                grids.
+              </p>
+              <p class="hero-summary">
+                DBFirstDataGrid is a full-stack equipment management dashboard
+                where the server inspects database schema and the frontend
+                builds useful CRUD UI from the returned field descriptors.
               </p>
             </div>
             <div class="header-actions">
@@ -48,151 +68,323 @@
                 href="https://dbfirstdatagrid.tebay.dev"
                 class="github-link"
                 target="_blank"
-                rel="noopener">
+                rel="noopener"
+              >
                 Open Demo
               </a>
               <a
                 href="https://github.com/nathan-tebay/DBFirstDatagrid"
                 class="github-link"
                 target="_blank"
-                rel="noopener">
-                View on GitHub
+                rel="noopener"
+              >
+                View GitHub
               </a>
             </div>
           </div>
+
+          <div class="divider"></div>
+
+          <div class="project-hero-copy project-section">
+            <h3>What it solves</h3>
+            <p>
+              Admin dashboards often repeat the same table headers, form inputs,
+              dropdowns, validators, and CRUD calls for every database table.
+            </p>
+            <p>
+              DBFirstDataGrid shifts that repetition into metadata. The backend
+              describes tables and fields; the frontend renders the grid, edit
+              forms, add modal, distinct-value dropdowns, and nested subgrids
+              from that contract.
+            </p>
+          </div>
+
           <div class="renders-row renders-row--full">
             <div class="render-card">
               <img
                 src="../assets/images/dbfirstgridscreenshot.png"
                 loading="lazy"
                 decoding="async"
-                alt="DBFirstDataGrid - screenshot" />
-              <span class="render-label">Orders Screenshot</span>
+                alt="DBFirstDataGrid orders screenshot"
+              />
+              <span class="render-label"
+                >Orders grid with schema-driven columns</span
+              >
             </div>
           </div>
-          <div class="divider"></div>
 
           <div class="project-body">
+            <div class="project-section project-section--audience">
+              <h3>Who this is for</h3>
+              <ul>
+                <li>
+                  Teams building internal equipment or operations dashboards
+                </li>
+                <li>
+                  Developers who want metadata-driven CRUD instead of repeated
+                  forms
+                </li>
+                <li>
+                  Projects where relational subgrids matter to the workflow
+                </li>
+                <li>
+                  People comparing SQLite local dev and MySQL production paths
+                </li>
+              </ul>
+            </div>
+
             <div class="project-section project-section--overview">
-              <h3>Overview</h3>
+              <h3>What it does</h3>
               <p>
-                A React + Express equipment management dashboard where the UI is
-                driven entirely by database schema metadata. The server inspects
-                each table's columns at runtime and returns typed field
-                descriptors — the frontend then builds table headers, form
-                inputs, and dropdown lists without any hardcoded field
-                knowledge.
+                The Express server inspects table columns at runtime and returns
+                typed field descriptors. The React frontend uses those
+                descriptors to build table headers, field labels, input types,
+                dropdowns, paginated data views, and add/edit flows without
+                hardcoded field knowledge.
               </p>
               <p>
-                Supports nested subgrids (e.g. order items inside orders),
-                paginated data fetching, and an add-record modal. Switchable
-                between SQLite for local development and MySQL for production.
+                The grid supports nested subgrids such as order items inside
+                orders. It can switch between SQLite for local development and
+                MySQL for production while keeping the UI contract consistent.
               </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Workflow covered</h3>
+              <ol class="workflow-list">
+                <li>
+                  <strong>Read schema</strong> - validate table names, inspect
+                  columns, infer field behavior, and return metadata to the UI.
+                </li>
+                <li>
+                  <strong>Render operations UI</strong> - build grids, add/edit
+                  forms, dropdowns, and recursive subgrids from descriptors.
+                </li>
+                <li>
+                  <strong>Mutate safely</strong> - run create, update, and
+                  delete operations through allowlisted identifiers and
+                  parameterized values.
+                </li>
+              </ol>
             </div>
 
             <div class="project-section project-section--stack">
-              <h3>Stack</h3>
-              <div class="tag-list">
-                <span class="tag">React 17</span>
-                <span class="tag">Express 4</span>
-                <span class="tag">SQLite</span>
-                <span class="tag">MySQL</span>
-                <span class="tag">Podman</span>
-                <span class="tag">Node.js</span>
-                <span class="tag">ES Modules</span>
+              <h3>Technical highlights / stack</h3>
+              <div class="stack-groups">
+                <div>
+                  <strong>Frontend</strong>
+                  <div class="tag-list">
+                    <span class="tag">React 17</span>
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">Recursive components</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Backend</strong>
+                  <div class="tag-list">
+                    <span class="tag">Express 4</span>
+                    <span class="tag">Node.js</span>
+                    <span class="tag">ES Modules</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Storage</strong>
+                  <div class="tag-list">
+                    <span class="tag">SQLite</span>
+                    <span class="tag">MySQL</span>
+                    <span class="tag">In-memory test DB</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Environment</strong>
+                  <div class="tag-list">
+                    <span class="tag">Podman</span>
+                    <span class="tag">Podman Compose</span>
+                    <span class="tag">Server tests</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Why it matters</h3>
+              <p>
+                This project follows the same pattern as QMK Nexus: keep the
+                underlying system honest, expose the right metadata, and let the
+                interface guide users through a complex domain without hiding
+                important constraints.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Technical notes</h3>
+              <div class="note-grid">
+                <div>
+                  <strong>Schema contract</strong>
+                  <span>
+                    Field descriptors carry labels, input types, dropdown
+                    behavior, and relationship hints to the frontend.
+                  </span>
+                </div>
+                <div>
+                  <strong>Identifier safety</strong>
+                  <span>
+                    Dynamic table and column names require allowlists and regex
+                    validation; value parameters alone are not enough.
+                  </span>
+                </div>
+                <div>
+                  <strong>Recursive subgrids</strong>
+                  <span>
+                    Orders and order items can nest without the grid knowing the
+                    relationship shape ahead of time.
+                  </span>
+                </div>
+                <div>
+                  <strong>Dialect boundary</strong>
+                  <span>
+                    SQLite and MySQL differences stay behind a query layer so
+                    local development can match production behavior.
+                  </span>
+                </div>
               </div>
             </div>
 
             <div class="project-section project-section--challenges">
-              <h3>Challenges</h3>
+              <h3>Hard parts</h3>
               <ul>
                 <li>
-                  Safely exposing arbitrary table columns to the frontend
-                  without enabling SQL injection required strict allowlisting
-                  and regex validation at the server boundary.
+                  Exposing arbitrary database columns without creating SQL
+                  injection paths.
                 </li>
                 <li>
-                  Building recursive subgrids (orders → order items) from
-                  generic metadata meant the component needed to handle unknown
-                  nesting depth without hardcoded assumptions.
+                  Rendering nested relational data without hardcoded
+                  table-specific components.
                 </li>
                 <li>
-                  Keeping SQLite and MySQL behaviours compatible across dev and
-                  prod required careful abstraction of dialect differences in
-                  the query layer.
+                  Keeping SQLite and MySQL behavior compatible across
+                  development and production.
                 </li>
                 <li>
-                  Writing meaningful tests against a live database without flaky
-                  state required isolating each suite with an in-memory SQLite
-                  instance seeded per run.
+                  Writing reliable tests against live database behavior without
+                  flaky shared state.
                 </li>
               </ul>
             </div>
 
             <div class="project-section project-section--learnings">
-              <h3>Learnings</h3>
+              <h3>Engineering takeaways</h3>
               <ul>
                 <li>
-                  Schema-driven UI is powerful but requires a well-defined
-                  contract between server and client — ambiguous column names
-                  produce confusing UI without clear naming conventions.
+                  Schema-driven UI needs a precise server/client contract or the
+                  UI becomes ambiguous.
                 </li>
                 <li>
-                  SQL injection prevention at the framework level still requires
-                  explicit allowlisting for dynamic identifiers like column and
-                  table names; parameterised queries alone are not enough there.
+                  Identifier allowlisting is required whenever SQL structure is
+                  dynamic.
                 </li>
                 <li>
-                  In-memory SQLite for test isolation is fast and reliable but
-                  needs schema parity with the production database to catch real
-                  migration issues.
+                  In-memory SQLite keeps tests fast, but schema parity must be
+                  protected.
                 </li>
                 <li>
-                  Containerising both SQLite and MySQL environments early
-                  eliminated environment-specific bugs that would otherwise
-                  surface only in production.
+                  Containerizing both database paths early prevents
+                  environment-only surprises.
                 </li>
               </ul>
             </div>
 
-            <div class="project-section">
-              <h3>Key Features</h3>
-              <ul>
-                <li>
-                  Schema-driven UI — field types, dropdowns, and labels inferred
-                  from column names
-                </li>
-                <li>
-                  Recursive subgrids for relational data (orders → order items)
-                </li>
-                <li>
-                  SQL injection prevention via strict allowlist and regex
-                  validation
-                </li>
-                <li>
-                  Podman Compose for containerised dev and test environments
-                </li>
-                <li>
-                  Server + frontend test suites with in-memory SQLite for
-                  isolation
-                </li>
-              </ul>
+            <div class="project-section project-section--scope">
+              <h3>Current scope</h3>
+              <div class="scope-grid">
+                <div>
+                  <h4>Works now</h4>
+                  <ul>
+                    <li>Paginated rows</li>
+                    <li>Add record modal</li>
+                    <li>Inline update/delete flow</li>
+                    <li>Recursive subgrids</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>API</h4>
+                  <ul>
+                    <li><code>GET /fetch</code></li>
+                    <li><code>GET /fetchFields</code></li>
+                    <li><code>GET /fetchDistinct</code></li>
+                    <li><code>PUT /add</code></li>
+                    <li><code>PATCH /update</code></li>
+                    <li><code>DELETE /delete</code></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Still improving</h4>
+                  <ul>
+                    <li>Field naming conventions</li>
+                    <li>Migration coverage</li>
+                    <li>Relationship metadata depth</li>
+                    <li>Production polish</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             <div class="project-section">
-              <h3>API</h3>
-              <ul>
-                <li><span class="tag">GET</span> /fetch — paginated rows</li>
-                <li>
-                  <span class="tag">GET</span> /fetchFields — column metadata
-                </li>
-                <li>
-                  <span class="tag">GET</span> /fetchDistinct — distinct values
-                </li>
-                <li><span class="tag">PUT</span> /add — insert row</li>
-                <li><span class="tag">PATCH</span> /update — update row</li>
-                <li><span class="tag">DELETE</span> /delete — delete row</li>
-              </ul>
+              <h3>Related work</h3>
+              <div class="related-project-grid">
+                <a class="related-project-card" href="qmknexus.html">
+                  <strong>QMK Nexus</strong>
+                  <span
+                    >Another guided workflow built from structured domain
+                    data.</span
+                  >
+                </a>
+                <a class="related-project-card" href="personalsite.html">
+                  <strong>PersonalSite</strong>
+                  <span
+                    >Framework-free web surface with validation and admin
+                    tools.</span
+                  >
+                </a>
+                <a class="related-project-card" href="aiagents.html">
+                  <strong>AI Agents</strong>
+                  <span
+                    >Typed routing and durable records for delegated work.</span
+                  >
+                </a>
+                <a class="related-project-card" href="autorejection.html">
+                  <strong>AutoRejection</strong>
+                  <span
+                    >Operations-heavy hardware product with real dashboard
+                    needs.</span
+                  >
+                </a>
+              </div>
+            </div>
+
+            <div class="project-section project-cta-panel">
+              <h3>What to do next</h3>
+              <p>
+                Open the demo or source if you want to inspect the metadata
+                contract, recursive grid behavior, CRUD API, and database safety
+                boundaries.
+              </p>
+              <div class="home-actions">
+                <a
+                  class="github-link"
+                  href="https://dbfirstdatagrid.tebay.dev"
+                  target="_blank"
+                  rel="noopener"
+                  >Open Demo</a
+                >
+                <a
+                  class="github-link"
+                  href="https://github.com/nathan-tebay/DBFirstDatagrid"
+                  target="_blank"
+                  rel="noopener"
+                  >View GitHub</a
+                >
+              </div>
             </div>
           </div>
         </div>

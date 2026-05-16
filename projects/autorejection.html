@@ -3,60 +3,103 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AutoRejection — Tebay.dev</title>
+    <title>
+      AutoRejection - Industrial Can Rejection System by Nathan Tebay
+    </title>
     <meta
       name="description"
-      content="AutoRejection project write-up: a Node-RED automation system with hardware integration, low-fill can rejection, and a custom dashboard UI."
+      content="AutoRejection case study: an industrial low-fill can rejection machine with load-cell hardware, Raspberry Pi control, Node-RED automation, dashboard UI, and brewery-line integration."
     />
     <meta name="author" content="Nathan Tebay" />
-    <link rel="canonical" href="https://tebay.dev/projects/autorejection.html" />
+    <link
+      rel="canonical"
+      href="https://tebay.dev/projects/autorejection.html"
+    />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tebay.dev" />
-    <meta property="og:title" content="AutoRejection - Tebay.dev" />
+    <meta
+      property="og:title"
+      content="AutoRejection - Industrial Can Rejection System"
+    />
     <meta
       property="og:description"
-      content="A Node-RED automation system with hardware integration, low-fill can rejection, and a custom dashboard UI."
+      content="AutoRejection case study: an industrial low-fill can rejection machine with load-cell hardware, Raspberry Pi control, Node-RED automation, dashboard UI, and brewery-line integration."
     />
-    <meta property="og:url" content="https://tebay.dev/projects/autorejection.html" />
-    <meta property="og:image" content="https://tebay.dev/assets/images/autorejection-front.webp" />
+    <meta
+      property="og:url"
+      content="https://tebay.dev/projects/autorejection.html"
+    />
+    <meta
+      property="og:image"
+      content="https://tebay.dev/assets/images/autorejection-front.webp"
+    />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AutoRejection - Tebay.dev" />
+    <meta
+      name="twitter:title"
+      content="AutoRejection - Industrial Can Rejection System"
+    />
     <meta
       name="twitter:description"
-      content="A Node-RED automation system with hardware integration, low-fill can rejection, and a custom dashboard UI."
+      content="AutoRejection case study: an industrial low-fill can rejection machine with load-cell hardware, Raspberry Pi control, Node-RED automation, dashboard UI, and brewery-line integration."
     />
-    <meta name="twitter:image" content="https://tebay.dev/assets/images/autorejection-front.webp" />
+    <meta
+      name="twitter:image"
+      content="https://tebay.dev/assets/images/autorejection-front.webp"
+    />
     <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
   <body data-page="autorejection" data-basepath="../">
     <div class="page-layout">
       <div id="layout-nav"></div>
+
       <div class="main-col">
         <div class="side-panel">
           <div class="project-header">
             <div>
               <h1>AutoRejection</h1>
               <p class="tagline">
-                Node-RED automation system with hardware integration and a
-                custom dashboard UI
+                Industrial low-fill can rejection with hardware, software, and
+                brewery-line constraints.
+              </p>
+              <p class="hero-summary">
+                AutoRejection combined load-cell measurement, custom PCB work,
+                Raspberry Pi control, Node-RED automation, AWS IoT, and a Wi-Fi
+                dashboard to reject underfilled cans at production-line speed.
               </p>
             </div>
             <div class="header-actions">
               <button
                 class="render-open-btn render-open-btn--lg"
                 data-demo-src="https://autorejection.tebay.dev"
-                data-demo-caption="AutoRejection dashboard demo">
+                data-demo-caption="AutoRejection dashboard demo"
+              >
                 Open Demo
               </button>
               <button
                 class="render-open-btn render-open-btn--lg"
                 data-video-src="https://tebay.dev/videos/autorejection-prototype.mp4"
-                data-video-caption="First prototype in action">
+                data-video-caption="First prototype in action"
+              >
                 See Prototype
               </button>
-   
             </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="project-hero-copy project-section">
+            <h3>What it solves</h3>
+            <p>
+              Breweries need to detect and reject low-fill cans without slowing
+              the canning line or forcing operators to watch every pass by hand.
+            </p>
+            <p>
+              AutoRejection measured can weight in motion, tracked historical
+              data, exposed calibration and production views over Wi-Fi, and
+              triggered pneumatic rejection hardware when cans fell outside the
+              accepted range.
+            </p>
           </div>
 
           <div class="renders-row renders-row--2">
@@ -67,8 +110,9 @@
                 height="320"
                 loading="lazy"
                 decoding="async"
-                alt="AutoRejection — front render" />
-              <span class="render-label">Front</span>
+                alt="AutoRejection front render"
+              />
+              <span class="render-label">Front cabinet and product path</span>
             </div>
             <div class="render-card">
               <img
@@ -77,8 +121,11 @@
                 height="312"
                 loading="lazy"
                 decoding="async"
-                alt="AutoRejection — top render" />
-              <span class="render-label">Top</span>
+                alt="AutoRejection top render"
+              />
+              <span class="render-label"
+                >Top view of conveyor and reject area</span
+              >
             </div>
             <div class="render-card">
               <img
@@ -87,8 +134,9 @@
                 height="312"
                 loading="lazy"
                 decoding="async"
-                alt="AutoRejection — back render" />
-              <span class="render-label">Back</span>
+                alt="AutoRejection back render"
+              />
+              <span class="render-label">Back view of service access</span>
             </div>
             <div class="render-card">
               <img
@@ -97,174 +145,287 @@
                 height="789"
                 loading="lazy"
                 decoding="async"
-                alt="AutoRejection — load cell PCB" />
-              <span class="render-label">Load Cell PCB</span>
+                alt="AutoRejection load cell PCB"
+              />
+              <span class="render-label">Custom load-cell PCB</span>
             </div>
           </div>
 
-          <div class="divider"></div>
-
           <div class="project-body">
+            <div class="project-section project-section--audience">
+              <h3>Who this is for</h3>
+              <ul>
+                <li>Breweries running automated canning lines</li>
+                <li>Equipment partners integrating with existing machinery</li>
+                <li>Operators who need calibration, monitoring, and exports</li>
+                <li>
+                  Engineers building real-world hardware/software products
+                </li>
+              </ul>
+            </div>
+
             <div class="project-section project-section--overview">
-              <h3>Overview</h3>
+              <h3>What it does</h3>
               <p>
-                The AutoRejection project was a side project that became a
-                business concept. I worked on it for most of a year, building it
-                with my business partner under the company MAP Equipment, in
-                cooperation with Wild Goose Filling and several local breweries
-                in the Bozeman area. It was the second machine I programmed with
-                MAP Equipment, the first being a packaging machine capable of
-                boxing 12 packs or applying PakTech carriers to 6 packs of beer
-                with only one prototype. Both of these were controlled by
-                Raspberry Pi single-board computers, with the UI presented over
-                Wi-Fi.
+                AutoRejection was a side project that became a business concept
+                under MAP Equipment. I worked on it for most of a year with a
+                business partner, Wild Goose Filling, and local breweries in the
+                Bozeman area.
               </p>
               <p>
-                Aside from the technical challenges, many business challenges
-                made these projects full of hard-earned experience. Overall,
-                working with Wild Goose Filling was an incredible experience
-                that I had hoped would have turned into more; they ultimately
-                bought 5 of the 10 total units sold. They had a separate version
-                from the one pictured that integrated with the output feed of
-                their existing canning lines, a design that required extensive
-                prototyping to get working at 50+ cans per minute.
-              </p>
-              <p>
-                The AutoRejection system included a UI with historical graphs of
-                beer weights, current can weights as they passed over the scale,
-                and a calibration routine. Stored data can be downloaded to a
-                connected device in CSV format for customer use. It also
-                communicated with AWS IoT to allow for over-the-air updates and
-                data storage in AWS RDS. It communicated with a load cell
-                through a custom PCB I designed and programmed. The Raspberry Pi
-                is encrypted using a ZYMKEY - ZYMBIT for security and real-time
-                clock functionality. A UL-listed stainless steel cabinet houses
-                separate 5V and 24V power supplies for the electronics and the
-                machine's automation.
+                The machine weighed cans as they crossed the scale, rejected
+                underfilled cans with pneumatic hardware, showed live and
+                historical weights in a custom dashboard, exported CSV data, and
+                used AWS IoT for updates and remote data storage. It ran on a
+                Raspberry Pi with encrypted storage, a ZYMKEY real-time clock,
+                separate 5V and 24V supplies, and a UL-listed stainless cabinet.
               </p>
             </div>
 
+            <div class="project-section">
+              <h3>Workflow covered</h3>
+              <ol class="workflow-list">
+                <li>
+                  <strong>Measure and classify</strong> - read load-cell values
+                  in motion, stabilize the signal, and compare each can against
+                  calibrated thresholds.
+                </li>
+                <li>
+                  <strong>Reject and monitor</strong> - trigger the pneumatic
+                  reject mechanism, show live weights, and give operators a
+                  clear dashboard for current line state.
+                </li>
+                <li>
+                  <strong>Calibrate and report</strong> - tune the scale, review
+                  historical graphs, export CSV data, and support OTA updates
+                  through the connected system.
+                </li>
+              </ol>
+            </div>
+
             <div class="project-section project-section--stack">
-              <h3>Stack</h3>
-              <div class="tag-list">
-                <span class="tag">Node-RED</span>
-                <span class="tag">Node.js</span>
-                <span class="tag">JavaScript</span>
-                <span class="tag">Arduino</span>
-                <span class="tag">UIBuilder</span>
+              <h3>Technical highlights / stack</h3>
+              <div class="stack-groups">
+                <div>
+                  <strong>Control</strong>
+                  <div class="tag-list">
+                    <span class="tag">Node-RED</span>
+                    <span class="tag">Node.js</span>
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">Raspberry Pi</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Hardware</strong>
+                  <div class="tag-list">
+                    <span class="tag">Load cell</span>
+                    <span class="tag">Custom PCB</span>
+                    <span class="tag">Arduino</span>
+                    <span class="tag">Pneumatics</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Interface</strong>
+                  <div class="tag-list">
+                    <span class="tag">UIBuilder</span>
+                    <span class="tag">Wi-Fi dashboard</span>
+                    <span class="tag">CSV export</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Operations</strong>
+                  <div class="tag-list">
+                    <span class="tag">AWS IoT</span>
+                    <span class="tag">AWS RDS</span>
+                    <span class="tag">ZYMKEY</span>
+                    <span class="tag">UL cabinet</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Why it matters</h3>
+              <p>
+                This project forced software decisions to survive physical
+                timing, wet environments, manufacturability, partner schedules,
+                support needs, and operator workflows. Code was only one part of
+                the product.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Technical notes</h3>
+              <div class="note-grid">
+                <div>
+                  <strong>Signal quality</strong>
+                  <span>
+                    The scale had to read fast enough for production speed while
+                    still filtering vibration and product motion.
+                  </span>
+                </div>
+                <div>
+                  <strong>Line integration</strong>
+                  <span>
+                    Wild Goose integration required separate mechanical variants
+                    and repeated prototyping around can flow.
+                  </span>
+                </div>
+                <div>
+                  <strong>Operator UI</strong>
+                  <span>
+                    The dashboard needed live state, calibration, historical
+                    graphs, and CSV export without requiring wired access.
+                  </span>
+                </div>
+                <div>
+                  <strong>Security tradeoffs</strong>
+                  <span>
+                    Encryption and remote update support were valuable, but too
+                    much security early slowed hardware iteration.
+                  </span>
+                </div>
               </div>
             </div>
 
             <div class="project-section project-section--challenges">
-              <h3>Challenges</h3>
+              <h3>Hard parts</h3>
               <ul>
                 <li>
-                  Achieving stable, reliable weight measurements and can
-                  rejection at 50+ cans per minute required many iterations.
+                  Reliable weight measurement and rejection at 50+ cans per
+                  minute.
                 </li>
                 <li>
-                  Building a simple, mobile-friendly dashboard for real-time
-                  monitoring and historical data over Wi-Fi.
+                  Designing for moisture, temperature changes, vibration, and
+                  brewery use.
                 </li>
                 <li>
-                  AWS IoT integration for OTA updates and data storage,
-                  complicated by encryption requirements on the Raspberry Pi.
+                  Coordinating machine variants with Wild Goose Filling and
+                  brewery staff.
                 </li>
                 <li>
-                  Designing for a harsh brewery environment, including moisture,
-                  temperature changes, and limited control over the Wild Goose
-                  canning line integration.
+                  Balancing AWS connectivity, encryption, cost,
+                  manufacturability, and support.
                 </li>
                 <li>
-                  Developing a custom load cell PCB and firmware for accurate,
-                  cost-effective weight measurement required working with a
-                  local electrical engineer and PCB manufacturer.
-                </li>
-                <li>
-                  Coordinating with Wild Goose Filling and brewery staff to
-                  ensure the system fit existing workflows.
-                </li>
-                <li>
-                  Balancing technical goals with cost, manufacturability, and a
-                  physical design that was not ideal for rapid prototyping.
-                </li>
-                <li>
-                  Adding security features like drive encryption too early made
-                  prototyping more difficult.
+                  Developing custom load-cell hardware with local engineering
+                  and PCB partners.
                 </li>
               </ul>
             </div>
 
             <div class="project-section project-section--learnings">
-              <h3>Learnings</h3>
+              <h3>Engineering takeaways</h3>
               <ul>
                 <li>
-                  It didn’t need to be this complex; it could have been
-                  implemented with an ESP32, a simpler UI, and no AWS
-                  integration.
+                  Rapid hardware iteration matters more than architectural
+                  completeness.
                 </li>
                 <li>
-                  Hardware projects depend on rapid prototyping and iteration to
-                  reach reliable performance.
+                  A simpler ESP32-style design may have served the product
+                  better than a Pi plus AWS stack.
                 </li>
                 <li>
-                  Close collaboration with partners and customers is essential
-                  for successful integration.
+                  Industrial products need documentation, support planning, and
+                  contracts, not only working code.
                 </li>
                 <li>
-                  Good products must balance technical performance with cost and
-                  manufacturability.
-                </li>
-                <li>
-                  Security matters, but adding it too early can slow
-                  development.
-                </li>
-                <li>
-                  Harsh environments require thoughtful enclosure, power, and
-                  material choices.
-                </li>
-                <li>
-                  Bringing hardware products to market takes longer than
-                  expected due to testing, manufacturing, and partner alignment.
-                </li>
-                <li>
-                  Supply chain issues, like Raspberry Pi shortages, can quickly
-                  become major project risks.
-                </li>
-                <li>
-                  Document the process thoroughly; code alone does not capture
-                  the full value of the work.
-                </li>
-                <li>
-                  In partnerships, protect your time and value—unpaid work
-                  without a contract creates strain.
+                  Partner and customer alignment determines whether good
+                  prototypes become sustainable products.
                 </li>
               </ul>
             </div>
 
-            <div class="project-section">
-              <h3>Components</h3>
-              <ul>
-                <li>Node-RED flows for automation logic and AWS integration</li>
-                <li>
-                  StandAlone and WildGoose variants for weight measurement and
-                  rejection
-                </li>
-                <li>Custom JavaScript for data processing and UI</li>
-                <li>UIBuilder dashboard for real-time monitoring</li>
-                <li>AWS IoT for data storage and OTA updates</li>
-                <li>Pneumatic rejection system for the canning line</li>
-              </ul>
+            <div class="project-section project-section--scope">
+              <h3>Current scope</h3>
+              <div class="scope-grid">
+                <div>
+                  <h4>Built</h4>
+                  <ul>
+                    <li>Standalone machine variant</li>
+                    <li>Wild Goose line variant</li>
+                    <li>Dashboard and calibration flow</li>
+                    <li>CSV data export</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Hardware</h4>
+                  <ul>
+                    <li>Load-cell PCB</li>
+                    <li>Raspberry Pi control</li>
+                    <li>Pneumatic rejector</li>
+                    <li>5V / 24V cabinet power</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Business result</h4>
+                  <ul>
+                    <li>10 total units sold</li>
+                    <li>5 purchased by Wild Goose</li>
+                    <li>Most work remained prototype-heavy</li>
+                    <li>Strong lessons for future hardware products</li>
+                  </ul>
+                </div>
+              </div>
             </div>
+
             <div class="project-section">
-              <h3>Hardware</h3>
-              <ul>
-                <li>Arduino-based Load Cell PCB with custom firmware</li>
-                <li>Raspberry Pi with dual Wi-Fi network control</li>
-                <li>UL-listed stainless steel enclosure</li>
-                <li>Separate 5V and 24V power supplies</li>
-                <li>ZYMKEY (ZYMBIT) for encryption and RTC</li>
-              </ul>
+              <h3>Related work</h3>
+              <div class="related-project-grid">
+                <a
+                  class="related-project-card"
+                  href="microphonecontroller.html"
+                >
+                  <strong>MicrophoneController</strong>
+                  <span
+                    >Small hardware interface with HID firmware
+                    constraints.</span
+                  >
+                </a>
+                <a class="related-project-card" href="qmknexus.html">
+                  <strong>QMK Nexus</strong>
+                  <span
+                    >Hardware-adjacent workflow tooling for firmware
+                    builders.</span
+                  >
+                </a>
+                <a class="related-project-card" href="dbfirstgrid.html">
+                  <strong>DBFirstDataGrid</strong>
+                  <span>Operational data UI driven by backend metadata.</span>
+                </a>
+                <a class="related-project-card" href="personalsite.html">
+                  <strong>PersonalSite</strong>
+                  <span
+                    >The case-study system that documents the machine
+                    work.</span
+                  >
+                </a>
+              </div>
+            </div>
+
+            <div class="project-section project-cta-panel">
+              <h3>What to do next</h3>
+              <p>
+                Open the dashboard demo or watch the prototype clip if you want
+                to see the operator workflow and physical rejection path behind
+                the write-up.
+              </p>
+              <div class="home-actions">
+                <button
+                  class="render-open-btn render-open-btn--lg"
+                  data-demo-src="https://autorejection.tebay.dev"
+                  data-demo-caption="AutoRejection dashboard demo"
+                >
+                  Open Demo
+                </button>
+                <button
+                  class="render-open-btn render-open-btn--lg"
+                  data-video-src="https://tebay.dev/videos/autorejection-prototype.mp4"
+                  data-video-caption="First prototype in action"
+                >
+                  See Prototype
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -273,6 +434,6 @@
 
     <script src="../assets/project-data.js"></script>
     <script src="../assets/layout.js"></script>
-    <script src="../assets/script.js"></script>
+    <script src="../assets/script.js" defer></script>
   </body>
 </html>

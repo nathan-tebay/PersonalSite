@@ -3,43 +3,67 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WhisperTranscribe — Tebay.dev</title>
+    <title>WhisperTranscribe - Linux Voice Automation by Nathan Tebay</title>
     <meta
       name="description"
-      content="WhisperTranscribe project write-up: a Linux push-to-talk transcription and voice command daemon using Whisper speech recognition and configurable LLMs."
+      content="WhisperTranscribe case study: a Linux push-to-talk transcription and voice command daemon using whisper.cpp, evdev, ydotool, GTK tray controls, and configurable LLM backends."
     />
     <meta name="author" content="Nathan Tebay" />
-    <link rel="canonical" href="https://tebay.dev/projects/whispertranscribe.html" />
+    <link
+      rel="canonical"
+      href="https://tebay.dev/projects/whispertranscribe.html"
+    />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tebay.dev" />
-    <meta property="og:title" content="WhisperTranscribe - Tebay.dev" />
+    <meta
+      property="og:title"
+      content="WhisperTranscribe - Linux Voice Automation"
+    />
     <meta
       property="og:description"
-      content="A Linux push-to-talk transcription and voice command daemon using Whisper speech recognition and configurable LLMs."
+      content="WhisperTranscribe case study: a Linux push-to-talk transcription and voice command daemon using whisper.cpp, evdev, ydotool, GTK tray controls, and configurable LLM backends."
     />
-    <meta property="og:url" content="https://tebay.dev/projects/whispertranscribe.html" />
-    <meta property="og:image" content="https://tebay.dev/assets/images/whisper-transcribe-tray-settings.jpg" />
+    <meta
+      property="og:url"
+      content="https://tebay.dev/projects/whispertranscribe.html"
+    />
+    <meta
+      property="og:image"
+      content="https://tebay.dev/assets/images/whisper-transcribe-tray-settings.jpg"
+    />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="WhisperTranscribe - Tebay.dev" />
+    <meta
+      name="twitter:title"
+      content="WhisperTranscribe - Linux Voice Automation"
+    />
     <meta
       name="twitter:description"
-      content="A Linux push-to-talk transcription and voice command daemon using Whisper speech recognition and configurable LLMs."
+      content="WhisperTranscribe case study: a Linux push-to-talk transcription and voice command daemon using whisper.cpp, evdev, ydotool, GTK tray controls, and configurable LLM backends."
     />
-    <meta name="twitter:image" content="https://tebay.dev/assets/images/whisper-transcribe-tray-settings.jpg" />
+    <meta
+      name="twitter:image"
+      content="https://tebay.dev/assets/images/whisper-transcribe-tray-settings.jpg"
+    />
     <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
   <body data-page="whispertranscribe" data-basepath="../">
     <div class="page-layout">
       <div id="layout-nav"></div>
+
       <div class="main-col">
         <div class="side-panel">
           <div class="project-header">
             <div>
               <h1>WhisperTranscribe</h1>
               <p class="tagline">
-                Linux push-to-talk transcription and voice command daemon —
-                one button types, the other routes speech into configurable LLMs
+                Linux push-to-talk transcription and voice command routing for
+                the focused desktop.
+              </p>
+              <p class="hero-summary">
+                WhisperTranscribe records while a hardware key is held,
+                transcribes with whisper.cpp, then either types into the focused
+                window or routes speech through an LLM-backed command parser.
               </p>
             </div>
             <div class="header-actions">
@@ -49,9 +73,25 @@
                 target="_blank"
                 rel="noopener"
               >
-                View on GitHub
+                View GitHub
               </a>
             </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="project-hero-copy project-section">
+            <h3>What it solves</h3>
+            <p>
+              Desktop speech tools often break context by using clipboards,
+              separate text boxes, or opaque voice-command layers.
+            </p>
+            <p>
+              WhisperTranscribe keeps the focused application as the integration
+              point: one hardware button types transcription directly, while the
+              other turns spoken instructions into strict GUI, terminal, or key
+              actions.
+            </p>
           </div>
 
           <div class="renders-row renders-row--2">
@@ -62,8 +102,9 @@
                 height="329"
                 loading="lazy"
                 decoding="async"
-                alt="WhisperTranscribe — tray settings" />
-              <span class="render-label">Tray Settings</span>
+                alt="WhisperTranscribe tray settings"
+              />
+              <span class="render-label">Tray settings</span>
             </div>
             <div class="render-card">
               <img
@@ -72,300 +113,282 @@
                 height="606"
                 loading="lazy"
                 decoding="async"
-                alt="WhisperTranscribe — tray advanced settings" />
-              <span class="render-label">Advanced Settings</span>
+                alt="WhisperTranscribe advanced tray settings"
+              />
+              <span class="render-label">Advanced settings</span>
             </div>
           </div>
 
-          <div class="divider"></div>
-
           <div class="project-body">
-            <div class="project-section project-section--overview">
-              <h3>Overview</h3>
-              <p>
-                WhisperTranscribe turns a custom two-button HID controller into
-                a practical voice interface for the Linux desktop: one button
-                types into whatever window is focused, while the other turns
-                spoken instructions into GUI launches, terminal commands, or
-                injected key sequences.
-              </p>
-              <p>
-                It is a Python daemon driven by the two-button
-                <a href="microphonecontroller.html">MicrophoneController</a> USB
-                HID device. Both buttons share the same hold-to-record flow:
-                audio is captured while the key is held, transcribed by
-                whisper.cpp on release, and then routed based on the trigger.
-              </p>
-              <p>
-                <strong>Scroll Lock</strong> injects the transcription directly
-                into the focused window via ydotool with no clipboard
-                interaction. <strong>Pause</strong> routes the text through a
-                configurable LLM backend, which interprets the spoken
-                instruction and returns an executable action: launching an app,
-                running a shell command in a terminal, or injecting a key
-                sequence.
-              </p>
-              <p>
-                The daemon watches evdev keyboard devices with hotplug support,
-                deduplicates duplicate event nodes from the same physical
-                keyboard, and can now filter by a configured input device name.
-                A 0.5-second tap guard discards accidental presses. A systemd
-                user service handles autostart and restart on failure.
-              </p>
-              <p>
-                A GTK3 system tray application provides a persistent icon that
-                reflects the daemon's running state and a settings dialog for
-                configuring hotkeys, LLM backend, model, binary paths, language,
-                timeouts, terminal emulator, target input device, and whether
-                whisper.cpp should use GPU offload — all without editing config
-                files.
-              </p>
-            </div>
-
-            <div class="project-section">
-              <h3>Current Status</h3>
+            <div class="project-section project-section--audience">
+              <h3>Who this is for</h3>
               <ul>
                 <li>
-                  Active branch: <code>other-models</code>, focused on making
-                  command mode work across more LLM providers and machine
-                  configurations.
+                  Linux desktop users who want fast voice-to-text insertion
+                </li>
+                <li>People using physical hotkeys for hands-free workflows</li>
+                <li>
+                  Developers comparing local and cloud LLM command backends
                 </li>
                 <li>
-                  Command backends now include Ollama, Claude CLI, OpenAI, Groq,
-                  LM Studio, and OpenRouter through a shared OpenAI-compatible
-                  chat-completions path.
-                </li>
-                <li>
-                  Advanced settings now include an input-device name filter and
-                  a <code>whisper_gpu</code> toggle, allowing the daemon to
-                  target a specific keyboard and run whisper.cpp with or without
-                  GPU acceleration.
-                </li>
-                <li>
-                  The tray adapts its model field by backend: Ollama gets a live
-                  local model picker, while OpenAI-compatible providers get a
-                  model text entry.
-                </li>
-                <li>
-                  The README documents Python 3.9+ support, systemd user
-                  services, install/uninstall flow, and cloud/local model
-                  configuration through <code>config.json</code>.
+                  Builders interested in evdev, PipeWire, ydotool, and tray apps
                 </li>
               </ul>
             </div>
 
+            <div class="project-section project-section--overview">
+              <h3>What it does</h3>
+              <p>
+                WhisperTranscribe is a Python daemon driven by the two-button
+                <a href="microphonecontroller.html">MicrophoneController</a>
+                USB HID device. Both buttons share the same hold-to-record flow:
+                audio is captured while the key is held, transcribed by
+                whisper.cpp on release, and routed based on the trigger.
+              </p>
+              <p>
+                Scroll Lock injects transcription directly into the focused
+                window via ydotool. Pause routes the text through a configurable
+                LLM backend that must return one executable action: launch a GUI
+                app or URL, run a terminal command, or inject a key sequence. A
+                GTK3 tray exposes service state and settings without editing
+                config files.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Workflow covered</h3>
+              <ol class="workflow-list">
+                <li>
+                  <strong>Capture and transcribe</strong> - watch selected evdev
+                  devices, record with PipeWire while a key is held, and run
+                  whisper.cpp on release.
+                </li>
+                <li>
+                  <strong>Type or command</strong> - inject direct text for
+                  transcription mode or route text into a strict command parser
+                  for LLM mode.
+                </li>
+                <li>
+                  <strong>Configure and supervise</strong> - use the tray to
+                  change hotkeys, backends, models, binary paths, device
+                  filters, GPU mode, and systemd service state.
+                </li>
+              </ol>
+            </div>
+
             <div class="project-section project-section--stack">
-              <h3>Stack</h3>
-              <div class="tag-list">
-                <span class="tag">Python 3.9+</span>
-                <span class="tag">whisper.cpp</span>
-                <span class="tag">Vulkan</span>
-                <span class="tag">python-evdev</span>
-                <span class="tag">PipeWire</span>
-                <span class="tag">ydotool</span>
-                <span class="tag">Ollama</span>
-                <span class="tag">Claude</span>
-                <span class="tag">OpenAI</span>
-                <span class="tag">Groq</span>
-                <span class="tag">OpenRouter</span>
-                <span class="tag">LM Studio</span>
-                <span class="tag">GTK3</span>
-                <span class="tag">D-Bus</span>
-                <span class="tag">systemd</span>
-                <span class="tag">pytest</span>
+              <h3>Technical highlights / stack</h3>
+              <div class="stack-groups">
+                <div>
+                  <strong>Speech</strong>
+                  <div class="tag-list">
+                    <span class="tag">Python 3.9+</span>
+                    <span class="tag">whisper.cpp</span>
+                    <span class="tag">Vulkan</span>
+                    <span class="tag">PipeWire</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Input/output</strong>
+                  <div class="tag-list">
+                    <span class="tag">python-evdev</span>
+                    <span class="tag">ydotool</span>
+                    <span class="tag">USB HID</span>
+                    <span class="tag">systemd</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>LLM backends</strong>
+                  <div class="tag-list">
+                    <span class="tag">Ollama</span>
+                    <span class="tag">Claude CLI</span>
+                    <span class="tag">OpenAI</span>
+                    <span class="tag">Groq</span>
+                    <span class="tag">OpenRouter</span>
+                    <span class="tag">LM Studio</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>UI</strong>
+                  <div class="tag-list">
+                    <span class="tag">GTK3</span>
+                    <span class="tag">D-Bus</span>
+                    <span class="tag">StatusNotifierItem</span>
+                    <span class="tag">pytest</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div class="project-section">
-              <h3>Challenges</h3>
+              <h3>Why it matters</h3>
+              <p>
+                The project makes AI and speech useful by narrowing the command
+                surface. The model does not get to improvise arbitrary output;
+                it must produce one of a few parseable actions that the daemon
+                can inspect and execute.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Technical notes</h3>
+              <div class="note-grid">
+                <div>
+                  <strong>Device watching</strong>
+                  <span>
+                    The daemon handles hotplug, duplicate event nodes,
+                    permission errors, and configured input-device filters.
+                  </span>
+                </div>
+                <div>
+                  <strong>Direct insertion</strong>
+                  <span>
+                    ydotool injects text and key sequences into the active
+                    window without touching the clipboard.
+                  </span>
+                </div>
+                <div>
+                  <strong>Command grammar</strong>
+                  <span>
+                    LLM output must be <code>GUI:</code>,
+                    <code>TERMINAL:</code>, or <code>KEYS:</code>, which keeps
+                    execution predictable.
+                  </span>
+                </div>
+                <div>
+                  <strong>Tray control</strong>
+                  <span>
+                    GTK3 StatusNotifierItem and DBusMenu provide service toggle,
+                    settings, model picker, hotkey capture, and backend config.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-section project-section--challenges">
+              <h3>Hard parts</h3>
               <ul>
                 <li>
-                  Normalizing local and cloud LLM providers into one command
-                  interface while keeping response parsing strict enough to be
-                  safe and predictable.
+                  Normalizing local and cloud LLM providers into one strict
+                  command interface.
                 </li>
                 <li>
-                  Keeping evdev device handling reliable across hotplug events,
-                  duplicate physical interfaces, permission errors, and
-                  user-selected device filters.
+                  Handling evdev hotplug, duplicate physical devices,
+                  permissions, and filters.
                 </li>
                 <li>
-                  Supporting both GPU and CPU whisper.cpp execution paths
-                  without turning install/configuration into a hardware-specific
-                  maze.
+                  Supporting GPU and CPU whisper.cpp paths without making setup
+                  confusing.
                 </li>
                 <li>
-                  Building a GTK3 tray that works with Linux tray standards and
-                  exposes enough configuration to avoid hand-editing JSON for
-                  normal use.
+                  Building a tray app across fragmented Linux tray standards.
                 </li>
               </ul>
             </div>
 
-            <div class="project-section">
-              <h3>Learnings</h3>
+            <div class="project-section project-section--learnings">
+              <h3>Engineering takeaways</h3>
               <ul>
                 <li>
-                  OpenAI-compatible APIs reduce backend code, but defaults still
-                  matter: each provider needs sensible URL/model behavior and
-                  clear API-key handling.
+                  OpenAI-compatible APIs reduce code, but each provider still
+                  needs clear defaults.
                 </li>
                 <li>
-                  Desktop automation is most useful when it never touches the
-                  clipboard; ydotool text and raw key injection keep the focused
-                  application as the integration point.
+                  Desktop automation works best when it preserves the focused
+                  application context.
                 </li>
                 <li>
                   Hotplug-aware keyboard watching needs physical-device
-                  deduplication, not just event-node enumeration.
+                  deduplication.
                 </li>
                 <li>
-                  GTK3 tray via StatusNotifierItem + DBusMenu works, but sparse
-                  docs and fragmented Linux tray standards make it harder than
-                  the actual daemon logic.
+                  Tray UI can remove config friction, but Linux tray standards
+                  add hidden complexity.
                 </li>
               </ul>
+            </div>
+
+            <div class="project-section project-section--scope">
+              <h3>Current scope</h3>
+              <div class="scope-grid">
+                <div>
+                  <h4>Works now</h4>
+                  <ul>
+                    <li>Hold-to-record flow</li>
+                    <li>Direct transcription typing</li>
+                    <li>LLM command mode</li>
+                    <li>Systemd user service</li>
+                    <li>GTK tray settings</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Command formats</h4>
+                  <ul>
+                    <li><code>GUI: &lt;cmd&gt;</code></li>
+                    <li><code>TERMINAL: &lt;cmd&gt;</code></li>
+                    <li><code>KEYS: &lt;sequence&gt;</code></li>
+                    <li>Backend-specific model config</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Branch focus</h4>
+                  <ul>
+                    <li><code>other-models</code> backend support</li>
+                    <li>Input-device targeting</li>
+                    <li>GPU toggle</li>
+                    <li>OpenAI-compatible provider controls</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             <div class="project-section">
-              <h3>LLM Command Mode</h3>
-              <p>
-                The LLM receives the transcription and must respond with exactly
-                one of three formats, which the daemon parses and executes:
-              </p>
-              <ul>
-                <li>
-                  <code>GUI: &lt;cmd&gt;</code> — launches an application or URL
-                  silently in the background
-                </li>
-                <li>
-                  <code>TERMINAL: &lt;cmd&gt;</code> — runs a shell command in a
-                  new terminal window using the configured terminal emulator
-                </li>
-                <li>
-                  <code>KEYS: &lt;sequence&gt;</code> — injects raw ydotool
-                  keycode events, enabling shortcuts like select-all, undo, or
-                  arbitrary key combinations by voice
-                </li>
-              </ul>
-              <p>
-                Backends are selected through config or the tray UI. Ollama
-                remains the default local path; Claude CLI is supported for
-                command-line use; OpenAI, Groq, OpenRouter, and LM Studio share
-                the OpenAI-compatible request path with configurable URL, model,
-                API key, and timeout.
-              </p>
+              <h3>Related work</h3>
+              <div class="related-project-grid">
+                <a
+                  class="related-project-card"
+                  href="microphonecontroller.html"
+                >
+                  <strong>MicrophoneController</strong>
+                  <span>The two-button HID device that drives the daemon.</span>
+                </a>
+                <a class="related-project-card" href="aiagents.html">
+                  <strong>AI Agents</strong>
+                  <span
+                    >Controlled model routing and review gates for broader
+                    tasks.</span
+                  >
+                </a>
+                <a class="related-project-card" href="qmknexus.html">
+                  <strong>QMK Nexus</strong>
+                  <span>Keyboard and firmware workflow tooling.</span>
+                </a>
+                <a class="related-project-card" href="personalsite.html">
+                  <strong>PersonalSite</strong>
+                  <span
+                    >The deployment surface and write-up system for this
+                    tool.</span
+                  >
+                </a>
+              </div>
             </div>
 
-            <div class="project-section">
-              <h3>System Tray</h3>
+            <div class="project-section project-cta-panel">
+              <h3>What to do next</h3>
               <p>
-                A GTK3 system tray application implements the KDE
-                StatusNotifierItem + DBusMenu protocols, giving a persistent
-                tray icon that reflects the daemon's running state. The tray
-                polls the systemd user service every two seconds and updates
-                the icon between a microphone and a muted microphone
-                accordingly.
+                Review the source if you want to inspect the evdev watcher,
+                whisper.cpp invocation, ydotool insertion, strict command
+                parser, LLM backends, or GTK tray settings.
               </p>
-              <p>
-                The tray menu provides start/stop toggle and a settings dialog
-                covering: keyboard device selection (dropdown of all
-                evdev-capable devices), hotkey capture (click the button then
-                press any key), LLM backend selection, live Ollama model picker
-                (queries the local instance for installed models), an
-                OpenAI-compatible model field, and an advanced panel for binary
-                paths, API settings, input device name filtering, GPU toggle,
-                language, timeouts, and terminal emulator. Works natively on
-                KDE; GNOME requires the AppIndicator shell extension.
-              </p>
-            </div>
-
-            <div class="project-section project-section--components">
-              <h3>Components</h3>
-              <ul>
-                <li>
-                  <code>key_watcher</code> — evdev device discovery and
-                  exclusive keyboard grab; maps multiple keycodes to independent
-                  callback pairs
-                </li>
-                <li>
-                  <code>recorder</code> — spawns pw-record as a subprocess to
-                  stream audio to a temp WAV while the key is held
-                </li>
-                <li>
-                  <code>transcriber</code> — invokes whisper.cpp with
-                  <code>--no-timestamps -np</code>, appending
-                  <code>--no-gpu</code> when GPU offload is disabled; strips and
-                  returns clean text, or None on failure
-                </li>
-                <li>
-                  <code>commander</code> — builds a structured prompt, queries
-                  Ollama, Claude CLI, or an OpenAI-compatible backend, parses
-                  the response, and dispatches GUI/TERMINAL/KEYS actions
-                </li>
-                <li>
-                  <code>typer</code> — calls ydotool to inject transcribed text
-                  or raw key sequences into the active window
-                </li>
-                <li>
-                  <code>tray</code> — GTK3 StatusNotifierItem tray with
-                  DBusMenu settings dialog
-                </li>
-                <li>
-                  <code>daemon</code> — orchestrates all modules; handles
-                  SIGTERM/SIGINT cleanly and manages the minimum-duration guard
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section project-section--wip">
-              <h3>Branch Work</h3>
-              <p>
-                The older <code>ubuntu-debian-support</code> work broadened
-                platform compatibility. The current <code>other-models</code>
-                branch is focused on LLM provider flexibility and machine-level
-                configuration.
-              </p>
-              <ul>
-                <li>
-                  <strong>Multi-provider command mode</strong> — OpenAI, Groq,
-                  OpenRouter, and LM Studio now share an OpenAI-compatible
-                  backend alongside Ollama and Claude CLI.
-                </li>
-                <li>
-                  <strong>Device targeting</strong> — the daemon can filter
-                  watched evdev devices by configured device-name substring,
-                  which helps when multiple keyboards or HID devices are
-                  present.
-                </li>
-                <li>
-                  <strong>GPU toggle</strong> — the tray and config can disable
-                  whisper.cpp GPU offload, causing transcription to pass
-                  <code>--no-gpu</code> for CPU-only or troubleshooting cases.
-                </li>
-                <li>
-                  <strong>OpenAI-compatible model controls</strong> — the tray
-                  shows provider-specific model controls and stores the chosen
-                  model, URL, API key, and timeout in
-                  <code>~/.config/whisper-transcribe/config.json</code>.
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section">
-              <h3>Hardware</h3>
-              <ul>
-                <li>
-                  <a href="microphonecontroller.html">MicrophoneController</a>
-                  USB HID device — Scroll Lock triggers transcription mode;
-                  Pause triggers LLM command mode
-                </li>
-                <li>
-                  AMD Radeon RX 7900 XTX — Vulkan backend drives GPU-accelerated
-                  whisper.cpp inference (GGML_VULKAN=ON), keeping transcription
-                  latency low for both modes
-                </li>
-              </ul>
+              <div class="home-actions">
+                <a
+                  class="github-link"
+                  href="https://github.com/nathan-tebay/whisper-transcribe"
+                  target="_blank"
+                  rel="noopener"
+                  >View GitHub</a
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -374,6 +397,6 @@
 
     <script src="../assets/project-data.js"></script>
     <script src="../assets/layout.js"></script>
-    <script src="../assets/script.js"></script>
+    <script src="../assets/script.js" defer></script>
   </body>
 </html>

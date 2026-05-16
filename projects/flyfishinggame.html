@@ -3,34 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fly Fishing Game — Tebay.dev</title>
+    <title>Fly Fishing Game - Procedural River Sim by Nathan Tebay</title>
     <meta
       name="description"
-      content="Fly Fishing Game project write-up: a playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules." />
+      content="Fly Fishing Game case study: a Godot 4.3 fly-fishing prototype with procedural river anatomy, fish behavior, casting, mending, hatch matching, and authored terrain modules."
+    />
     <meta name="author" content="Nathan Tebay" />
     <link
       rel="canonical"
-      href="https://tebay.dev/projects/flyfishinggame.html" />
+      href="https://tebay.dev/projects/flyfishinggame.html"
+    />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tebay.dev" />
-    <meta property="og:title" content="Fly Fishing Game - Tebay.dev" />
+    <meta
+      property="og:title"
+      content="Fly Fishing Game - Procedural River Sim"
+    />
     <meta
       property="og:description"
-      content="A playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules." />
+      content="Fly Fishing Game case study: a Godot 4.3 fly-fishing prototype with procedural river anatomy, fish behavior, casting, mending, hatch matching, and authored terrain modules."
+    />
     <meta
       property="og:url"
-      content="https://tebay.dev/projects/flyfishinggame.html" />
+      content="https://tebay.dev/projects/flyfishinggame.html"
+    />
     <meta
       property="og:image"
-      content="https://tebay.dev/assets/images/flyfishinggame.png" />
+      content="https://tebay.dev/assets/images/flyfishinggame.png"
+    />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Fly Fishing Game - Tebay.dev" />
+    <meta
+      name="twitter:title"
+      content="Fly Fishing Game - Procedural River Sim"
+    />
     <meta
       name="twitter:description"
-      content="A playable Godot 4.3 fly-fishing prototype with procedural river ecology and authored terrain modules." />
+      content="Fly Fishing Game case study: a Godot 4.3 fly-fishing prototype with procedural river anatomy, fish behavior, casting, mending, hatch matching, and authored terrain modules."
+    />
     <meta
       name="twitter:image"
-      content="https://tebay.dev/assets/images/flyfishinggame.png" />
+      content="https://tebay.dev/assets/images/flyfishinggame.png"
+    />
     <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
@@ -44,9 +57,13 @@
             <div>
               <h1>Fly Fishing Game</h1>
               <p class="tagline">
-                A playable fly-fishing prototype built in Godot 4.3 with
-                procedural rivers, hatch-driven fish behaviour, and
-                hand-authored SNES-style terrain tiles
+                A playable Godot prototype where river structure drives fishing
+                behavior.
+              </p>
+              <p class="hero-summary">
+                Fly Fishing Game turns procedural river anatomy, fish holding
+                logic, casting, mending, hatch matching, and authored SNES-style
+                terrain modules into a full fishing loop.
               </p>
             </div>
             <div class="header-actions">
@@ -54,13 +71,27 @@
                 href="https://github.com/nathan-tebay/flyfishinggame"
                 class="github-link"
                 target="_blank"
-                rel="noopener">
-                View on GitHub
+                rel="noopener"
+              >
+                View GitHub
               </a>
             </div>
           </div>
 
           <div class="divider"></div>
+
+          <div class="project-hero-copy project-section">
+            <h3>What it solves</h3>
+            <p>
+              Fishing games can collapse into random bite probability if the
+              water, fish, cast, fly choice, and presentation do not interact.
+            </p>
+            <p>
+              This prototype treats river anatomy as gameplay data. Pools,
+              riffles, runs, fords, pocket water, exposure, current, structure,
+              hatches, and approach angle all feed the fishing loop.
+            </p>
+          </div>
 
           <div class="renders-row renders-row--full renders-row--screens">
             <div class="render-card">
@@ -70,256 +101,284 @@
                 height="953"
                 alt="Fly Fishing Game river generation screenshot"
                 loading="lazy"
-                decoding="async" />
+                decoding="async"
+              />
               <span class="render-label">
-                The current build: a full fishing loop on procedurally
-                generated river sections, with sprite-based angler and fish
-                systems, and a custom renderer that pulls water, shoreline,
-                gravel, terrain, and props from checked-in module atlases.
+                Current build: procedural river sections, sprite-based angler
+                and fish systems, and a renderer driven by authored water,
+                shoreline, gravel, terrain, and prop modules.
               </span>
             </div>
           </div>
 
           <div class="project-body">
-            <div class="project-section project-section--overview">
-              <h3>Overview</h3>
-              <p>
-                A 16-bit style fly-fishing game set on a side-scrolling
-                river inspired by the Madison. It started as a river generator
-                demo; now it is a playable proof of concept where you
-                configure a session, scout water, approach fish, manage your
-                line, cast, mend, match the hatch, respond to takes, and log
-                your catches.
-              </p>
-              <p>
-                The river simulation models pool-riffle-run cycles, fords,
-                pocket water, exposure, species-specific holding preferences,
-                V-seam spawn offsets, boulder and rock eddies, and seeded
-                section streaming. Fish behavior is driven by directional
-                vision, intrusion memory, exposure-adjusted spook sensitivity,
-                hatch state, fly matching, and hookset timing rather than a
-                simple bite probability.
-              </p>
-              <p>
-                Most recent work is the terrain-module rendering pass. The game
-                treats procedural <code>RiverData</code> as the gameplay
-                source, but the production <code>RiverRenderer</code>
-                maps that data onto authored water, shoreline, gravel-bar,
-                terrain-fill, transition, and prop sprites instead of the
-                earlier continuous colour-field river style.
-              </p>
-              <p>
-                A normalized packed atlas and TileSet also live in the repo for
-                editor painting and TileMap experiments, but they are not the
-                active renderer path. <code>RiverWorld</code> uses the
-                custom section renderer so procedural streaming, fish placement,
-                hold scores, and wading logic stay tied to the simulation
-                instead of a hand-painted map.
-              </p>
-            </div>
-
-            <div class="project-section project-section--stack">
-              <h3>Stack</h3>
-              <div class="tag-list">
-                <span class="tag">Godot 4.3</span>
-                <span class="tag">GDScript</span>
-                <span class="tag">SQLite</span>
-                <span class="tag">godot-sqlite</span>
-                <span class="tag">FastNoiseLite</span>
-                <span class="tag">Sprite sheets</span>
-                <span class="tag">Authored terrain modules</span>
-                <span class="tag">Procedural generation</span>
-                <span class="tag">GL Compatibility</span>
-              </div>
-            </div>
-
-            <div class="project-section">
-              <h3>Current Status</h3>
+            <div class="project-section project-section--audience">
+              <h3>Who this is for</h3>
               <ul>
+                <li>Players who want fishing to depend on reading water</li>
                 <li>
-                  Playable PoC loop is implemented: session configuration,
-                  exploration, fish approach, casting, drift/mending, fly
-                  matching, hookset, catch confirmation, and logbook entries.
+                  Godot developers interested in procedural gameplay systems
                 </li>
                 <li>
-                  Three difficulty tiers flow through the systems: fish counts,
-                  spook radius, blind spot size, strike windows, fly-matching
-                  strictness, and UI assistance.
+                  Designers balancing simulation detail against readable UI
                 </li>
                 <li>
-                  Procedural sections stream ahead of the player at 70% progress
-                  and despawn old sections while preserving section-relative
-                  fish state and angler context.
-                </li>
-                <li>
-                  The production renderer loads active water, shoreline,
-                  terrain-fill, gravel-bar, and decorative prop modules from the
-                  checked-in asset tree.
-                </li>
-                <li>
-                  Curated shallow-to-mid and mid-to-deep water transition tiles
-                  are wired into the chunk render pass, with directional depth
-                  blending kept as the fallback when an authored transition does
-                  not apply.
-                </li>
-                <li>
-                  Shoreline placement now validates 2x2 water footprints before
-                  drawing corners, prioritizing outer corners, inner corners,
-                  then straight edges to avoid obvious wrong-corner artifacts.
-                </li>
-                <li>
-                  The remaining terrain work is visual polish: bank material
-                  transitions, seam reduction, section-boundary continuity, and
-                  a visual smoke pass across bends, islands, gravel bars, and
-                  concave banks.
+                  Pixel-art builders joining authored tiles with generated
+                  worlds
                 </li>
               </ul>
             </div>
 
+            <div class="project-section project-section--overview">
+              <h3>What it does</h3>
+              <p>
+                Fly Fishing Game is a 16-bit style fly-fishing prototype set on
+                a side-scrolling river inspired by the Madison. The current loop
+                lets the player configure a session, scout water, approach fish,
+                manage line, cast, mend, match the hatch, respond to takes, and
+                log catches.
+              </p>
+              <p>
+                The river simulation models pool-riffle-run cycles, fords,
+                pocket water, exposure, species-specific holding preferences,
+                V-seam spawn offsets, rock and boulder eddies, and seeded
+                section streaming. Fish behavior uses directional vision,
+                intrusion memory, exposure-adjusted spook sensitivity, hatch
+                state, fly matching, and hookset timing.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Workflow covered</h3>
+              <ol class="workflow-list">
+                <li>
+                  <strong>Generate fishable water</strong> - create river
+                  sections with anatomy, depth, current, structure, habitat, and
+                  hold scores.
+                </li>
+                <li>
+                  <strong>Read and approach</strong> - expose fish behavior,
+                  spook rules, visibility, cover, and approach angle through the
+                  playable exploration loop.
+                </li>
+                <li>
+                  <strong>Cast and resolve</strong> - handle line length,
+                  presentation, mending, hatch matching, takes, hooksets, and
+                  catch logging.
+                </li>
+              </ol>
+            </div>
+
+            <div class="project-section project-section--stack">
+              <h3>Technical highlights / stack</h3>
+              <div class="stack-groups">
+                <div>
+                  <strong>Engine</strong>
+                  <div class="tag-list">
+                    <span class="tag">Godot 4.3</span>
+                    <span class="tag">GDScript</span>
+                    <span class="tag">GL Compatibility</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Simulation</strong>
+                  <div class="tag-list">
+                    <span class="tag">Procedural generation</span>
+                    <span class="tag">FastNoiseLite</span>
+                    <span class="tag">Fish behavior</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Data</strong>
+                  <div class="tag-list">
+                    <span class="tag">SQLite</span>
+                    <span class="tag">godot-sqlite</span>
+                    <span class="tag">Logbook</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Rendering</strong>
+                  <div class="tag-list">
+                    <span class="tag">Sprite sheets</span>
+                    <span class="tag">Authored terrain modules</span>
+                    <span class="tag">Runtime transitions</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Why it matters</h3>
+              <p>
+                This is product and systems work in game form: model the real
+                domain deeply enough that player choices matter, then build a UI
+                and renderer that make the hidden state understandable.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Technical notes</h3>
+              <div class="note-grid">
+                <div>
+                  <strong>River data model</strong>
+                  <span>
+                    <code>RiverData</code> remains the gameplay source while the
+                    renderer maps it onto authored terrain modules.
+                  </span>
+                </div>
+                <div>
+                  <strong>Fish behavior</strong>
+                  <span>
+                    Spook sensitivity accounts for size, cover, time of day,
+                    approach angle, difficulty, vibration, and exposure.
+                  </span>
+                </div>
+                <div>
+                  <strong>Casting state</strong>
+                  <span>
+                    The controller moves through false casting, presentation,
+                    drift, result, and mending states with line-length timing.
+                  </span>
+                </div>
+                <div>
+                  <strong>Terrain modules</strong>
+                  <span>
+                    Water, shoreline, gravel, fill, transitions, and props come
+                    from checked-in module atlases rather than pure color
+                    fields.
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div class="project-section project-section--challenges">
-              <h3>Challenges</h3>
+              <h3>Hard parts</h3>
               <ul>
                 <li>
-                  Making procedural rivers feel like fishable water instead of
-                  random noise: pool heads, pool bellies, tailouts, riffles,
-                  fords, pocket water, exposure, and current speed all have to
-                  influence where fish should hold.
+                  Making procedural rivers feel like readable fishable water
+                  instead of noise.
                 </li>
                 <li>
-                  Keeping the renderer and simulation decoupled.
-                  <code>RiverData</code>
-                  drives gameplay, while the current
-                  renderer maps that data onto authored terrain modules, runtime
-                  transition tiles, and sprite props.
+                  Keeping simulation and rendering decoupled while still
+                  visually coherent.
                 </li>
                 <li>
-                  Tuning fish behaviour so approach angle, water exposure,
-                  cover, time of day, fly rejection, line slap, and wading
-                  vibration all affect fish without creating contradictory spook
-                  rules.
+                  Tuning fish spook, cover, fly rejection, line slap, wading,
+                  and hook timing together.
                 </li>
                 <li>
-                  Building a casting loop that is readable without becoming a
-                  timing minigame detached from fishing: line length changes the
-                  rhythm, loop quality affects presentation, and mends affect
-                  drag during the drift.
+                  Making casting readable without turning it into an unrelated
+                  timing minigame.
                 </li>
                 <li>
-                  Integrating generated pixel-art terrain assets without
-                  introducing visual seams at water transitions, shoreline
-                  corners, bank material changes, or section boundaries.
-                </li>
-                <li>
-                  Maintaining two useful terrain paths without confusing their
-                  roles: the custom renderer is production, while the packed
-                  TileSet is a normalized comparison and prototyping asset.
+                  Reducing visual seams at shoreline corners, bank transitions,
+                  and section boundaries.
                 </li>
               </ul>
             </div>
 
             <div class="project-section project-section--learnings">
-              <h3>Learnings</h3>
+              <h3>Engineering takeaways</h3>
               <ul>
                 <li>
-                  Centralising spook calculations in
-                  <code>SpookCalculator</code>
-                  made later additions, especially exposure-based sensitivity,
-                  much cheaper to integrate.
+                  Centralizing spook rules made later behavior changes much
+                  cheaper.
                 </li>
                 <li>
-                  The river generator became much more convincing once it used
-                  explicit river anatomy templates. Noise is useful texture, but
-                  pool-riffle-run structure needs to be intentional.
+                  Noise helps texture, but convincing rivers need explicit
+                  anatomy templates.
                 </li>
                 <li>
-                  Separating generation from rendering paid off during the art
-                  transition: the same hold scores, fish placement, current map,
-                  and section streaming logic can survive renderer rewrites.
+                  Separating generation from rendering protected gameplay during
+                  art rewrites.
                 </li>
                 <li>
-                  Terrain tile work needs deterministic selection and validation
-                  rules before blending. Good module choice prevents many seams
-                  that would otherwise be hidden with expensive pixel blending.
-                </li>
-                <li>
-                  Shoreline tiles need geometry-aware placement, not just
-                  neighbor checks. The renderer now validates water-facing
-                  contact and quadrant fit before committing corner modules.
+                  Terrain selection needs deterministic validation before
+                  blending can hide seams.
                 </li>
               </ul>
             </div>
 
-            <div class="project-section">
-              <h3>Key Systems</h3>
-              <ul>
-                <li>
-                  <strong>RiverGenerator</strong> — deterministic pipeline:
-                  noise texture, pool-riffle-run template, ford injection,
-                  habitat classification, tile map, structures, eddies, pocket
-                  water, hold scoring, and annotated top holds
-                </li>
-                <li>
-                  <strong>RiverRenderer</strong> — production renderer that maps
-                  <code>RiverData</code> onto authored terrain modules: land
-                  fills, water depth modules, shoreline edge/corner modules,
-                  gravel bars, runtime water transition tiles, and sprite-based
-                  props
-                </li>
-                <li>
-                  <strong>Terrain asset pipeline</strong> — checked-in
-                  <code>assets/terrain/modules</code> and
-                  <code>assets/terrain/runtime</code> pools feed the live
-                  renderer; the generated packed atlas and TileSet remain
-                  available for TileMap experiments and visual comparison
-                </li>
-                <li>
-                  <strong>CastingController</strong> — state machine IDLE →
-                  FALSE_CASTING → PRESENTATION → RESULT → DRIFT, with
-                  line-length timing scaling and mouse mend detection
-                </li>
-                <li>
-                  <strong>SpookCalculator</strong> — all spook checks route
-                  here; formula accounts for fish size, cover, time of day,
-                  approach angle, difficulty, wading vibration, and habitat
-                  exposure
-                </li>
-                <li>
-                  <strong>FishAI</strong> — FEEDING → ALERT → SPOOKED →
-                  RELOCATING → HOLDING state machine driven by hold selection,
-                  feeding edges, SpookCalculator, and FlyMatcher rejection
-                  events
-                </li>
-                <li>
-                  <strong>HatchManager</strong> — time-of-day hatch state
-                  machine shifts fish feeding mode between emerger and dry fly
-                  windows; drives FlyMatcher best-match fly
-                </li>
-                <li>
-                  <strong>HooksetController + CatchLog</strong> — dry-fly rise
-                  and nymph indicator takes, strike-window timing, hard spooks,
-                  catch confirmation, fish snapshots, and logbook storage
-                </li>
-                <li>
-                  <strong>DatabaseManager</strong> — autoload; opens
-                  <code>user://flyfishing.db</code> on startup, runs schema
-                  migrations, seeds difficulty presets; all persistence routes
-                  here
-                </li>
-                <li>
-                  <strong>Section streaming</strong> — pre-generates next
-                  section at 70% through current; despawns two sections behind;
-                  seed chain derived from session seed + section index
-                </li>
-              </ul>
+            <div class="project-section project-section--scope">
+              <h3>Current scope</h3>
+              <div class="scope-grid">
+                <div>
+                  <h4>Works now</h4>
+                  <ul>
+                    <li>Session configuration</li>
+                    <li>Exploration and fish approach</li>
+                    <li>Casting, drift, and mending</li>
+                    <li>Fly matching and hooksets</li>
+                    <li>Catch logbook</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Core systems</h4>
+                  <ul>
+                    <li>RiverGenerator</li>
+                    <li>RiverRenderer</li>
+                    <li>CastingController</li>
+                    <li>SpookCalculator</li>
+                    <li>Terrain module pipeline</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Still improving</h4>
+                  <ul>
+                    <li>Bank material transitions</li>
+                    <li>Section-boundary continuity</li>
+                    <li>Visual smoke passes</li>
+                    <li>Windows, Android, and iOS support</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             <div class="project-section">
-              <h3>Platforms</h3>
-              <div class="tag-list">
-                <span class="tag">Linux</span>
-                <span class="tag">Windows</span>
-                <span class="tag">Android (planned)</span>
-                <span class="tag">iOS (planned)</span>
+              <h3>Related work</h3>
+              <div class="related-project-grid">
+                <a class="related-project-card" href="qmknexus.html">
+                  <strong>QMK Nexus</strong>
+                  <span
+                    >Another visual workflow over a strict technical
+                    model.</span
+                  >
+                </a>
+                <a class="related-project-card" href="dbfirstgrid.html">
+                  <strong>DBFirstDataGrid</strong>
+                  <span>Metadata-driven UI for complex structured data.</span>
+                </a>
+                <a class="related-project-card" href="aiagents.html">
+                  <strong>AI Agents</strong>
+                  <span
+                    >Long-running orchestration with explicit state and
+                    logs.</span
+                  >
+                </a>
+                <a class="related-project-card" href="personalsite.html">
+                  <strong>PersonalSite</strong>
+                  <span
+                    >The portfolio system used to document this prototype.</span
+                  >
+                </a>
+              </div>
+            </div>
+
+            <div class="project-section project-cta-panel">
+              <h3>What to do next</h3>
+              <p>
+                Review the source if you want to inspect the river generator,
+                renderer split, casting controller, fish behavior, or terrain
+                module pipeline.
+              </p>
+              <div class="home-actions">
+                <a
+                  class="github-link"
+                  href="https://github.com/nathan-tebay/flyfishinggame"
+                  target="_blank"
+                  rel="noopener"
+                  >View GitHub</a
+                >
               </div>
             </div>
           </div>

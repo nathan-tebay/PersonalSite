@@ -3,65 +3,104 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MicrophoneController — Tebay.dev</title>
+    <title>
+      MicrophoneController - Two-Button USB HID Controller by Nathan Tebay
+    </title>
     <meta
       name="description"
-      content="MicrophoneController project write-up: a two-button USB HID microphone controller with tap-to-toggle and push-to-talk modes." />
+      content="MicrophoneController case study: a two-button ATmega32U4 USB HID device for push-to-talk, tap-to-toggle, keyboard/gamepad output, and voice transcription workflows."
+    />
     <meta name="author" content="Nathan Tebay" />
     <link
       rel="canonical"
-      href="https://tebay.dev/projects/microphonecontroller.html" />
+      href="https://tebay.dev/projects/microphonecontroller.html"
+    />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tebay.dev" />
-    <meta property="og:title" content="MicrophoneController - Tebay.dev" />
+    <meta
+      property="og:title"
+      content="MicrophoneController - Two-Button USB HID Controller"
+    />
     <meta
       property="og:description"
-      content="A two-button USB HID microphone controller with tap-to-toggle and push-to-talk modes." />
+      content="MicrophoneController case study: a two-button ATmega32U4 USB HID device for push-to-talk, tap-to-toggle, keyboard/gamepad output, and voice transcription workflows."
+    />
     <meta
       property="og:url"
-      content="https://tebay.dev/projects/microphonecontroller.html" />
+      content="https://tebay.dev/projects/microphonecontroller.html"
+    />
     <meta
       property="og:image"
-      content="https://tebay.dev/assets/images/microphone-controller.jpg" />
+      content="https://tebay.dev/assets/images/microphone-controller.jpg"
+    />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="MicrophoneController - Tebay.dev" />
+    <meta
+      name="twitter:title"
+      content="MicrophoneController - Two-Button USB HID Controller"
+    />
     <meta
       name="twitter:description"
-      content="A two-button USB HID microphone controller with tap-to-toggle and push-to-talk modes." />
+      content="MicrophoneController case study: a two-button ATmega32U4 USB HID device for push-to-talk, tap-to-toggle, keyboard/gamepad output, and voice transcription workflows."
+    />
     <meta
       name="twitter:image"
-      content="https://tebay.dev/assets/images/microphone-controller.jpg" />
+      content="https://tebay.dev/assets/images/microphone-controller.jpg"
+    />
     <link rel="icon" type="image/png" href="../favicon.png" />
     <link rel="stylesheet" href="../assets/style.css" />
   </head>
   <body data-page="microphonecontroller" data-basepath="../">
     <div class="page-layout">
       <div id="layout-nav"></div>
+
       <div class="main-col">
         <div class="side-panel">
           <div class="project-header">
             <div>
               <h1>MicrophoneController</h1>
               <p class="tagline">
-                2-button USB HID microphone controller with tap-to-toggle and
-                push-to-talk
+                Two-button USB HID controller for push-to-talk, tap-to-toggle,
+                and voice workflows.
+              </p>
+              <p class="hero-summary">
+                MicrophoneController turns a small ATmega32U4 board into a
+                physical control surface for microphone channels, games,
+                transcription, and AI command routing.
               </p>
             </div>
-            <div class="header-actions"> 
-               <button
+            <div class="header-actions">
+              <button
                 class="render-open-btn render-open-btn--lg"
                 data-video-src="https://tebay.dev/videos/microphone-controller-demo.mp4"
-                data-video-caption="MicrophoneController demo">
+                data-video-caption="MicrophoneController demo"
+              >
                 Open Demo
               </button>
               <a
                 href="https://github.com/nathan-tebay/MicrophoneController"
                 class="github-link"
                 target="_blank"
-                rel="noopener">
-                View on GitHub
+                rel="noopener"
+              >
+                View GitHub
               </a>
             </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="project-hero-copy project-section">
+            <h3>What it solves</h3>
+            <p>
+              Software hotkeys are easy to lose in focused windows, game input
+              modes, and voice workflows. A physical controller makes speech
+              modes explicit and reliable.
+            </p>
+            <p>
+              The device exposes two buttons, two LEDs, and a mode switch. It
+              can act as keyboard HID or gamepad HID, with tap-to-toggle and
+              hold-to-talk behavior built into the firmware.
+            </p>
           </div>
 
           <div class="renders-row renders-row--2">
@@ -72,8 +111,9 @@
                 height="1691"
                 loading="lazy"
                 decoding="async"
-                alt="MicrophoneController — assembled" />
-              <span class="render-label">Assembled</span>
+                alt="MicrophoneController assembled"
+              />
+              <span class="render-label">Assembled controller</span>
             </div>
             <div class="render-card">
               <img
@@ -82,106 +122,272 @@
                 height="1208"
                 loading="lazy"
                 decoding="async"
-                alt="MicrophoneController — internal" />
-              <span class="render-label">Internal</span>
+                alt="MicrophoneController internal wiring"
+              />
+              <span class="render-label">Internal wiring and board</span>
             </div>
           </div>
 
-          <div class="divider"></div>
-
           <div class="project-body">
+            <div class="project-section project-section--audience">
+              <h3>Who this is for</h3>
+              <ul>
+                <li>People who need reliable physical push-to-talk controls</li>
+                <li>Linux users pairing hardware with speech transcription</li>
+                <li>
+                  Game and communication users separating multiple mic channels
+                </li>
+                <li>Builders experimenting with small USB HID devices</li>
+              </ul>
+            </div>
+
             <div class="project-section project-section--overview">
-              <h3>Overview</h3>
+              <h3>What it does</h3>
               <p>
-                This project began as a way to control multiple microphone
-                channels in games and communication apps, such as team and
-                proximity chat. The controller uses two buttons so you can
-                either push-to-talk or tap-to-toggle without guessing whether a
-                channel is active. The bottom mode switch changes the device
-                between keyboard and gamepad HID output depending on which type
-                the app supports.
+                MicrophoneController began as a way to control multiple
+                microphone channels in games and communication apps, such as
+                team and proximity chat. The controller uses two buttons so the
+                user can push-to-talk or tap-to-toggle without guessing whether
+                a channel is active.
               </p>
               <p>
-                Today I mainly use it with my WhisperTranscription application.
-                The dual buttons and tap-or-hold behavior make it easy to
-                distinguish between transcribing text and sending commands to an
-                AI model. I may eventually make the hotkeys configurable over
-                WebUSB, but for now the current setup works well. Since WebUSB
-                depends on an external application, I am considering hosting the
-                software in Lambda alongside this site.
+                Today I mainly use it with WhisperTranscribe. One button maps to
+                Scroll Lock for direct transcription, while the other maps to
+                Pause for LLM command mode. A bottom switch changes whether the
+                device sends keyboard or gamepad HID output.
               </p>
             </div>
 
+            <div class="project-section">
+              <h3>Workflow covered</h3>
+              <ol class="workflow-list">
+                <li>
+                  <strong>Select output mode</strong> - use the hardware switch
+                  to choose keyboard HID or gamepad HID depending on the target
+                  application.
+                </li>
+                <li>
+                  <strong>Tap or hold</strong> - tap to toggle a microphone
+                  state, or hold to send active push-to-talk until release.
+                </li>
+                <li>
+                  <strong>Route speech</strong> - pair the two hotkeys with
+                  WhisperTranscribe so one button types text and the other sends
+                  voice commands to an LLM.
+                </li>
+              </ol>
+            </div>
+
             <div class="project-section project-section--stack">
-              <h3>Stack</h3>
-              <div class="tag-list">
-                <span class="tag">Arduino C++</span>
-                <span class="tag">ATmega32U4</span>
-                <span class="tag">USB HID</span>
-                <span class="tag">AVR core</span>
-                <span class="tag">arduino-cli</span>
+              <h3>Technical highlights / stack</h3>
+              <div class="stack-groups">
+                <div>
+                  <strong>Firmware</strong>
+                  <div class="tag-list">
+                    <span class="tag">Arduino C++</span>
+                    <span class="tag">AVR core</span>
+                    <span class="tag">arduino-cli</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Board</strong>
+                  <div class="tag-list">
+                    <span class="tag">ATmega32U4</span>
+                    <span class="tag">nullbits Bit-C PRO</span>
+                    <span class="tag">Leonardo-compatible</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Output</strong>
+                  <div class="tag-list">
+                    <span class="tag">USB HID</span>
+                    <span class="tag">Keyboard mode</span>
+                    <span class="tag">Gamepad mode</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>Behavior</strong>
+                  <div class="tag-list">
+                    <span class="tag">Tap-to-toggle</span>
+                    <span class="tag">Push-to-talk</span>
+                    <span class="tag">LED state</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-section">
+              <h3>Why it matters</h3>
+              <p>
+                Good automation often starts with physical affordances. The
+                controller makes voice mode visible and tactile, which is much
+                harder to achieve with only global hotkeys.
+              </p>
+            </div>
+
+            <div class="project-section">
+              <h3>Technical notes</h3>
+              <div class="note-grid">
+                <div>
+                  <strong>Mode switch</strong>
+                  <span>
+                    D15 to ground selects keyboard mode; floating selects
+                    gamepad mode without reinitializing the device.
+                  </span>
+                </div>
+                <div>
+                  <strong>Button timing</strong>
+                  <span>
+                    Holds of at least 50 ms become push-to-talk while shorter
+                    presses toggle the output state.
+                  </span>
+                </div>
+                <div>
+                  <strong>Keyboard mapping</strong>
+                  <span>
+                    Button 1 sends Scroll Lock and button 2 sends Pause for the
+                    transcription/command split.
+                  </span>
+                </div>
+                <div>
+                  <strong>Gamepad mapping</strong>
+                  <span>
+                    Gamepad buttons 8 and 9 avoid common controller mappings but
+                    still work for apps that prefer gamepad input.
+                  </span>
+                </div>
               </div>
             </div>
 
             <div class="project-section project-section--challenges">
-              <h3>Challenges</h3>
+              <h3>Hard parts</h3>
               <ul>
                 <li>
-                  As a keyboard HID, the device interfered with controller input
-                  detection in games.
+                  Keyboard HID output interfered with controller detection in
+                  some games.
                 </li>
                 <li>
-                  AI-generated hold-or-toggle implementation didn't work as
-                  intended — rewrote it manually.
+                  AI-generated hold-or-toggle code was unreliable and needed a
+                  manual rewrite.
+                </li>
+                <li>
+                  Tap, hold, latch, release, and mode-switch states had to stay
+                  predictable.
+                </li>
+                <li>
+                  Physical wiring needed to stay simple enough for future
+                  enclosure iterations.
                 </li>
               </ul>
             </div>
 
             <div class="project-section project-section--learnings">
-              <h3>Learnings</h3>
+              <h3>Engineering takeaways</h3>
               <ul>
                 <li>
-                  Simpler model wins: a single toggle state is cleaner than
-                  separate latch and hold logic.
+                  A single toggle state is cleaner than separate latch and hold
+                  logic.
                 </li>
                 <li>
-                  The mode switch changes which USB interface sends input — the
-                  device doesn't reinitialize.
+                  Physical mode switches should reset outputs so stuck mic
+                  states are impossible.
+                </li>
+                <li>
+                  HID behavior is easiest to trust when every state transition
+                  is explicit.
+                </li>
+                <li>
+                  Small hardware tools become more valuable when paired with
+                  real daily workflows.
                 </li>
               </ul>
             </div>
 
-            <div class="project-section">
-              <h3>Hardware</h3>
-              <ul>
-                <li>Board: nullbits Bit-C PRO (Arduino Leonardo-compatible)</li>
-                <li>Button 1 — D2, internal pull-up → GND</li>
-                <li>Button 2 — D3, internal pull-up → GND</li>
-                <li>LED 1 — D4 via 220 Ω resistor</li>
-                <li>LED 2 — D5 via 220 Ω resistor</li>
-                <li>Mode switch — D15 to GND = keyboard; floating = gamepad</li>
-              </ul>
+            <div class="project-section project-section--scope">
+              <h3>Current scope</h3>
+              <div class="scope-grid">
+                <div>
+                  <h4>Hardware</h4>
+                  <ul>
+                    <li>nullbits Bit-C PRO</li>
+                    <li>Buttons on D2 and D3</li>
+                    <li>LEDs on D4 and D5</li>
+                    <li>Mode switch on D15</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Inputs</h4>
+                  <ul>
+                    <li>Keyboard Scroll Lock</li>
+                    <li>Keyboard Pause</li>
+                    <li>Gamepad button 8</li>
+                    <li>Gamepad button 9</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4>Possible next</h4>
+                  <ul>
+                    <li>Configurable hotkeys</li>
+                    <li>WebUSB setup tool</li>
+                    <li>Updated enclosure</li>
+                    <li>Hosted configuration UI</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             <div class="project-section">
-              <h3>Button Behaviour</h3>
-              <ul>
-                <li>
-                  Tap — toggle mic on/off (keyboard: key press+release; gamepad:
-                  brief button press)
-                </li>
-                <li>
-                  Hold ≥ 50 ms — push-to-talk; latch active while held, cleared
-                  on release
-                </li>
-                <li>
-                  Mode switch — releases all outputs and resets all latch states
-                </li>
-                <li>Keyboard keys: Scroll Lock (btn 1), Pause (btn 2)</li>
-                <li>
-                  Gamepad buttons: 8 and 9 (beyond standard controller layouts)
-                </li>
-              </ul>
+              <h3>Related work</h3>
+              <div class="related-project-grid">
+                <a class="related-project-card" href="whispertranscribe.html">
+                  <strong>WhisperTranscribe</strong>
+                  <span
+                    >The main software workflow driven by this controller.</span
+                  >
+                </a>
+                <a class="related-project-card" href="qmknexus.html">
+                  <strong>QMK Nexus</strong>
+                  <span
+                    >Keyboard firmware tooling for more complex HID
+                    devices.</span
+                  >
+                </a>
+                <a class="related-project-card" href="autorejection.html">
+                  <strong>AutoRejection</strong>
+                  <span>Another hardware/software control system.</span>
+                </a>
+                <a class="related-project-card" href="aiagents.html">
+                  <strong>AI Agents</strong>
+                  <span
+                    >Voice commands can feed controlled local-agent
+                    workflows.</span
+                  >
+                </a>
+              </div>
+            </div>
+
+            <div class="project-section project-cta-panel">
+              <h3>What to do next</h3>
+              <p>
+                Watch the demo or inspect the firmware if you want to see the
+                HID mode split, tap/hold state machine, and wiring assumptions.
+              </p>
+              <div class="home-actions">
+                <button
+                  class="render-open-btn render-open-btn--lg"
+                  data-video-src="https://tebay.dev/videos/microphone-controller-demo.mp4"
+                  data-video-caption="MicrophoneController demo"
+                >
+                  Open Demo
+                </button>
+                <a
+                  class="github-link"
+                  href="https://github.com/nathan-tebay/MicrophoneController"
+                  target="_blank"
+                  rel="noopener"
+                  >View GitHub</a
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -190,6 +396,6 @@
 
     <script src="../assets/project-data.js"></script>
     <script src="../assets/layout.js"></script>
-    <script src="../assets/script.js"></script>
+    <script src="../assets/script.js" defer></script>
   </body>
 </html>
