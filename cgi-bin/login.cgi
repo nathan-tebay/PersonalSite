@@ -26,12 +26,12 @@ if [ "${REQUEST_METHOD}" = "POST" ]; then
     submitted=$(printf '%s' "$password" | sha256sum | cut -d' ' -f1)
 
     if [ -n "$ADMIN_TOKEN" ] && [ "$submitted" = "$ADMIN_TOKEN" ]; then
-      # Generate random opaque session token and CSRF token
-      SESSION_TOKEN=$(od -An -tx1 -N32 /dev/urandom | tr -d ' \n')
+      # Generate signed session token: timestamp.nonce.sha256(ADMIN_TOKEN:nonce:timestamp)
+      NONCE=$(od -An -tx1 -N16 /dev/urandom | tr -d ' \n')
       CSRF_TOKEN=$(od -An -tx1 -N16 /dev/urandom | tr -d ' \n')
       _NOW=$(date +%s)
-      mkdir -p /tmp/sessions
-      echo "$_NOW" > "/tmp/sessions/${SESSION_TOKEN}"
+      SIG=$(printf '%s:%s:%s' "$ADMIN_TOKEN" "$NONCE" "$_NOW" | sha256sum | cut -d' ' -f1)
+      SESSION_TOKEN="${_NOW}.${NONCE}.${SIG}"
       printf 'Status: 302 Found\r\n'
       emit_security_headers
       printf 'Set-Cookie: admin_session=%s; Path=/; SameSite=Strict; HttpOnly%s\r\n' "$SESSION_TOKEN" "$SECURE_FLAG"

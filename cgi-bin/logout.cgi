@@ -7,15 +7,6 @@ if [ "${HTTP_X_FORWARDED_PROTO:-}" = "https" ] || [ "${HTTPS:-}" = "on" ]; then
   SECURE_FLAG="; Secure"
 fi
 
-# Invalidate the server-side session file
-_sess_token=$(printf '%s' "${HTTP_COOKIE:-}" | tr ';' '\n' | sed 's/^ *//' | grep '^admin_session=' | head -1 | cut -d= -f2-)
-case "$_sess_token" in
-  *[^0-9a-f]*|"") ;;
-  *)
-    [ "$(printf '%s' "$_sess_token" | wc -c)" = 64 ] && rm -f "/tmp/sessions/${_sess_token}"
-  ;;
-esac
-
 printf 'Status: 302 Found\r\n'
 emit_security_headers
 printf 'Set-Cookie: admin_session=; Path=/; SameSite=Strict; Max-Age=0; HttpOnly%s\r\n' "$SECURE_FLAG"

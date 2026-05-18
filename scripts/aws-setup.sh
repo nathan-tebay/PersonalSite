@@ -27,7 +27,6 @@
 #                  [--cf-dist-id EXXXXXXXXXX --cf-invalidation-iam] \
 #                  [--cf-dist-id EXXXXXXXXXX --waf-upload-fix] \
 #                  [--cf-dist-id EXXXXXXXXXX --cf-response-headers] \
-#                  [--cf-dist-id EXXXXXXXXXX --waf-login-ratelimit] \
 #                  [--save-env] \
 #                  [--dry-run]
 #
@@ -107,11 +106,6 @@
 #                  'tebay-security-headers' with HSTS (max-age=31536000, includeSubDomains)
 #                  and X-Content-Type-Options: nosniff, then attach it to the
 #                  default cache behaviour and all other behaviours. Requires --cf-dist-id.
-#   --waf-login-ratelimit
-#                  Add a WAF rate-based rule named 'LoginRateLimit' to the WebACL
-#                  attached to --cf-dist-id, capping /cgi-bin/login.cgi and /admin/
-#                  at 100 requests per 5-minute window per IP. Idempotent (skips if
-#                  the rule already exists). Requires --cf-dist-id.
 #   --cf-s3-origin Add (or restore) the S3 bucket origin and a videos/*
 #                  cache behavior to the CloudFront distribution. The origin
 #                  uses the OAC named <bucket>.s3.amazonaws.com. Requires
@@ -142,7 +136,6 @@ BUCKET_POLICY=0
 CF_VIDEO_POLICY=0
 CF_BLOGS_POLICY=0
 CF_RESPONSE_HEADERS=0
-WAF_LOGIN_RATELIMIT=0
 CF_S3_ORIGIN=0
 CF_INVALIDATION_IAM=0
 WAF_UPLOAD_FIX=0
@@ -176,7 +169,6 @@ while [ "$#" -gt 0 ]; do
     --cf-invalidation-iam) CF_INVALIDATION_IAM=1;   shift   ;;
     --cf-response-headers) CF_RESPONSE_HEADERS=1;   shift   ;;
     --waf-upload-fix)      WAF_UPLOAD_FIX=1;        shift   ;;
-    --waf-login-ratelimit) WAF_LOGIN_RATELIMIT=1;   shift   ;;
     --oac-id)              OAC_ID="$2";             shift 2 ;;
     --save-env)         SAVE_ENV=1;           shift   ;;
     --dry-run)          DRY_RUN=1;            shift   ;;
@@ -251,10 +243,6 @@ if [ "$WAF_UPLOAD_FIX" = "1" ] && [ -z "$CF_DIST_ID" ]; then
 fi
 if [ "$CF_RESPONSE_HEADERS" = "1" ] && [ -z "$CF_DIST_ID" ]; then
   echo "Error: --cf-response-headers requires --cf-dist-id"
-  exit 1
-fi
-if [ "$WAF_LOGIN_RATELIMIT" = "1" ] && [ -z "$CF_DIST_ID" ]; then
-  echo "Error: --waf-login-ratelimit requires --cf-dist-id"
   exit 1
 fi
 
@@ -980,108 +968,6 @@ print(json.dumps(config))
     || err "Failed to update CloudFront distribution"
 }
 
-# Add a WAF rate-based rule limiting /cgi-bin/login.cgi and /admin/ to 100 req/5min.
-apply_waf_login_ratelimit() {
-  info "Fetching WebACL ARN from distribution $CF_DIST_ID..."
-  local webacl_arn
-  webacl_arn=$(aws cloudfront get-distribution-config \
-    --id "$CF_DIST_ID" \
-    --query 'DistributionConfig.WebACLId' \
-    --output text 2>/dev/null)
-
-  if [ -z "$webacl_arn" ] || [ "$webacl_arn" = "None" ]; then
-    err "No WAF WebACL attached to distribution $CF_DIST_ID"
-    return 1
-  fi
-
-  local webacl_name webacl_id
-  webacl_name=$(printf '%s' "$webacl_arn" | awk -F'/' '{print $(NF-1)}')
-  webacl_id=$(printf '%s' "$webacl_arn" | awk -F'/' '{print $NF}')
-  info "WebACL: $webacl_name ($webacl_id)"
-
-  local waf_json
-  waf_json=$(aws wafv2 get-web-acl \
-    --name "$webacl_name" \
-    --id "$webacl_id" \
-    --scope CLOUDFRONT \
-    --region us-east-1 \
-    --output json)
-
-  local new_config
-  new_config=$(python3 <<PYEOF
-import json
-waf = json.loads("""${waf_json}""")
-acl = waf['WebACL']
-lock_token = waf['LockToken']
-rules = acl.get('Rules', [])
-if 'LoginRateLimit' not in {r['Name'] for r in rules}:
-    rules.append({
-        'Name': 'LoginRateLimit',
-        'Priority': len(rules),
-        'Statement': {
-            'RateBasedStatement': {
-                'Limit': 100,
-                'AggregateKeyType': 'IP',
-                'ScopeDownStatement': {
-                    'OrStatement': {
-                        'Statements': [
-                            {
-                                'ByteMatchStatement': {
-                                    'SearchString': '/cgi-bin/login.cgi',
-                                    'FieldToMatch': {'UriPath': {}},
-                                    'TextTransformations': [{'Priority': 0, 'Type': 'NONE'}],
-                                    'PositionalConstraint': 'STARTS_WITH'
-                                }
-                            },
-                            {
-                                'ByteMatchStatement': {
-                                    'SearchString': '/admin/',
-                                    'FieldToMatch': {'UriPath': {}},
-                                    'TextTransformations': [{'Priority': 0, 'Type': 'NONE'}],
-                                    'PositionalConstraint': 'STARTS_WITH'
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        'Action': {'Block': {}},
-        'VisibilityConfig': {
-            'SampledRequestsEnabled': True,
-            'CloudWatchMetricsEnabled': True,
-            'MetricName': 'LoginRateLimit'
-        }
-    })
-print(json.dumps({
-    'name': acl['Name'], 'id': acl['Id'], 'lock_token': lock_token,
-    'default_action': acl['DefaultAction'],
-    'visibility_config': acl['VisibilityConfig'],
-    'rules': rules
-}))
-PYEOF
-  )
-
-  local acl_name acl_id lock_token default_action visibility_config rules_json
-  acl_name=$(printf '%s' "$new_config"        | python3 -c "import json,sys; print(json.load(sys.stdin)['name'])")
-  acl_id=$(printf '%s' "$new_config"          | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")
-  lock_token=$(printf '%s' "$new_config"      | python3 -c "import json,sys; print(json.load(sys.stdin)['lock_token'])")
-  default_action=$(printf '%s' "$new_config"  | python3 -c "import json,sys; print(json.dumps(json.load(sys.stdin)['default_action']))")
-  visibility_config=$(printf '%s' "$new_config" | python3 -c "import json,sys; print(json.dumps(json.load(sys.stdin)['visibility_config']))")
-  rules_json=$(printf '%s' "$new_config"      | python3 -c "import json,sys; print(json.dumps(json.load(sys.stdin)['rules']))")
-
-  aws wafv2 update-web-acl \
-    --name "$acl_name" --id "$acl_id" \
-    --scope CLOUDFRONT --region us-east-1 \
-    --lock-token "$lock_token" \
-    --default-action "$default_action" \
-    --visibility-config "$visibility_config" \
-    --rules "$rules_json" \
-    --output json >/dev/null \
-    && ok "WAF rate limit rule added — /cgi-bin/login.cgi and /admin/ capped at 100 req/5min" \
-    || err "Failed to update WAF WebACL"
-}
-
 # ── Main ──────────────────────────────────────────────────────────────────────
 section "tebay.dev blog — AWS policy setup"
 info "AWS_ACCOUNT_ID  : $AWS_ACCOUNT_ID"
@@ -1324,18 +1210,6 @@ if [ "$CF_RESPONSE_HEADERS" = "1" ]; then
     info "and attach it to all cache behaviours in $CF_DIST_ID."
   else
     apply_cf_response_headers
-  fi
-fi
-
-# ── 4e. WAF login rate limit (optional) ───────────────────────────────────────
-if [ "$WAF_LOGIN_RATELIMIT" = "1" ]; then
-  section "4e. WAF login rate limit (100 req/5min on /cgi-bin/login.cgi + /admin/)"
-  info "Distribution: $CF_DIST_ID"
-  if [ "$DRY_RUN" = "1" ]; then
-    info "Would add WAF rate-based rule 'LoginRateLimit' to the WebACL attached"
-    info "to $CF_DIST_ID, capping /cgi-bin/login.cgi and /admin/ at 100 req/5min."
-  else
-    apply_waf_login_ratelimit
   fi
 fi
 

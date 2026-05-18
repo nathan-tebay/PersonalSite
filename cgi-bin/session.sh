@@ -1,9 +1,8 @@
 #!/bin/sh
 # session.sh — source at the top of any admin CGI to enforce session auth.
-# Validates the admin_session cookie against a server-side session file in
-# /tmp/sessions/. Login generates a random opaque token; ADMIN_TOKEN never
-# leaves the server. Redirects to login if the token is absent, invalid, or
-# expired.
+# Cookie value: "<timestamp>.<nonce>.<sha256(ADMIN_TOKEN:nonce:timestamp)>"
+# Stateless — verifiable on any Lambda instance without shared /tmp state.
+# Redirects to login if the token is absent, invalid, or expired.
 
 _SESSION_COOKIE_NAME="admin_session"
 _CSRF_COOKIE_NAME="csrf_token"
@@ -60,28 +59,33 @@ _fail_csrf() {
 }
 
 # ── Session verification ───────────────────────────────────────────────
-_SESSION_DIR="/tmp/sessions"
 
 _token=$(_get_cookie "$_SESSION_COOKIE_NAME")
 _NOW=$(date +%s)
 
-# Reject tokens that are not exactly 64 lowercase hex chars (prevents path traversal)
-_token_len=$(printf '%s' "${_token}" | wc -c)
-case "${_token}" in
-  *[^0-9a-f]*|"") _token_len=0 ;;
-esac
+# Parse token: timestamp.nonce.signature
+_ts=$(printf '%s' "$_token"  | cut -d. -f1)
+_nonce=$(printf '%s' "$_token" | cut -d. -f2)
+_sig=$(printf '%s' "$_token"  | cut -d. -f3)
 
-if [ "$_token_len" != 64 ] || [ ! -f "${_SESSION_DIR}/${_token}" ]; then
+# Guard: all parts present, timestamp is numeric, ADMIN_TOKEN is set
+_valid=1
+[ -z "$_ts" ] || [ -z "$_nonce" ] || [ -z "$_sig" ] || [ -z "$ADMIN_TOKEN" ] && _valid=0
+case "${_ts:-x}" in ''|*[!0-9]*) _valid=0 ;; esac
+
+if [ "$_valid" = 1 ]; then
+  _expected=$(printf '%s:%s:%s' "$ADMIN_TOKEN" "$_nonce" "$_ts" | sha256sum | cut -d' ' -f1)
+  [ "$_sig" != "$_expected" ] && _valid=0
+fi
+
+if [ "$_valid" = 0 ]; then
   printf 'Status: 302 Found\r\nLocation: /cgi-bin/login.cgi\r\n\r\n'
   exit 0
 fi
 
-_session_created=$(cat "${_SESSION_DIR}/${_token}" 2>/dev/null || echo 0)
-_ELAPSED=$((_NOW - _session_created))
+_ELAPSED=$((_NOW - _ts))
 
 if [ "$_ELAPSED" -gt "$_SESSION_TIMEOUT" ]; then
-  rm -f "${_SESSION_DIR}/${_token}"
-  find "$_SESSION_DIR" -maxdepth 1 -type f -mmin +1440 -delete 2>/dev/null || true
   SECURE_FLAG=""
   if [ "${HTTP_X_FORWARDED_PROTO:-}" = "https" ] || [ "${HTTPS:-}" = "on" ]; then
     SECURE_FLAG="; Secure"
@@ -92,9 +96,4 @@ if [ "$_ELAPSED" -gt "$_SESSION_TIMEOUT" ]; then
   printf 'Set-Cookie: csrf_token=; Path=/; SameSite=Strict; Max-Age=0%s\r\n' "$SECURE_FLAG"
   printf 'Location: /cgi-bin/login.cgi?expired=1\r\n\r\n'
   exit 0
-fi
-
-# Sliding window: update session file if more than 1 hour has passed
-if [ "$_ELAPSED" -gt 3600 ]; then
-  echo "$_NOW" > "${_SESSION_DIR}/${_token}"
 fi

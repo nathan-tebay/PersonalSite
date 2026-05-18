@@ -35,13 +35,14 @@ printf '\r\n'
 
 # ── Skip recording for admin sessions ─────────────────────────────────────
 _sess=$(printf '%s' "${HTTP_COOKIE:-}" | tr ';' '\n' | sed 's/^ *//' | grep '^admin_session=' | head -1 | cut -d= -f2-)
-if [ -n "$_sess" ]; then
-  case "$_sess" in
-    *[^0-9a-f]*|"") ;;
-    *)
-      [ "$(printf '%s' "$_sess" | wc -c)" = 64 ] && [ -f "/tmp/sessions/${_sess}" ] && { printf '{"ok":true}\n'; exit 0; }
-    ;;
-  esac
+if [ -n "$_sess" ] && [ -n "${ADMIN_TOKEN:-}" ]; then
+  _sess_ts=$(printf '%s' "$_sess" | cut -d. -f1)
+  _sess_nonce=$(printf '%s' "$_sess" | cut -d. -f2)
+  _sess_sig=$(printf '%s' "$_sess" | cut -d. -f3)
+  if [ -n "$_sess_ts" ] && [ -n "$_sess_nonce" ] && [ -n "$_sess_sig" ]; then
+    _sess_expected=$(printf '%s:%s:%s' "$ADMIN_TOKEN" "$_sess_nonce" "$_sess_ts" | sha256sum | cut -d' ' -f1)
+    [ "$_sess_sig" = "$_sess_expected" ] && { printf '{"ok":true}\n'; exit 0; }
+  fi
 fi
 
 STORAGE="${STORAGE:-s3}"
