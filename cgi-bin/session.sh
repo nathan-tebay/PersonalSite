@@ -1,9 +1,9 @@
 #!/bin/sh
 # session.sh — source at the top of any admin CGI to enforce session auth.
-# ADMIN_TOKEN must be set to SHA-256(password) — computed once offline:
-#   printf 'yourpassword' | sha256sum | cut -d' ' -f1
-# The token is never stored in plaintext; the env var holds only the hash.
-# Redirects to the login page and exits if the cookie is absent or invalid.
+# Validates the admin_session cookie against a server-side session file in
+# /tmp/sessions/. Login generates a random opaque token; ADMIN_TOKEN never
+# leaves the server. Redirects to login if the token is absent, invalid, or
+# expired.
 
 _SESSION_COOKIE_NAME="admin_session"
 _CSRF_COOKIE_NAME="csrf_token"
@@ -50,58 +50,51 @@ _verify_csrf() {
 }
 
 # Emit a 403 CSRF failure and exit.
+# Relies on emit_security_headers from common.sh (always sourced before this is called).
 _fail_csrf() {
   printf 'Content-Type: application/json\r\nStatus: 403 Forbidden\r\n'
-  printf 'X-Content-Type-Options: nosniff\r\n'
-  printf 'X-Frame-Options: DENY\r\n'
-  printf 'X-XSS-Protection: 1; mode=block\r\n'
-  printf 'Referrer-Policy: strict-origin-when-cross-origin\r\n'
-  printf 'Permissions-Policy: geolocation=(), microphone=(), camera=()\r\n'
-  printf 'Content-Security-Policy: default-src '\''self'\''; frame-ancestors none\r\n'
+  emit_security_headers
   printf '\r\n'
   printf '{"error":"CSRF token mismatch"}\n'
   exit 0
 }
 
 # ── Session verification ───────────────────────────────────────────────
+_SESSION_DIR="/tmp/sessions"
 
 _token=$(_get_cookie "$_SESSION_COOKIE_NAME")
+_NOW=$(date +%s)
 
-if [ -z "$ADMIN_TOKEN" ] || [ "$_token" != "$ADMIN_TOKEN" ]; then
+# Reject tokens that are not exactly 64 lowercase hex chars (prevents path traversal)
+_token_len=$(printf '%s' "${_token}" | wc -c)
+case "${_token}" in
+  *[^0-9a-f]*|"") _token_len=0 ;;
+esac
+
+if [ "$_token_len" != 64 ] || [ ! -f "${_SESSION_DIR}/${_token}" ]; then
   printf 'Status: 302 Found\r\nLocation: /cgi-bin/login.cgi\r\n\r\n'
   exit 0
 fi
 
-# ── Session timeout check ──────────────────────────────────────────────
-# We embed the session creation timestamp in a second cookie (_session_ts)
-# so that timeouts work reliably even across container restarts or Lambda
-# cold starts where /tmp is ephemeral.
-_SESSION_TS_COOKIE="_session_ts"
-_session_ts=$(_get_cookie_safe "$_SESSION_TS_COOKIE")
-_NOW=$(date +%s)
+_session_created=$(cat "${_SESSION_DIR}/${_token}" 2>/dev/null || echo 0)
+_ELAPSED=$((_NOW - _session_created))
 
-if [ -n "$_session_ts" ] && [ "$_session_ts" -gt 0 ] 2>/dev/null; then
-  _ELAPSED=$((_NOW - _session_ts))
-  if [ "$_ELAPSED" -gt "$_SESSION_TIMEOUT" ]; then
-    # Session expired — clear cookies and redirect to login
-    SECURE_FLAG=""
-    if [ "${HTTP_X_FORWARDED_PROTO:-}" = "https" ] || [ "${HTTPS:-}" = "on" ]; then
-      SECURE_FLAG="; Secure"
-    fi
-    printf 'Status: 302 Found\r\n'
-    printf 'Set-Cookie: admin_session=; Path=/%s; SameSite=Strict; Max-Age=0; HttpOnly\r\n' "$SECURE_FLAG"
-    printf 'Set-Cookie: admin_ui=; Path=/; SameSite=Strict; Max-Age=0%s\r\n' "$SECURE_FLAG"
-    printf 'Set-Cookie: csrf_token=; Path=/; SameSite=Strict; Max-Age=0%s\r\n' "$SECURE_FLAG"
-    printf 'Set-Cookie: _session_ts=; Path=/; SameSite=Strict; Max-Age=0%s\r\n' "$SECURE_FLAG"
-    printf 'Location: /cgi-bin/login.cgi?expired=1\r\n\r\n'
-    exit 0
+if [ "$_ELAPSED" -gt "$_SESSION_TIMEOUT" ]; then
+  rm -f "${_SESSION_DIR}/${_token}"
+  find "$_SESSION_DIR" -maxdepth 1 -type f -mmin +1440 -delete 2>/dev/null || true
+  SECURE_FLAG=""
+  if [ "${HTTP_X_FORWARDED_PROTO:-}" = "https" ] || [ "${HTTPS:-}" = "on" ]; then
+    SECURE_FLAG="; Secure"
   fi
-  # Sliding window: refresh timestamp if more than 1 hour has passed
-  if [ "$_ELAPSED" -gt 3600 ]; then
-    export _SESSION_TS_REFRESH="$_NOW"
-  fi
-else
-  # First request without timestamp cookie — this is an older session;
-  # we allow it but note that login.cgi should set _session_ts going forward.
-  export _SESSION_TS_REFRESH="$_NOW"
+  printf 'Status: 302 Found\r\n'
+  printf 'Set-Cookie: admin_session=; Path=/; SameSite=Strict; Max-Age=0; HttpOnly%s\r\n' "$SECURE_FLAG"
+  printf 'Set-Cookie: admin_ui=; Path=/; SameSite=Strict; Max-Age=0%s\r\n' "$SECURE_FLAG"
+  printf 'Set-Cookie: csrf_token=; Path=/; SameSite=Strict; Max-Age=0%s\r\n' "$SECURE_FLAG"
+  printf 'Location: /cgi-bin/login.cgi?expired=1\r\n\r\n'
+  exit 0
+fi
+
+# Sliding window: update session file if more than 1 hour has passed
+if [ "$_ELAPSED" -gt 3600 ]; then
+  echo "$_NOW" > "${_SESSION_DIR}/${_token}"
 fi

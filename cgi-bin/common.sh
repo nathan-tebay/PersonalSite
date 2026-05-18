@@ -47,7 +47,7 @@ get_field() {
 
 # ── HTTP helpers ──────────────────────────────────────────────────────
 
-# Emit security headers (CSP, X-Frame-Options, etc.)
+# Emit security headers (CSP, HSTS, X-Frame-Options, etc.)
 # Usage: emit_security_headers
 emit_security_headers() {
   printf 'X-Content-Type-Options: nosniff\r\n'
@@ -55,13 +55,10 @@ emit_security_headers() {
   printf 'X-XSS-Protection: 1; mode=block\r\n'
   printf 'Referrer-Policy: strict-origin-when-cross-origin\r\n'
   printf 'Permissions-Policy: geolocation=(), microphone=(), camera=()\r\n'
-  printf 'Content-Security-Policy: default-src %s; script-src %s %s; style-src %s %s; img-src %s %s %s; font-src %s; connect-src %s %s; frame-ancestors none\r\n' \
-    "'self'" \
-    "'self'" "'strict-dynamic'" \
-    "'self'" "'unsafe-inline'" \
-    "'self'" "data:" "blob:" \
-    "'self'" \
-    "'self'" "http://ip-api.com"
+  printf 'Content-Security-Policy: default-src '\''self'\''; script-src '\''self'\''; style-src '\''self'\'' '\''unsafe-inline'\''; img-src '\''self'\'' data: blob:; connect-src '\''self'\''; frame-ancestors '\''none'\''; base-uri '\''self'\''; form-action '\''self'\''; object-src '\''none'\''\r\n'
+  if [ "${HTTP_X_FORWARDED_PROTO:-}" = "https" ] || [ "${HTTPS:-}" = "on" ]; then
+    printf 'Strict-Transport-Security: max-age=31536000; includeSubDomains\r\n'
+  fi
 }
 
 # Emit JSON content-type header with security headers (with optional status).
@@ -70,14 +67,6 @@ emit_json_header() {
   printf 'Content-Type: application/json\r\n'
   printf 'Status: %s\r\n' "${1:-200 OK}"
   emit_security_headers
-  # Refresh session timestamp cookie if session.sh flagged it
-  if [ -n "${_SESSION_TS_REFRESH:-}" ]; then
-    _ts_secure=""
-    if [ "${HTTP_X_FORWARDED_PROTO:-}" = "https" ] || [ "${HTTPS:-}" = "on" ]; then
-      _ts_secure="; Secure"
-    fi
-    printf 'Set-Cookie: _session_ts=%s; Path=/; SameSite=Strict%s\r\n' "$_SESSION_TS_REFRESH" "$_ts_secure"
-  fi
 }
 
 # Emit a JSON error response and exit.

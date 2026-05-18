@@ -35,7 +35,14 @@ printf '\r\n'
 
 # ── Skip recording for admin sessions ─────────────────────────────────────
 _sess=$(printf '%s' "${HTTP_COOKIE:-}" | tr ';' '\n' | sed 's/^ *//' | grep '^admin_session=' | head -1 | cut -d= -f2-)
-[ -n "${ADMIN_TOKEN:-}" ] && [ -n "$_sess" ] && [ "$_sess" = "$ADMIN_TOKEN" ] && { printf '{"ok":true}\n'; exit 0; }
+if [ -n "$_sess" ]; then
+  case "$_sess" in
+    *[^0-9a-f]*|"") ;;
+    *)
+      [ "$(printf '%s' "$_sess" | wc -c)" = 64 ] && [ -f "/tmp/sessions/${_sess}" ] && { printf '{"ok":true}\n'; exit 0; }
+    ;;
+  esac
+fi
 
 STORAGE="${STORAGE:-s3}"
 ANALYTICS_DIR="/tmp/analytics"

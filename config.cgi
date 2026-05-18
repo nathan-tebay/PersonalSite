@@ -6,5 +6,5 @@ printf 'Content-Type: application/json\r\n\r\n'
 if [ "${STORAGE:-s3}" = "local" ]; then
   printf '{"postsUrl":"/blog/posts","storage":"local"}\n'
 else
-  printf '{"postsUrl":"/blog/posts","storage":"s3"}\n'
+  printf '{"postsUrl":"/blog/posts"}\n'
 fi

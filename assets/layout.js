@@ -48,6 +48,13 @@
   navCollapseButton.id = 'nav-collapse-toggle'
   navCollapseButton.type = 'button'
   navCollapseButton.setAttribute('aria-controls', 'nav-panel')
+  const navCollapseGlyph = document.createElement('span')
+  navCollapseGlyph.className = 'nav-collapse-glyph'
+  const navCollapseText = document.createElement('span')
+  navCollapseText.className = 'nav-collapse-text'
+  navCollapseText.textContent = 'Navigation'
+  navCollapseButton.appendChild(navCollapseGlyph)
+  navCollapseButton.appendChild(navCollapseText)
 
   /**
    * Sets the persistent desktop navigation collapse state.
@@ -66,7 +73,7 @@
     navCollapseButton.title = collapsed
       ? 'Expand navigation'
       : 'Collapse navigation'
-    navCollapseButton.textContent = collapsed ? '☰' : '‹'
+    navCollapseGlyph.textContent = collapsed ? '›' : '‹'
     try {
       window.localStorage.setItem('tebay_nav_collapsed', collapsed ? '1' : '0')
     } catch (_) {}
@@ -81,7 +88,6 @@
   navCollapseButton.addEventListener('click', function () {
     setNavCollapsed(!document.body.classList.contains('nav-collapsed'))
   })
-  navPanel.appendChild(navCollapseButton)
 
   /**
    * Creates an anchor element for the navigation tree.
@@ -128,9 +134,13 @@
   }
 
   const sectionLabel = document.createElement('span')
-  sectionLabel.className = 'section-label'
+  sectionLabel.className = 'section-label nav-heading-label'
   sectionLabel.textContent = 'Navigation'
-  navPanel.appendChild(sectionLabel)
+  const navHeading = document.createElement('div')
+  navHeading.id = 'nav-heading'
+  navHeading.appendChild(navCollapseButton)
+  navHeading.appendChild(sectionLabel)
+  navPanel.appendChild(navHeading)
 
   const navTree = document.createElement('ul')
   navTree.className = 'tree'

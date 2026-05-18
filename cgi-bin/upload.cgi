@@ -37,7 +37,7 @@ fi
 # ── Validate file extension (whitelist) ────────────────────────────────
 _ext=$(printf '%s' "$FILENAME" | sed 's/.*\.//' | tr '[:upper:]' '[:lower:]')
 case "$_ext" in
-  jpg|jpeg|png|gif|webp|svg) ;;
+  jpg|jpeg|png|gif|webp) ;;
   *) printf '\r\n{"error":"unsupported file type"}\n'; exit 0 ;;
 esac
 # ───────────────────────────────────────────────────────────────────────
@@ -63,7 +63,6 @@ case "$_ext" in
   png)      contenttype="image/png" ;;
   gif)      contenttype="image/gif" ;;
   webp)     contenttype="image/webp" ;;
-  svg)      contenttype="image/svg+xml" ;;
   *)        contenttype="application/octet-stream" ;;
 esac
 

@@ -26,15 +26,17 @@ if [ "${REQUEST_METHOD}" = "POST" ]; then
     submitted=$(printf '%s' "$password" | sha256sum | cut -d' ' -f1)
 
     if [ -n "$ADMIN_TOKEN" ] && [ "$submitted" = "$ADMIN_TOKEN" ]; then
-      # Generate CSRF token for this session
+      # Generate random opaque session token and CSRF token
+      SESSION_TOKEN=$(od -An -tx1 -N32 /dev/urandom | tr -d ' \n')
       CSRF_TOKEN=$(od -An -tx1 -N16 /dev/urandom | tr -d ' \n')
       _NOW=$(date +%s)
+      mkdir -p /tmp/sessions
+      echo "$_NOW" > "/tmp/sessions/${SESSION_TOKEN}"
       printf 'Status: 302 Found\r\n'
       emit_security_headers
-      printf 'Set-Cookie: admin_session=%s; Path=/; SameSite=Strict; HttpOnly%s\r\n' "$ADMIN_TOKEN" "$SECURE_FLAG"
+      printf 'Set-Cookie: admin_session=%s; Path=/; SameSite=Strict; HttpOnly%s\r\n' "$SESSION_TOKEN" "$SECURE_FLAG"
       printf 'Set-Cookie: admin_ui=1; Path=/; SameSite=Strict%s\r\n' "$SECURE_FLAG"
       printf 'Set-Cookie: csrf_token=%s; Path=/; SameSite=Strict%s\r\n' "$CSRF_TOKEN" "$SECURE_FLAG"
-      printf 'Set-Cookie: _session_ts=%s; Path=/; SameSite=Strict%s\r\n' "$_NOW" "$SECURE_FLAG"
       printf 'Location: /admin/\r\n\r\n'
       exit 0
     fi

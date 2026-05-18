@@ -95,12 +95,25 @@ body {
   position: sticky;
   top: 1.5rem;
   align-self: flex-start;
+  overflow: hidden;
   transition:
     width 0.18s ease,
     padding 0.18s ease,
     background-color 0.2s ease,
     outline-color 0.2s ease,
     color 0.2s ease;
+}
+
+#nav-heading {
+  align-items: center;
+  display: flex;
+  gap: 0.45rem;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+#nav-heading .section-label {
+  margin-bottom: 0;
 }
 
 #nav-collapse-toggle {
@@ -115,12 +128,15 @@ body {
   font-weight: 700;
   height: 2rem;
   justify-content: center;
-  margin-bottom: 0.85rem;
   transition:
     background 0.12s,
     color 0.12s,
     border-color 0.12s;
   width: 2rem;
+}
+
+.nav-collapse-text {
+  display: none;
 }
 
 #nav-collapse-toggle:hover {
@@ -224,15 +240,56 @@ body {
 
 @media (min-width: 601px) {
   body.nav-collapsed #nav-panel {
-    padding: 0.75rem;
-    width: 3.75rem;
+    border-radius: 0 0.85rem 0.85rem 0;
+    min-height: 10rem;
+    padding: 0;
+    width: 2.35rem;
   }
 
-  body.nav-collapsed #nav-collapse-toggle {
+  body.nav-collapsed #nav-heading {
+    display: block;
     margin-bottom: 0;
   }
 
-  body.nav-collapsed #nav-panel .section-label,
+  body.nav-collapsed #nav-heading .section-label {
+    display: none;
+  }
+
+  body.nav-collapsed #nav-collapse-toggle {
+    align-items: center;
+    border: 0;
+    border-radius: 0;
+    color: var(--text-link);
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    height: 100%;
+    inset: 0;
+    justify-content: flex-start;
+    padding: 0.65rem 0.25rem;
+    position: absolute;
+    width: 100%;
+  }
+
+  body.nav-collapsed #nav-collapse-toggle:hover {
+    background: var(--hover-bg);
+  }
+
+  body.nav-collapsed .nav-collapse-glyph {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  body.nav-collapsed .nav-collapse-text {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: -0.3em;
+    line-height: 1;
+    text-orientation: upright;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+  }
+
   body.nav-collapsed #nav-panel .tree,
   body.nav-collapsed #nav-panel .divider,
   body.nav-collapsed #picker-wrap,
@@ -1304,6 +1361,7 @@ summary:focus-visible {
   background: var(--hover-bg);
   color: var(--text-high);
 }
+
 
 /* ── Theme swatch picker ─────────────────────────────────────────────── */
 #picker-wrap {
