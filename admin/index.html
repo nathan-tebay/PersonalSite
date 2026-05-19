@@ -976,8 +976,8 @@
                     <tr>
                       <th>IP</th>
                       <th>Location</th>
-                      <th>First Seen (UTC)</th>
-                      <th>Last Seen (UTC)</th>
+                      <th>First Seen (MST)</th>
+                      <th>Last Seen (MST)</th>
                       <th style="text-align:right">Visits</th>
                       <th></th>
                     </tr>
@@ -1932,7 +1932,12 @@
           uvTbody.innerHTML = "";
           sortedVisitors.forEach(function (entry) {
             var tr = document.createElement("tr");
-            var fmtTs = function (ts) { return ts ? ts.replace("T", " ").replace("Z", "") : "—"; };
+            var fmtTs = function (ts) {
+              if (!ts) return "—";
+              var d = new Date(ts);
+              return d.toLocaleString("en-CA", { timeZone: "America/Denver", hour12: false })
+                       .replace(",", "");
+            };
             [
               { cls: "td-ip",    val: entry.ip },
               { cls: "",         val: entry.location },
