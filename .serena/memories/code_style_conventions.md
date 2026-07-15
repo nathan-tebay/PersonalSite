@@ -1,32 +1,32 @@
 # Code Style & Conventions — PersonalSite
 
 ## General
-- **Indentation**: 2 spaces throughout
-- **No frameworks**, no npm, no build step — KISS & readability
-- Minimize/compress/bundle JS and CSS for the browser
+- Vanilla HTML/CSS/JS plus CGI shell scripts.
+- No app framework and no browser build pipeline.
+- Keep source readable; do not add minify/bundle steps unless user explicitly asks.
+- Runtime has no npm app dependency, but dev checks may use `npx` tools when available.
+- Indentation: 2 spaces throughout.
 
 ## JavaScript
-- **Linter**: StandardJS
-- **Formatter**: Prettier
-- camelCase for functions and variables
-- Descriptive variable names — no abbreviations
-- JSDoc for function and interface documentation
-- Avoid inline conditionals with >1 condition
-- Prefer guard clauses over nesting / else-if chains
+- Linter: StandardJS for `assets/*.js`.
+- Formatter: Prettier for targeted changed files.
+- camelCase for functions and variables.
+- Descriptive variable names; avoid unclear abbreviations.
+- JSDoc only where it adds useful interface/behavior clarity.
+- Avoid inline conditionals with more than one condition.
+- Prefer guard clauses over nesting / else-if chains.
 
 ## HTML/CSS
-- Maintain 2-space indentation matching existing files
-- Navigation injected by `assets/layout.js` — do NOT duplicate nav markup in HTML files
-- Pages declare routing via body attributes:
-  ```html
-  <body data-page="pagename" data-basepath="../">
-  ```
+- Maintain 2-space indentation matching existing files.
+- Navigation injected by `assets/layout.js`; do NOT duplicate nav markup in HTML files.
+- Pages declare routing with body attributes, e.g.:
+  `<body data-page="pagename" data-basepath="../">`
 
 ## Theming
-- Six dark swatches; JS derives border, panel fill, and text vars from chosen hex
-- Theme persisted to localStorage key `tebay_theme`
+- Six dark swatches; JS derives border, panel fill, and text vars from chosen hex.
+- Theme persisted to localStorage key `tebay_theme`.
 
-## CGI Scripts (bash)
-- Source `session.sh` for auth enforcement
-- Source `storage.sh` for backend abstraction
-- Always use `podman`, never `docker`
+## CGI Scripts
+- Bash CGI scripts source `session.sh` for auth enforcement where needed.
+- Source `storage.sh` for backend abstraction.
+- Use Podman, never Docker CLI, for container work.
