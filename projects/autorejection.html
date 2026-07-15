@@ -96,9 +96,9 @@
             </p>
             <p>
               AutoRejection measured can weight in motion, tracked historical
-              data, exposed calibration and production views over Wi-Fi, and
-              triggered pneumatic rejection hardware when cans fell outside the
-              accepted range.
+              data, and exposed calibration and production views over Wi-Fi
+              while triggering pneumatic rejection hardware when cans fell
+              outside the accepted range.
             </p>
           </div>
 
@@ -204,7 +204,7 @@
             </div>
 
             <div class="project-section project-section--stack">
-              <h3>Technical highlights / stack</h3>
+              <h3>Tech Stack</h3>
               <div class="stack-groups">
                 <div>
                   <strong>Control</strong>
@@ -254,42 +254,8 @@
               </p>
             </div>
 
-            <div class="project-section">
-              <h3>Technical notes</h3>
-              <div class="note-grid">
-                <div>
-                  <strong>Signal quality</strong>
-                  <span>
-                    The scale had to read fast enough for production speed while
-                    still filtering vibration and product motion.
-                  </span>
-                </div>
-                <div>
-                  <strong>Line integration</strong>
-                  <span>
-                    Wild Goose integration required separate mechanical variants
-                    and repeated prototyping around can flow.
-                  </span>
-                </div>
-                <div>
-                  <strong>Operator UI</strong>
-                  <span>
-                    The dashboard needed live state, calibration, historical
-                    graphs, and CSV export without requiring wired access.
-                  </span>
-                </div>
-                <div>
-                  <strong>Security tradeoffs</strong>
-                  <span>
-                    Encryption and remote update support were valuable, but too
-                    much security early slowed hardware iteration.
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <div class="project-section project-section--challenges">
-              <h3>Hard parts</h3>
+              <h3>Challenges</h3>
               <ul>
                 <li>
                   Reliable weight measurement and rejection at 50+ cans per
@@ -310,28 +276,6 @@
                 <li>
                   Developing custom load-cell hardware with local engineering
                   and PCB partners.
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section project-section--learnings">
-              <h3>Engineering takeaways</h3>
-              <ul>
-                <li>
-                  Rapid hardware iteration matters more than architectural
-                  completeness.
-                </li>
-                <li>
-                  A simpler ESP32-style design may have served the product
-                  better than a Pi plus AWS stack.
-                </li>
-                <li>
-                  Industrial products need documentation, support planning, and
-                  contracts, not only working code.
-                </li>
-                <li>
-                  Partner and customer alignment determines whether good
-                  prototypes become sustainable products.
                 </li>
               </ul>
             </div>

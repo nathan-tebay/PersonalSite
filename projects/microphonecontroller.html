@@ -179,7 +179,7 @@
             </div>
 
             <div class="project-section project-section--stack">
-              <h3>Technical highlights / stack</h3>
+              <h3>Tech Stack</h3>
               <div class="stack-groups">
                 <div>
                   <strong>Firmware</strong>
@@ -225,42 +225,8 @@
               </p>
             </div>
 
-            <div class="project-section">
-              <h3>Technical notes</h3>
-              <div class="note-grid">
-                <div>
-                  <strong>Mode switch</strong>
-                  <span>
-                    D15 to ground selects keyboard mode; floating selects
-                    gamepad mode without reinitializing the device.
-                  </span>
-                </div>
-                <div>
-                  <strong>Button timing</strong>
-                  <span>
-                    Holds of at least 50 ms become push-to-talk while shorter
-                    presses toggle the output state.
-                  </span>
-                </div>
-                <div>
-                  <strong>Keyboard mapping</strong>
-                  <span>
-                    Button 1 sends Scroll Lock and button 2 sends Pause for the
-                    transcription/command split.
-                  </span>
-                </div>
-                <div>
-                  <strong>Gamepad mapping</strong>
-                  <span>
-                    Gamepad buttons 8 and 9 avoid common controller mappings but
-                    still work for apps that prefer gamepad input.
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <div class="project-section project-section--challenges">
-              <h3>Hard parts</h3>
+              <h3>Challenges</h3>
               <ul>
                 <li>
                   Keyboard HID output interfered with controller detection in
@@ -277,28 +243,6 @@
                 <li>
                   Physical wiring needed to stay simple enough for future
                   enclosure iterations.
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section project-section--learnings">
-              <h3>Engineering takeaways</h3>
-              <ul>
-                <li>
-                  A single toggle state is cleaner than separate latch and hold
-                  logic.
-                </li>
-                <li>
-                  Physical mode switches should reset outputs so stuck mic
-                  states are impossible.
-                </li>
-                <li>
-                  HID behavior is easiest to trust when every state transition
-                  is explicit.
-                </li>
-                <li>
-                  Small hardware tools become more valuable when paired with
-                  real daily workflows.
                 </li>
               </ul>
             </div>

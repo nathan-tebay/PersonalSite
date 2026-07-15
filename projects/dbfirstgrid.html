@@ -169,7 +169,7 @@
             </div>
 
             <div class="project-section project-section--stack">
-              <h3>Technical highlights / stack</h3>
+              <h3>Tech Stack</h3>
               <div class="stack-groups">
                 <div>
                   <strong>Frontend</strong>
@@ -216,42 +216,8 @@
               </p>
             </div>
 
-            <div class="project-section">
-              <h3>Technical notes</h3>
-              <div class="note-grid">
-                <div>
-                  <strong>Schema contract</strong>
-                  <span>
-                    Field descriptors carry labels, input types, dropdown
-                    behavior, and relationship hints to the frontend.
-                  </span>
-                </div>
-                <div>
-                  <strong>Identifier safety</strong>
-                  <span>
-                    Dynamic table and column names require allowlists and regex
-                    validation; value parameters alone are not enough.
-                  </span>
-                </div>
-                <div>
-                  <strong>Recursive subgrids</strong>
-                  <span>
-                    Orders and order items can nest without the grid knowing the
-                    relationship shape ahead of time.
-                  </span>
-                </div>
-                <div>
-                  <strong>Dialect boundary</strong>
-                  <span>
-                    SQLite and MySQL differences stay behind a query layer so
-                    local development can match production behavior.
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <div class="project-section project-section--challenges">
-              <h3>Hard parts</h3>
+              <h3>Challenges</h3>
               <ul>
                 <li>
                   Exposing arbitrary database columns without creating SQL
@@ -268,28 +234,6 @@
                 <li>
                   Writing reliable tests against live database behavior without
                   flaky shared state.
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section project-section--learnings">
-              <h3>Engineering takeaways</h3>
-              <ul>
-                <li>
-                  Schema-driven UI needs a precise server/client contract or the
-                  UI becomes ambiguous.
-                </li>
-                <li>
-                  Identifier allowlisting is required whenever SQL structure is
-                  dynamic.
-                </li>
-                <li>
-                  In-memory SQLite keeps tests fast, but schema parity must be
-                  protected.
-                </li>
-                <li>
-                  Containerizing both database paths early prevents
-                  environment-only surprises.
                 </li>
               </ul>
             </div>

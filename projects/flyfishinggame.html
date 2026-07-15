@@ -62,8 +62,8 @@
               </p>
               <p class="hero-summary">
                 Fly Fishing Game turns procedural river anatomy, fish holding
-                logic, casting, mending, hatch matching, and authored SNES-style
-                terrain modules into a full fishing loop.
+                logic, casting, mending, hatch matching, and a 3D generated
+                river environment into a fly fishing simulator.
               </p>
             </div>
             <div class="header-actions">
@@ -83,13 +83,15 @@
           <div class="project-hero-copy project-section">
             <h3>What it solves</h3>
             <p>
-              Fishing games can collapse into random bite probability if the
-              water, fish, cast, fly choice, and presentation do not interact.
-            </p>
-            <p>
-              This prototype treats river anatomy as gameplay data. Pools,
-              riffles, runs, fords, pocket water, exposure, current, structure,
-              hatches, and approach angle all feed the fishing loop.
+              This is a project that had been in the back of my head for at
+              least a decade; however, I knew it would be a big one and
+              challenging to get right. My recent work with AI coding tools made
+              it feasible, as much of the technology used is out of my
+              wheelhouse. This is as close to vibe coding as I have gotten, and
+              that learning is the biggest thing it solves. I've been pretty
+              happy with the progress I've been able to make without caring much
+              about the code. It will continue to be an AI playground and
+              hopefully a playable game in the near future.
             </p>
           </div>
 
@@ -132,11 +134,11 @@
             <div class="project-section project-section--overview">
               <h3>What it does</h3>
               <p>
-                Fly Fishing Game is a 16-bit style fly-fishing prototype set on
-                a side-scrolling river inspired by the Madison. The current loop
-                lets the player configure a session, scout water, approach fish,
-                manage line, cast, mend, match the hatch, respond to takes, and
-                log catches.
+                Fly Fishing Game was a 16-bit style fly-fishing prototype set on
+                a side-scrolling river inspired by the Madison that has since
+                been converted to 3D. The current loop lets the player configure
+                a session, scout water, approach fish, manage line, cast, mend,
+                match the hatch, respond to takes, and log catches.
               </p>
               <p>
                 The river simulation models pool-riffle-run cycles, fords,
@@ -144,7 +146,8 @@
                 V-seam spawn offsets, rock and boulder eddies, and seeded
                 section streaming. Fish behavior uses directional vision,
                 intrusion memory, exposure-adjusted spook sensitivity, hatch
-                state, fly matching, and hookset timing.
+                state, fly matching, and hookset timing. Still rough as I work
+                through the details.
               </p>
             </div>
 
@@ -170,7 +173,7 @@
             </div>
 
             <div class="project-section project-section--stack">
-              <h3>Technical highlights / stack</h3>
+              <h3>Tech Stack</h3>
               <div class="stack-groups">
                 <div>
                   <strong>Engine</strong>
@@ -216,43 +219,8 @@
               </p>
             </div>
 
-            <div class="project-section">
-              <h3>Technical notes</h3>
-              <div class="note-grid">
-                <div>
-                  <strong>River data model</strong>
-                  <span>
-                    <code>RiverData</code> remains the gameplay source while the
-                    renderer maps it onto authored terrain modules.
-                  </span>
-                </div>
-                <div>
-                  <strong>Fish behavior</strong>
-                  <span>
-                    Spook sensitivity accounts for size, cover, time of day,
-                    approach angle, difficulty, vibration, and exposure.
-                  </span>
-                </div>
-                <div>
-                  <strong>Casting state</strong>
-                  <span>
-                    The controller moves through false casting, presentation,
-                    drift, result, and mending states with line-length timing.
-                  </span>
-                </div>
-                <div>
-                  <strong>Terrain modules</strong>
-                  <span>
-                    Water, shoreline, gravel, fill, transitions, and props come
-                    from checked-in module atlases rather than pure color
-                    fields.
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <div class="project-section project-section--challenges">
-              <h3>Hard parts</h3>
+              <h3>Challenges</h3>
               <ul>
                 <li>
                   Making procedural rivers feel like readable fishable water
@@ -268,33 +236,13 @@
                 </li>
                 <li>
                   Making casting readable without turning it into an unrelated
-                  timing minigame.
+                  timing minigame. Realistic casting dynamics are core to the
+                  gameplay, and are proving difficult for AI to understand and
+                  translate into the game.
                 </li>
                 <li>
                   Reducing visual seams at shoreline corners, bank transitions,
                   and section boundaries.
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section project-section--learnings">
-              <h3>Engineering takeaways</h3>
-              <ul>
-                <li>
-                  Centralizing spook rules made later behavior changes much
-                  cheaper.
-                </li>
-                <li>
-                  Noise helps texture, but convincing rivers need explicit
-                  anatomy templates.
-                </li>
-                <li>
-                  Separating generation from rendering protected gameplay during
-                  art rewrites.
-                </li>
-                <li>
-                  Terrain selection needs deterministic validation before
-                  blending can hide seams.
                 </li>
               </ul>
             </div>
@@ -308,8 +256,6 @@
                     <li>Session configuration</li>
                     <li>Exploration and fish approach</li>
                     <li>Casting, drift, and mending</li>
-                    <li>Fly matching and hooksets</li>
-                    <li>Catch logbook</li>
                   </ul>
                 </div>
                 <div>
@@ -328,6 +274,8 @@
                     <li>Bank material transitions</li>
                     <li>Section-boundary continuity</li>
                     <li>Visual smoke passes</li>
+                    <li>Fly matching and hooksets</li>
+                    <li>Catch logbook</li>
                     <li>Windows, Android, and iOS support</li>
                   </ul>
                 </div>

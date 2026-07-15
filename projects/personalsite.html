@@ -52,10 +52,10 @@
                 pipeline without a frontend framework.
               </p>
               <p class="hero-summary">
-                PersonalSite is the operating surface for tebay.dev: static
-                project pages, dynamic blog and links content, shell CGI admin
-                workflows, S3-backed storage, analytics, and Lambda container
-                deployment.
+                This site is a record of my personal projects, thoughts and
+                experience as a tech nerd, software engineer and tinkerer. It
+                will be constantly evolving as I get more time to improve it,
+                add more content and implement my latest ideas.
               </p>
             </div>
             <div class="header-actions">
@@ -76,14 +76,15 @@
           <div class="project-hero-copy project-section">
             <h3>What it solves</h3>
             <p>
-              I wanted a portfolio and CMS that stayed small, understandable,
+              I wanted a portfolio that stayed small, understandable,
               self-hosted, and deployable without a frontend build chain or
               heavyweight application server.
             </p>
             <p>
               The result is a plain HTML/CSS/JS site with shared layout scripts,
-              CGI admin endpoints, S3-backed content, local MinIO development,
-              CloudFront delivery, and repeatable Lambda container deployment.
+              CGI admin endpoints, S3-backed content, CloudFront delivery, and
+              repeatable Lambda container deployment. All running on demand
+              within AWS free tier limits.
             </p>
           </div>
 
@@ -108,11 +109,10 @@
             <div class="project-section project-section--overview">
               <h3>What it does</h3>
               <p>
-                PersonalSite started as a constraint-driven portfolio rebuild:
-                no frontend framework, no Node runtime, no build step, and no
-                heavy CMS. It now powers project documentation, a blog, curated
-                links, an admin panel, deployment scripts, smoke checks, and a
-                small analytics pipeline.
+                This is a simple portfolio site with no frontend framework, no
+                Node runtime, no build step, and no heavy CMS. It powers project
+                documentation, a blog, curated links and a small analytics
+                pipeline backed with a strong CI/CD workflow.
               </p>
               <p>
                 Production runs as an AWS Lambda container behind CloudFront.
@@ -146,7 +146,7 @@
             </div>
 
             <div class="project-section project-section--stack">
-              <h3>Technical highlights / stack</h3>
+              <h3>Tech Stack</h3>
               <div class="stack-groups">
                 <div>
                   <strong>Frontend</strong>
@@ -189,90 +189,40 @@
             <div class="project-section">
               <h3>Why it matters</h3>
               <p>
-                This project shows how I prefer to build: choose constraints,
-                keep the runtime visible, automate the risky parts, and verify
-                behavior in the same environment that serves users.
+                I want to get my fun work out for the world to see. As a
+                software engineer, that meant building it myself. I've never
+                liked working on WYSIWYG site builders, and I want to keep costs
+                to a minimum. This meant a site with a small overall footprint
+                that is still visually interesting and showcases my skills. It
+                shows how I approach all problems: keep it as clean and simple
+                as possible while including all the functionality that matters.
+                Automate the repetitive tasks, create a stable working
+                environment, and make it repeatable and scalable.
               </p>
             </div>
 
-            <div class="project-section">
-              <h3>Technical notes</h3>
-              <div class="note-grid">
-                <div>
-                  <strong>Read-only Lambda</strong>
-                  <span>
-                    Startup copies the image web root to <code>/tmp/www</code>
-                    so CGI writes can update manifests and generated files.
-                  </span>
-                </div>
-                <div>
-                  <strong>S3 cache</strong>
-                  <span>
-                    A synchronous S3 sync runs before serving, then background
-                    refresh keeps local reads fast and simple.
-                  </span>
-                </div>
-                <div>
-                  <strong>Admin surface</strong>
-                  <span>
-                    Login, draft save, publish, delete, upload, links, and
-                    analytics all go through small CGI scripts.
-                  </span>
-                </div>
-                <div>
-                  <strong>Release checks</strong>
-                  <span>
-                    Static validation catches broken HTML and links, while live
-                    smoke checks cover CloudFront, Lambda, adapter, and routes.
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <div class="project-section project-section--challenges">
-              <h3>Hard parts</h3>
+              <h3>Challenges</h3>
               <ul>
                 <li>
                   Lambda's read-only filesystem required a writable
                   <code>/tmp/www</code> runtime copy.
                 </li>
                 <li>
-                  Lambda containers required the Web Adapter, correct port
-                  setup, and cold-start timing.
+                  Learning about Lambda containers and how they require the Web
+                  Adapter, correct port setup, and cold-start timing.
                 </li>
                 <li>
-                  AWS CLI was more reliable than smaller S3 clients with Lambda
-                  temporary credentials.
-                </li>
-                <li>
-                  Shell-based JSON and manifest handling needed locks, cleanup,
-                  and validation.
+                  Not overusing AI-generated content. My initial deployments
+                  included too much of it, and while I worked to include the
+                  relevant information, there was too much repetition and fluff.
+                  I still intend to use AI as much as possible, so I'm working
+                  on balancing the efficiency it brings against maintaining my
+                  voice.
                 </li>
                 <li>
                   Cold-start failures can look like generic website failures
                   without smoke checks.
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section project-section--learnings">
-              <h3>Engineering takeaways</h3>
-              <ul>
-                <li>
-                  Lambda plus CGI is viable for a low-traffic site when
-                  persistence is pushed to S3.
-                </li>
-                <li>
-                  Cold-start behavior deserves first-class validation, not only
-                  steady-state checks.
-                </li>
-                <li>
-                  MinIO-backed local development is worth it because storage
-                  code stays realistic.
-                </li>
-                <li>
-                  AI assistance is useful when constraints are explicit and
-                  runtime feedback is trusted.
                 </li>
               </ul>
             </div>

@@ -83,14 +83,18 @@
           <div class="project-hero-copy project-section">
             <h3>What it solves</h3>
             <p>
-              Desktop speech tools often break context by using clipboards,
-              separate text boxes, or opaque voice-command layers.
+              I built this transcription and voice command daemon to fit my use
+              case on Linux. I wanted to use open source speech recognition and
+              the two button MicrophoneController that I had already built. The
+              ability to easily switch between transcription and command routing
+              through local or cloud LLM backends was important, as was a tray
+              app for changing hotkeys, backends, and models without editing
+              config files.
             </p>
             <p>
-              WhisperTranscribe keeps the focused application as the integration
-              point: one hardware button types transcription directly, while the
-              other turns spoken instructions into strict GUI, terminal, or key
-              actions.
+              As I used AI more in my daily workflow, using the keyboard less
+              and relying more on voice commands became more useful. This
+              application streamlines the workflow for hands-free productivity.
             </p>
           </div>
 
@@ -150,7 +154,7 @@
                 window via ydotool. Pause routes the text through a configurable
                 LLM backend that must return one executable action: launch a GUI
                 app or URL, run a terminal command, or inject a key sequence. A
-                GTK3 tray exposes service state and settings without editing
+                tray icon exposes service state and settings without editing
                 config files.
               </p>
             </div>
@@ -177,7 +181,7 @@
             </div>
 
             <div class="project-section project-section--stack">
-              <h3>Technical highlights / stack</h3>
+              <h3>Tech Stack</h3>
               <div class="stack-groups">
                 <div>
                   <strong>Speech</strong>
@@ -220,126 +224,27 @@
               </div>
             </div>
 
-            <div class="project-section">
-              <h3>Why it matters</h3>
-              <p>
-                The project makes AI and speech useful by narrowing the command
-                surface. The model does not get to improvise arbitrary output;
-                it must produce one of a few parseable actions that the daemon
-                can inspect and execute.
-              </p>
-            </div>
-
-            <div class="project-section">
-              <h3>Technical notes</h3>
-              <div class="note-grid">
-                <div>
-                  <strong>Device watching</strong>
-                  <span>
-                    The daemon handles hotplug, duplicate event nodes,
-                    permission errors, and configured input-device filters.
-                  </span>
-                </div>
-                <div>
-                  <strong>Direct insertion</strong>
-                  <span>
-                    ydotool injects text and key sequences into the active
-                    window without touching the clipboard.
-                  </span>
-                </div>
-                <div>
-                  <strong>Command grammar</strong>
-                  <span>
-                    LLM output must be <code>GUI:</code>,
-                    <code>TERMINAL:</code>, or <code>KEYS:</code>, which keeps
-                    execution predictable.
-                  </span>
-                </div>
-                <div>
-                  <strong>Tray control</strong>
-                  <span>
-                    GTK3 StatusNotifierItem and DBusMenu provide service toggle,
-                    settings, model picker, hotkey capture, and backend config.
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <div class="project-section project-section--challenges">
-              <h3>Hard parts</h3>
+              <h3>Challenges</h3>
               <ul>
                 <li>
-                  Normalizing local and cloud LLM providers into one strict
-                  command interface.
+                  Implementing the tray icon and settings in the Linux tray on
+                  the latest Plasma version was the most challenging part of
+                  this project. The tray standards are fragmented and the
+                  documentation is sparse, so AI required a lot of coaching to
+                  get the tray working correctly.
                 </li>
                 <li>
-                  Handling evdev hotplug, duplicate physical devices,
-                  permissions, and filters.
+                  Working with multiple devices involved blocking the hotkeys on
+                  the main device so they wouldn't interfere with the configured
+                  hotkeys. Hotkeys need to be keys that are generally unused, or
+                  in my case don't exist on my keyboard.
                 </li>
                 <li>
-                  Supporting GPU and CPU whisper.cpp paths without making setup
-                  confusing.
-                </li>
-                <li>
-                  Building a tray app across fragmented Linux tray standards.
+                  Supporting as many local and remote models as possible, this
+                  will likely expand as the AI ecosystem evolves.
                 </li>
               </ul>
-            </div>
-
-            <div class="project-section project-section--learnings">
-              <h3>Engineering takeaways</h3>
-              <ul>
-                <li>
-                  OpenAI-compatible APIs reduce code, but each provider still
-                  needs clear defaults.
-                </li>
-                <li>
-                  Desktop automation works best when it preserves the focused
-                  application context.
-                </li>
-                <li>
-                  Hotplug-aware keyboard watching needs physical-device
-                  deduplication.
-                </li>
-                <li>
-                  Tray UI can remove config friction, but Linux tray standards
-                  add hidden complexity.
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section project-section--scope">
-              <h3>Current scope</h3>
-              <div class="scope-grid">
-                <div>
-                  <h4>Works now</h4>
-                  <ul>
-                    <li>Hold-to-record flow</li>
-                    <li>Direct transcription typing</li>
-                    <li>LLM command mode</li>
-                    <li>Systemd user service</li>
-                    <li>GTK tray settings</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4>Command formats</h4>
-                  <ul>
-                    <li><code>GUI: &lt;cmd&gt;</code></li>
-                    <li><code>TERMINAL: &lt;cmd&gt;</code></li>
-                    <li><code>KEYS: &lt;sequence&gt;</code></li>
-                    <li>Backend-specific model config</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4>Branch focus</h4>
-                  <ul>
-                    <li><code>other-models</code> backend support</li>
-                    <li>Input-device targeting</li>
-                    <li>GPU toggle</li>
-                    <li>OpenAI-compatible provider controls</li>
-                  </ul>
-                </div>
-              </div>
             </div>
 
             <div class="project-section">

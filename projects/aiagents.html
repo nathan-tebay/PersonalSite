@@ -138,7 +138,7 @@
             </div>
 
             <div class="project-section project-section--stack">
-              <h3>Technical highlights / stack</h3>
+              <h3>Tech Stack</h3>
               <div class="stack-groups">
                 <div>
                   <strong>Language/runtime</strong>
@@ -187,42 +187,8 @@
               </p>
             </div>
 
-            <div class="project-section">
-              <h3>Technical notes</h3>
-              <div class="note-grid">
-                <div>
-                  <strong>Typed routing</strong>
-                  <span>
-                    Task policies live in routing code and configuration so
-                    delegation rules can evolve without scattered conditionals.
-                  </span>
-                </div>
-                <div>
-                  <strong>Reviewer gate</strong>
-                  <span>
-                    Coding output is treated as proposed work until a reviewer
-                    approves the write path.
-                  </span>
-                </div>
-                <div>
-                  <strong>Shared memory</strong>
-                  <span>
-                    SQLite keeps durable structured records while ChromaDB adds
-                    fuzzy recall for context that is hard to query exactly.
-                  </span>
-                </div>
-                <div>
-                  <strong>Scheduled jobs</strong>
-                  <span>
-                    APScheduler jobs make recurring stock reports and health
-                    checks visible instead of hiding them in ad-hoc scripts.
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <div class="project-section project-section--challenges">
-              <h3>Hard parts</h3>
+              <h3>Challenges</h3>
               <ul>
                 <li>
                   Drawing a hard boundary between work a local model can safely
@@ -239,28 +205,6 @@
                 <li>
                   Designing schedules, retries, and logs so long-running work
                   fails clearly instead of disappearing.
-                </li>
-              </ul>
-            </div>
-
-            <div class="project-section project-section--learnings">
-              <h3>Engineering takeaways</h3>
-              <ul>
-                <li>
-                  Local models work best when the task boundary is narrow and
-                  the expected output format is typed.
-                </li>
-                <li>
-                  Agent memory needs both structured records and semantic
-                  search; one without the other misses important context.
-                </li>
-                <li>
-                  Coding-agent safety belongs in policy and review gates, not in
-                  trust that a prompt will behave.
-                </li>
-                <li>
-                  Explicit agents, routes, review, and logs are easier to trust
-                  than hidden framework magic.
                 </li>
               </ul>
             </div>
